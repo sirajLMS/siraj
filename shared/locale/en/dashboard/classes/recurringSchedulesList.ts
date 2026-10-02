@@ -8,6 +8,7 @@ export const recurringSchedulesList: RecurringSchedulesListLabels = {
     breadcrumbClasses: "Classes",
     emptyMessage: "No recurring schedules found",
     loadError: "Failed to load recurring schedules",
+    addNew: "Add New",
   },
   columns: {
     student: "Student",

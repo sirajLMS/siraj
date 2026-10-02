@@ -378,6 +378,49 @@ export async function checkRateLimit(
  * includes a hash of `user-agent` and `accept-language` headers so dev/test
  * clients with different fingerprints are rate-limited separately.
  */
+
+/**
+ * Resolves the client IP from `x-forwarded-for` / `x-real-ip`, honored only
+ * behind an explicitly trusted reverse proxy (TRUSTED_PROXY=true). Takes the
+ * FIRST entry (leftmost = original client); the last entry could be an
+ * attacker-controlled proxy hop (r10-003). Every candidate is validated with
+ * isIP() so a spoofed non-IP value cannot be used to rotate rate-limit
+ * buckets. Returns undefined when no valid IP is present.
+ */
+function resolveTrustedProxyClientIp(request: Request): string | undefined {
+  // r10-003 / H4-parity: validate the first non-empty XFF entry with
+  // isIP() so a spoofed non-IP XFF value cannot be used to rotate
+  // rate-limit buckets. Mirrors gqlContextFactory.resolveTrustedProxyIp.
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const first = forwardedFor
+      .split(",")
+      .map(s => s.trim())
+      .find(s => s.length > 0 && isIP(s));
+    if (first) {
+      return first;
+    }
+  }
+
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) {
+    const trimmed = realIp.trim();
+    if (trimmed && isIP(trimmed) > 0) {
+      return trimmed;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Computes a stable per-client identifier for rate limiting: platform
+ * trusted headers first (when the deployment is known to be on that
+ * platform), then trusted-proxy headers, then a conservative fallback.
+ * Missing-IP conditions are observable in production logs and operators can
+ * set TRUSTED_PROXY=true for per-IP buckets. Outside production the fallback
+ * includes a hash of `user-agent` and `accept-language` headers so dev/test
+ * clients with different fingerprints are rate-limited separately.
+ */
 export function getClientIdentifier(request: Request): string {
   // Only trust platform-trusted headers when we know the deployment is on
   // that platform. Environment variables like VERCEL and CLOUDFLARE are set
@@ -407,23 +450,9 @@ export function getClientIdentifier(request: Request): string {
   // (leftmost = original client); the last entry could be an attacker-controlled
   // proxy hop (r10-003).
   if (getBooleanEnv("TRUSTED_PROXY")) {
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    if (forwardedFor) {
-      // r10-003 / H4-parity: validate the first non-empty XFF entry with
-      // isIP() so a spoofed non-IP XFF value cannot be used to rotate
-      // rate-limit buckets. Mirrors gqlContextFactory.resolveTrustedProxyIp.
-      const first = forwardedFor
-        .split(",")
-        .map(s => s.trim())
-        .find(s => s.length > 0 && isIP(s));
-      if (first) {
-        return first;
-      }
-    }
-
-    const realIp = request.headers.get("x-real-ip");
-    if (realIp) {
-      return realIp.trim();
+    const trustedIp = resolveTrustedProxyClientIp(request);
+    if (trustedIp) {
+      return trustedIp;
     }
   }
 

@@ -11,6 +11,7 @@ interface RecurringSchedulesListShellLabels {
   readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];
   readonly emptyMessage: string;
   readonly loadError: string;
+  readonly addNew: string;
   readonly retryLabel: string;
 }
 

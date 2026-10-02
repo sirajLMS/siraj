@@ -38,10 +38,38 @@ await mock.module("@/backend/services", () => ({
   },
 }));
 
-const { checkRateLimit } = await import("@/backend/lib/ratelimit");
+const { checkRateLimit, getClientIdentifier } = await import("@/backend/lib/ratelimit");
 
 afterEach(() => {
   mockGetBooleanEnv.mockImplementation((key: string) => key === "TEST_ENFORCE_RATE_LIMIT");
+});
+
+describe("getClientIdentifier X-Real-IP validation", () => {
+  test("returns valid IPv4 from x-real-ip when TRUSTED_PROXY=true", () => {
+    mockGetBooleanEnv.mockImplementation((key: string) => key === "TRUSTED_PROXY");
+    const req = new Request("https://example.com/api", {
+      headers: { "x-real-ip": "198.51.100.42" },
+    });
+    expect(getClientIdentifier(req)).toBe("198.51.100.42");
+  });
+
+  test("returns valid IPv6 from x-real-ip when TRUSTED_PROXY=true", () => {
+    mockGetBooleanEnv.mockImplementation((key: string) => key === "TRUSTED_PROXY");
+    const req = new Request("https://example.com/api", {
+      headers: { "x-real-ip": "2001:db8::1" },
+    });
+    expect(getClientIdentifier(req)).toBe("2001:db8::1");
+  });
+
+  test("rejects invalid/non-IP string in x-real-ip and falls back", () => {
+    mockGetBooleanEnv.mockImplementation((key: string) => key === "TRUSTED_PROXY");
+    const req = new Request("https://example.com/api", {
+      headers: { "x-real-ip": "invalid-ip-string-bucket-1" },
+    });
+    const id = getClientIdentifier(req);
+    expect(id).not.toBe("invalid-ip-string-bucket-1");
+    expect(id.startsWith("anon:")).toBe(true);
+  });
 });
 
 describe("checkRateLimit with TEST_ENFORCE_RATE_LIMIT flag", () => {

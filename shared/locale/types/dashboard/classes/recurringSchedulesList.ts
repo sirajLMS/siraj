@@ -5,6 +5,7 @@ export interface RecurringSchedulesListShellLabels {
   readonly breadcrumbClasses: string;
   readonly emptyMessage: string;
   readonly loadError: string;
+  readonly addNew: string;
 }
 
 export interface RecurringSchedulesListColumnLabels {

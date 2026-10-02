@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
@@ -36,9 +36,18 @@ export function RecurringSchedulesListDesktopView({
       retryLabel={shell.retryLabel}
       desktopBreadcrumbs={shell.breadcrumbs}
     >
-      <Box sx={{ mb: 2, maxWidth: 420 }}>
-        <SearchBarField value={searchValue} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
-      </Box>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <Box sx={{ maxWidth: 420, flex: 1 }}>
+          <SearchBarField value={searchValue} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
+        </Box>
+        <Button
+          variant="contained"
+          onClick={() => router.push("/recurring-schedules/new")}
+          sx={{ alignSelf: "center" }}
+        >
+          {shell.addNew}
+        </Button>
+      </Stack>
       <DesktopSectionPanel contentPadding={false}>
         <DesktopAppDataGrid
           rows={rows}

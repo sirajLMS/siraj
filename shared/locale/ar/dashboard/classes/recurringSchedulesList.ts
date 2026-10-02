@@ -8,6 +8,7 @@ export const recurringSchedulesList: RecurringSchedulesListLabels = {
     breadcrumbClasses: "الحصص",
     emptyMessage: "لم يتم العثور على جداول متكررة",
     loadError: "فشل تحميل الجداول المتكررة",
+    addNew: "إضافة جديد",
   },
   columns: {
     student: "الطالب",

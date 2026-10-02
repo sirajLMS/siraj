@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
@@ -39,7 +39,14 @@ export function RecurringSchedulesListMobileView({
     >
       <MobileContentInset>
         <Box sx={{ mb: 2 }}>
-          <SearchBarField value={searchValue} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+            <Box sx={{ flex: 1 }}>
+              <SearchBarField value={searchValue} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
+            </Box>
+            <Button variant="contained" onClick={() => router.push("/recurring-schedules/new")}>
+              {shell.addNew}
+            </Button>
+          </Stack>
         </Box>
       </MobileContentInset>
       <MobileCardList

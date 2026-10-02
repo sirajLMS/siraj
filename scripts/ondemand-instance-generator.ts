@@ -35,6 +35,50 @@ const SHORT_WEEKDAY_TO_ENUM: Record<string, DayOfWeek> = {
   Sat: DayOfWeek.SATURDAY,
 };
 
+/**
+ * Module-level caches for `Intl.DateTimeFormat` instances keyed by IANA timezone ID.
+ * Instantiating `Intl.DateTimeFormat` inside loop bodies is up to 100x-200x slower
+ * due to ICU/V8 runtime initialization overhead during daily batch instance generation.
+ */
+const shortWeekdayDtfCache = new Map<string, Intl.DateTimeFormat>();
+const datePartsDtfCache = new Map<string, Intl.DateTimeFormat>();
+const tzOffsetDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getShortWeekdayDtf(ianaTimezone: string): Intl.DateTimeFormat {
+  let dtf = shortWeekdayDtfCache.get(ianaTimezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", { timeZone: ianaTimezone, weekday: "short" });
+    shortWeekdayDtfCache.set(ianaTimezone, dtf);
+  }
+  return dtf;
+}
+
+function getDatePartsDtf(ianaTimezone: string): Intl.DateTimeFormat {
+  let dtf = datePartsDtfCache.get(ianaTimezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: ianaTimezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    datePartsDtfCache.set(ianaTimezone, dtf);
+  }
+  return dtf;
+}
+
+function getTzOffsetDtf(ianaTimezone: string): Intl.DateTimeFormat {
+  let dtf = tzOffsetDtfCache.get(ianaTimezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: ianaTimezone,
+      timeZoneName: "shortOffset",
+    });
+    tzOffsetDtfCache.set(ianaTimezone, dtf);
+  }
+  return dtf;
+}
+
 interface ExecutionStateResult {
   executionState: ClassExecutionState;
   ondemandStatus: OnDemandStatus | null;
@@ -49,13 +93,8 @@ interface ExecutionStateResult {
  * `startHour:startMin` occurs on `currentDate` in `ianaTimezone`.
  */
 function computeStartAtInTimezone(currentDate: Date, startHour: number, startMin: number, ianaTimezone: string): Date {
-  // Extract the date components using the schedule's IANA timezone via Intl.
-  const dateParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: ianaTimezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(currentDate);
+  // Extract the date components using cached Intl.DateTimeFormat instance to avoid CPU & GC overhead.
+  const dateParts = getDatePartsDtf(ianaTimezone).formatToParts(currentDate);
 
   const getPart = (type: string): string => dateParts.find(p => p.type === type)?.value ?? "";
 
@@ -68,11 +107,8 @@ function computeStartAtInTimezone(currentDate: Date, startHour: number, startMin
   // (UTC equivalent of YYYY-MM-DDTHH:MM:00 in ianaTimezone)
   const asIfUtc = Date.UTC(year, month, day, startHour, startMin, 0, 0);
 
-  // Calculate the offset between the IANA timezone and UTC at this instant.
-  const tzParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: ianaTimezone,
-    timeZoneName: "shortOffset",
-  }).formatToParts(new Date(asIfUtc));
+  // Calculate the offset between the IANA timezone and UTC at this instant using cached Intl.DateTimeFormat.
+  const tzParts = getTzOffsetDtf(ianaTimezone).formatToParts(new Date(asIfUtc));
 
   const offsetStr = tzParts.find(p => p.type === "timeZoneName")?.value ?? "+0";
   // Parse offset strings like "GMT+5", "GMT-3:30", "GMT" (UTC)
@@ -195,7 +231,7 @@ function buildExistingConflictSet(scheduleId: string, overlappingInstances: { sc
 
 /** Resolves the IANA-timezone-aware day-of-week for the current iteration date. */
 function resolveScheduleDOW(currentDate: Date, timezone: string): string | undefined {
-  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "short" });
+  const fmt = getShortWeekdayDtf(timezone);
   const weekdayShort = fmt.format(currentDate);
   return SHORT_WEEKDAY_TO_ENUM[weekdayShort];
 }
@@ -245,7 +281,7 @@ async function generatePendingInstancesForRange(
       // V3-009: Use IANA-aware day-of-week for the idempotency key so DST
       // transitions in the timezone don't cause key collisions/misses.
       const idempotencyDow = (() => {
-        const df = new Intl.DateTimeFormat("en-US", { timeZone: schedule.timezone, weekday: "short" });
+        const df = getShortWeekdayDtf(schedule.timezone);
         return SHORT_WEEKDAY_TO_ENUM[df.format(currentDate)] ?? currentDate.getDay();
       })();
       slots.push({

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import CloseIcon from "@mui/icons-material/CloseOutlined";
-import { Alert, Button, IconButton } from "@mui/material";
+import { Alert, Button, IconButton, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisplayCurrencyHintDismissed";
@@ -35,21 +35,23 @@ export function DisplayCurrencyHint({
   });
 
   const dismissButton = (
-    <IconButton
-      aria-label={t.dismiss}
-      size="small"
-      onClick={dismiss}
-      sx={theme => ({
-        ml: theme.direction === "rtl" ? 0 : 0.5,
-        mr: theme.direction === "rtl" ? 0.5 : 0,
-        "&:focus-visible": {
-          outline: `2px solid ${theme.palette.primary.main}`,
-          outlineOffset: 2,
-        },
-      })}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
+    <Tooltip title={t.dismiss}>
+      <IconButton
+        aria-label={t.dismiss}
+        size="small"
+        onClick={dismiss}
+        sx={theme => ({
+          ml: theme.direction === "rtl" ? 0 : 0.5,
+          mr: theme.direction === "rtl" ? 0.5 : 0,
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        })}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
   );
 
   if (mode === "viewer") {

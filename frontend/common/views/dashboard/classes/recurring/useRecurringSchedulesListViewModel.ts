@@ -114,6 +114,7 @@ export function useRecurringSchedulesListViewModel(
         breadcrumbs,
         emptyMessage: t.shell.emptyMessage,
         loadError: t.shell.loadError,
+        addNew: t.shell.addNew,
         retryLabel: tCommon.retry,
       },
       columns: t.columns,

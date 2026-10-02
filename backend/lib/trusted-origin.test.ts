@@ -31,9 +31,9 @@ describe("resolveTrustedOrigin", () => {
   });
 
   test("uses the client-facing entry of a comma-separated X-Forwarded-Proto chain", () => {
-    expect(
-      resolveTrustedOrigin(requestWith({ host: "localhost:3000", "x-forwarded-proto": "https, http" }))
-    ).toBe("https://localhost:3000");
+    expect(resolveTrustedOrigin(requestWith({ host: "localhost:3000", "x-forwarded-proto": "https, http" }))).toBe(
+      "https://localhost:3000"
+    );
   });
 
   test("rejects non-http(s) schemes instead of building a redirect target from them", () => {

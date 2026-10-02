@@ -155,6 +155,7 @@ export function AccountSection(props: AccountSectionProps) {
                   <IconButton
                     onClick={() => setResetPasswordOpen(true)}
                     sx={theme => ({ color: theme.palette.primary.main })}
+                    aria-label={tBase.adminResetPassword.title}
                   >
                     <KeyOutlined />
                   </IconButton>
