@@ -1,6 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
+import { NationalIdPothosObject } from "@/backend/graphql/pothos/shared";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
@@ -60,7 +61,7 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
     countryCode: t.exposeString("countryCode", { nullable: true }),
     // Unmasked for the owner (the teacher editing their own profile). Admin /
     // other-scope views go through StaffProfileService which masks the value.
-    nationalId: t.exposeString("nationalId", { nullable: true }),
+    nationalId: t.field({ type: NationalIdPothosObject, nullable: true, resolve: parent => parent.nationalId }),
     dateOfBirth: t.exposeString("dateOfBirth", { nullable: true }),
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     address: t.exposeString("address", { nullable: true }),

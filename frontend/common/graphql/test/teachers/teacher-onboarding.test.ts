@@ -39,7 +39,7 @@ const createMinimalTeacherInput = (
   rateCurrency: CurrencyCode.Usd,
   address: "123 Main St",
   dateOfBirth: "1990-01-01",
-  nationalId: "ID123456",
+  nationalId: { countryCode: null, number: "ID123456" },
   qualifications: "PhD",
   initialPayoutMethod: {
     type: PaymentMethodType.BankTransfer,
@@ -270,7 +270,7 @@ describe("Teacher Onboarding GraphQL API", () => {
   test("create teacher with nationalId set succeeds", async () => {
     const teacher = await createTeacherAsAdmin(
       { name: "NatId Teacher", email: `natid_${Date.now()}@test.com` },
-      { nationalId: "PASSPORT-998877" }
+      { nationalId: { countryCode: null, number: "PASSPORT-998877" } }
     );
     expect(teacher.userId).toBeDefined();
   });
@@ -337,7 +337,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     const input = {
       ...createMinimalTeacherInput({ name: "Complete Teacher", email: `complete_${Date.now()}@test.com` }),
       nationality: CountryCode.Ca,
-      nationalId: "CAN-998877",
+      nationalId: { countryCode: null, number: "CAN-998877" },
       phone: "+1-416-555-0199",
       gender: Gender.Female,
       dateOfBirth: "1980-03-22",

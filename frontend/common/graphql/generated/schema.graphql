@@ -3482,6 +3482,18 @@ type MyConnectedMeetingProvider {
   providerSlug: String
 }
 
+"""National ID with its country of issuance"""
+type NationalId {
+  countryCode: String
+  number: String
+}
+
+"""National ID input with its country of issuance"""
+input NationalIdInput {
+  countryCode: String
+  number: String!
+}
+
 type NextUnpaidInvoiceSummary {
   amount: String
   currency: CurrencyCode
@@ -6348,8 +6360,8 @@ input TeacherOnboardingInput {
   """Teacher full name"""
   name: String!
 
-  """Teacher national ID (encrypted)"""
-  nationalId: String
+  """Teacher national ID with its country of issuance (encrypted)"""
+  nationalId: NationalIdInput
 
   """Teacher nationality (country code)"""
   nationality: String
@@ -6378,7 +6390,7 @@ type TeacherOwnProfile {
   hourlyRate: String
   id: String
   name: String
-  nationalId: String
+  nationalId: NationalId
   nationality: String
   phone: String
   qualifications: String
@@ -6392,7 +6404,7 @@ input TeacherOwnProfileUpdateInput {
   countryCode: String
   dateOfBirth: String
   gender: Gender
-  nationalId: String
+  nationalId: NationalIdInput
   nationality: String
   phone: String
   qualifications: String
@@ -6432,7 +6444,7 @@ type TeacherProfileResult {
   hourlyRate: String
   id: String
   name: String
-  nationalId: String
+  nationalId: NationalId
   nationality: String
   phone: String
   qualifications: String
@@ -6450,7 +6462,7 @@ input TeacherProfileUpdateInput {
   dateOfBirth: String
   gender: Gender
   hourlyRate: String
-  nationalId: String
+  nationalId: NationalIdInput
   nationality: String
   phone: String
   qualifications: String

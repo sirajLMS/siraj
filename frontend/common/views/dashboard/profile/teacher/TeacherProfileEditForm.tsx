@@ -24,6 +24,17 @@ import {
 
 export type { TeacherEditData, TeacherOwnEditFormData };
 
+/** Convert a prefill national ID object into the form's value shape. */
+function toFormNationalId(
+  nationalId: { readonly countryCode?: string | null; readonly number?: string | null } | null | undefined
+): TeacherOwnEditFormData["nationalId"] {
+  const number = nationalId?.number?.trim();
+  if (!number) {
+    return undefined;
+  }
+  return { countryCode: nationalId?.countryCode ?? null, number };
+}
+
 export function TeacherProfileEditForm({
   labels,
   teacherData,
@@ -57,7 +68,7 @@ export function TeacherProfileEditForm({
       email: "",
       avatarUrl: null,
       phone: "",
-      nationalId: "",
+      nationalId: undefined,
       nationality: "",
       timezone: "",
       displayCurrency: null,
@@ -70,7 +81,7 @@ export function TeacherProfileEditForm({
       email: teacherData.email ?? "",
       avatarUrl: teacherData.avatarUrl ?? null,
       phone: teacherData.phone ?? "",
-      nationalId: teacherData.nationalId ?? "",
+      nationalId: toFormNationalId(teacherData.nationalId),
       nationality: teacherData.nationality ?? "",
       timezone: teacherData.timezone ?? "",
       displayCurrency: teacherData.displayCurrency ?? null,

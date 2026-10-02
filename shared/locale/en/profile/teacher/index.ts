@@ -28,6 +28,7 @@ export const profileTeacherEn: ProfileTeacherLabels = {
     phone: "Phone",
     address: "Address",
     timezone: "Timezone",
+    nationality: "Nationality",
     nationalId: "National ID",
     dateOfBirth: "Date of Birth",
     gender: "Gender",

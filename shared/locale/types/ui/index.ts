@@ -383,6 +383,14 @@ export interface PhoneInputLabels {
   readonly phoneNumber: string;
 }
 
+export interface NationalIdInputLabels {
+  readonly label: string;
+  readonly selectCountry: string;
+  readonly nationalIdNumber: string;
+  readonly required: string;
+  readonly invalid: string;
+}
+
 export interface RichTextLabels {
   readonly bold: string;
   readonly italic: string;
@@ -422,6 +430,7 @@ export interface UiLabels {
   readonly languageSelector: LanguageSelectorLabels;
   readonly localizedString: LocalizedStringLabels;
   readonly phoneInput: PhoneInputLabels;
+  readonly nationalIdInput: NationalIdInputLabels;
   readonly richText: RichTextLabels;
   readonly tagInput: TagInputLabels;
   readonly timezoneSelect: TimezoneSelectLabels;

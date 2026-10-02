@@ -6,6 +6,7 @@ export * from "./editableTypography";
 export * from "./genderSelector";
 export * from "./languageSelector";
 export * from "./localizedString";
+export * from "./nationalIdInput";
 export * from "./paymentMethodDefaultsEditor";
 export * from "./paymentMethodSelect";
 export * from "./paymentMethodTypeFields";

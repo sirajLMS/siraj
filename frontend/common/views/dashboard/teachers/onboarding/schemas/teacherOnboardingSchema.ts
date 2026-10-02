@@ -23,7 +23,12 @@ export const teacherOnboardingSchema = (validationLabels: TeacherOnboardingLabel
       }),
       avatarUrl: z.string().optional(),
       nationality: z.string().optional(),
-      nationalId: z.string().optional(),
+      nationalId: z
+        .object({
+          countryCode: z.string().nullable().optional(),
+          number: z.string(),
+        })
+        .optional(),
       phone: z.string().max(50, validationLabels.phoneMaxLength).optional(),
       dateOfBirth: z.string().optional(),
       gender: z.custom<Gender>(

@@ -28,17 +28,20 @@ export function MobileFab({ icon, label, onClick, disabled, sx }: MobileFabProps
       disabled={disabled}
       aria-label={label}
       sx={mergeSx(
-        {
+        (theme: Theme) => ({
           position: "fixed",
-          bottom: "88px",
+          // Mirror the main scroll-area offset (bottomNavHeight + safe-area +
+          // spacing(2)) so the FAB always clears the fixed bottom navbar,
+          // including devices with a home indicator (safe-area inset).
+          bottom: `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
           right: 24,
-          zIndex: theme => theme.zIndex.speedDial,
-          backgroundColor: theme => theme.palette.primary.main,
-          color: theme => theme.palette.onPrimary,
+          zIndex: theme.zIndex.speedDial,
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
           "&:hover": {
-            backgroundColor: theme => theme.palette.primary.dark,
+            backgroundColor: theme.palette.primary.dark,
           },
-        },
+        }),
         sx
       )}
     >

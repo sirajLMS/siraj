@@ -54,9 +54,8 @@ export function isValidNationalIdForCountry(value: string, countryCode: string |
  *  - Digit 14: checksum (Luhn-style check digit used by the Egyptian authority).
  *
  * We enforce the structural/semantic checks that are deterministic (length,
- * century digit, valid date, gender-digit parity) and a Luhn checksum, which
- * catches the vast majority of typos without coupling to the official
- * (undocumented) algorithm.
+ * century digit, valid date) and the weighted mod-11 checksum, which catches
+ * the vast majority of typos.
  */
 export function isValidEgyptianNationalId(value: string): boolean {
   if (!/^\d{14}$/.test(value)) {
@@ -85,8 +84,9 @@ export function isValidEgyptianNationalId(value: string): boolean {
   // coupling to the official governorate table.
   // (No further constraint on digits 8–13 beyond the checksum below.)
 
-  // Luhn checksum over all 14 digits — the final digit is the check digit.
-  return luhnChecksumValid(value);
+  // Weighted mod-11 checksum over all 14 digits — the final digit is the
+  // check digit (weights [2,7,6,5,4,3,2,7,6,5,4,3,2] over digits 1-13).
+  return checksumValid(value);
 }
 
 function isValidDate(year: number, month: number, day: number): boolean {
@@ -101,23 +101,30 @@ function isValidDate(year: number, month: number, day: number): boolean {
   return day <= daysInMonth;
 }
 
-/** Standard Luhn check: the last digit is the check digit for the preceding digits. */
-function luhnChecksumValid(value: string): boolean {
+/**
+ * Weighted mod-11 check digit for the Egyptian national ID.
+ *
+ * The 14th digit is a checksum: digits 1-13 are multiplied by the weights
+ * [2,7,6,5,4,3,2,7,6,5,4,3,2] and summed; the remainder mod 11 determines the
+ * check digit — `11 - remainder`, with a remainder of 0 mapping to 0 and a
+ * remainder of 1 mapping to check digit `10`, which cannot appear in a valid
+ * ID (a single digit), so such IDs are invalid.
+ */
+function checksumValid(value: string): boolean {
+  const weights = [2, 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
   let sum = 0;
-  const len = value.length; // 14 for Egyptian national ID
-  // Process all digits except the final check digit.
-  for (let i = 0; i < len - 1; i += 1) {
-    let d = value.charCodeAt(i) - 48;
-    // Double every second digit from the right (i.e. odd index from the left
-    // when counting from the leftmost payload digit).
-    if ((len - 2 - i) % 2 === 0) {
-      d *= 2;
-      if (d > 9) {
-        d -= 9;
-      }
-    }
-    sum += d;
+  for (let i = 0; i < weights.length; i += 1) {
+    sum += (value.charCodeAt(i) - 48) * weights[i];
   }
-  const checkDigit = (10 - (sum % 10)) % 10;
-  return checkDigit === value.charCodeAt(len - 1) - 48;
+  const remainder = sum % 11;
+  let expected: number;
+  if (remainder === 0) {
+    expected = 0;
+  } else if (remainder === 1) {
+    // Check digit 10 cannot appear as a single digit — such IDs are invalid.
+    expected = 10;
+  } else {
+    expected = 11 - remainder;
+  }
+  return expected === value.charCodeAt(13) - 48;
 }

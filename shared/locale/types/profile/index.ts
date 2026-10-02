@@ -76,6 +76,7 @@ export interface ProfileTeacherLabels {
     readonly phone: string;
     readonly address: string;
     readonly timezone: string;
+    readonly nationality: string;
     readonly nationalId: string;
     readonly dateOfBirth: string;
     readonly gender: string;

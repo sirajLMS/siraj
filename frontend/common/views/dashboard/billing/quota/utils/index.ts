@@ -2,5 +2,8 @@ export * from "./buildPaginationVars";
 export * from "./buildQuotaColumns";
 export * from "./quotaFormatters";
 export * from "./quotaInsights.helpers";
+export * from "./quotaInsightsChartData";
 export * from "./quotaInsightsChartShapes";
+export * from "./quotaInsightsMetricItems";
+export * from "./quotaInsightsMetrics.types";
 export * from "./quotaList.helpers";

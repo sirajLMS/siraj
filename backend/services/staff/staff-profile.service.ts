@@ -6,12 +6,10 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { invalidateTeacherWrite } from "@/backend/services/cache";
 import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInput } from "@/backend/types";
+import { parseNationalId, serializeNationalId } from "@/shared/lib/national-id";
 import { getServerTranslations } from "@/shared/locale";
 
-function maskNationalId(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
+function maskNationalId(value: string): string {
   const trimmed = value.trim();
   if (trimmed.length <= 4) {
     return "****";
@@ -21,9 +19,14 @@ function maskNationalId(value: string | null): string | null {
 }
 
 function toMaskedTeacherProfile(profile: TeacherProfileReturnType): TeacherProfileReturnType {
+  // The profile row's nationalId is the serialized `countryCode:number` string;
+  // mask only the number part, keeping the country visible.
+  const parsed = parseNationalId(profile.nationalId);
   return {
     ...profile,
-    nationalId: maskNationalId(profile.nationalId),
+    nationalId: parsed
+      ? serializeNationalId({ countryCode: parsed.countryCode, number: maskNationalId(parsed.number) })
+      : null,
   };
 }
 
@@ -55,7 +58,7 @@ export namespace StaffProfileService {
       locale
     );
 
-    const { timezone: timezoneInput, status, ...restInput } = input;
+    const { timezone: timezoneInput, status, nationalId, ...restInput } = input;
 
     if (timezoneInput != null) {
       const teacher = await TeacherRepository.findById(teacherId);
@@ -75,7 +78,10 @@ export namespace StaffProfileService {
       await UserRepository.updateStatus(teacher.userId, status, undefined, locale);
     }
 
-    const success = await TeacherRepository.updateTeacherProfile(teacherId, restInput);
+    const success = await TeacherRepository.updateTeacherProfile(teacherId, {
+      ...restInput,
+      nationalId: serializeNationalId(nationalId) ?? undefined,
+    });
 
     if (!success) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;

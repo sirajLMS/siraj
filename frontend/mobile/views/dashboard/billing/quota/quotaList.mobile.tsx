@@ -1,22 +1,10 @@
 "use client";
 
-import { AddOutlined, InsightsOutlined } from "@mui/icons-material";
-import {
-  Fade,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Skeleton,
-  Stack,
-} from "@mui/material";
-import Link from "next/link";
+import { AddOutlined } from "@mui/icons-material";
+import { Fade, Skeleton, Stack } from "@mui/material";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
-import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaListViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { buildQuotaListMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";
@@ -26,14 +14,11 @@ import {
   MobileContentStack,
   MobileEmptyState,
   MobileFab,
-  MobileFilterButton,
   MobileMetricCardGrid,
-  MobilePageContainer,
-  MobilePageHeader,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
+import { QuotaListFiltersMobile } from "@/frontend/mobile/views/dashboard/billing/quota/components/QuotaListFiltersMobile";
 import { QuotaListItemMobile } from "@/frontend/mobile/views/dashboard/billing/quota/components/QuotaListItemMobile";
-import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4"] as const;
 
@@ -47,65 +32,6 @@ function renderSkeletons(): ReactNode {
       </Stack>
     </MobileCardListItem>
   ));
-}
-
-interface MobileFilterControlsProps {
-  readonly t: QuotaLabels;
-  readonly searchQuery: string;
-  readonly filterStatus: QuotaStatus | null;
-  readonly filterKind: QuotaKind | null;
-  readonly setSearchQuery: (query: string) => void;
-  readonly setFilterStatus: (status: QuotaStatus | null) => void;
-  readonly setFilterKind: (kind: QuotaKind | null) => void;
-}
-
-function MobileFilterControls({
-  t,
-  searchQuery,
-  filterStatus,
-  filterKind,
-  setSearchQuery,
-  setFilterStatus,
-  setFilterKind,
-}: Readonly<MobileFilterControlsProps>) {
-  return (
-    <Stack spacing={1.5}>
-      <SearchBarField value={searchQuery} placeholder={t.listTitle} onChange={setSearchQuery} />
-      <Stack direction="row" spacing={1}>
-        <FormControl size="small" fullWidth>
-          <InputLabel>{t.fields.status}</InputLabel>
-          <Select<QuotaStatus | "">
-            value={filterStatus ?? ""}
-            label={t.fields.status}
-            onChange={(e: SelectChangeEvent<QuotaStatus | "">) => {
-              const val = e.target.value;
-              setFilterStatus(val === "" ? null : val);
-            }}
-          >
-            <MenuItem value="">{t.fields.all}</MenuItem>
-            <MenuItem value={QuotaStatus.Active}>{t.statuses.ACTIVE}</MenuItem>
-            <MenuItem value={QuotaStatus.Expired}>{t.statuses.EXPIRED}</MenuItem>
-            <MenuItem value={QuotaStatus.Archived}>{t.statuses.ARCHIVED}</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl size="small" fullWidth>
-          <InputLabel>{t.fields.kind}</InputLabel>
-          <Select<QuotaKind | "">
-            value={filterKind ?? ""}
-            label={t.fields.kind}
-            onChange={(e: SelectChangeEvent<QuotaKind | "">) => {
-              const val = e.target.value;
-              setFilterKind(val === "" ? null : val);
-            }}
-          >
-            <MenuItem value="">{t.fields.all}</MenuItem>
-            <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
-            <MenuItem value={QuotaKind.Periodic}>{t.kinds.PERIODIC}</MenuItem>
-          </Select>
-        </FormControl>
-      </Stack>
-    </Stack>
-  );
 }
 
 export function QuotaListMobile(props: Readonly<QuotaListViewModel>) {
@@ -148,57 +74,43 @@ export function QuotaListMobile(props: Readonly<QuotaListViewModel>) {
   return (
     <Fade in timeout={300}>
       <div>
-        <MobilePageContainer>
-          <MobilePageHeader
-            title={t.title}
-            breadcrumbs={[{ label: t.title, current: true }]}
-            actions={
-              <Link href="/quotas/insights" style={{ textDecoration: "none" }}>
-                <MobileFilterButton size="small" startIcon={<InsightsOutlined />}>
-                  {t.insights}
-                </MobileFilterButton>
-              </Link>
-            }
-          />
+        <MobileContentStack gap={3} paddingBottom={4}>
+          <MobileMetricCardGrid metrics={metrics} />
 
-          <MobileContentStack gap={3} paddingBottom={4}>
-            <MobileMetricCardGrid metrics={metrics} />
+          <MobileSectionPanel title={t.listTitle} contentInset={false}>
+            <QuotaListFiltersMobile
+              t={t}
+              searchQuery={searchQuery}
+              filterStatus={filterStatus}
+              filterKind={filterKind}
+              setSearchQuery={setSearchQuery}
+              setFilterStatus={setFilterStatus}
+              setFilterKind={setFilterKind}
+            />
+          </MobileSectionPanel>
 
-            <MobileSectionPanel title={t.listTitle} contentInset={false}>
-              <MobileFilterControls
-                t={t}
-                searchQuery={searchQuery}
-                filterStatus={filterStatus}
-                filterKind={filterKind}
-                setSearchQuery={setSearchQuery}
-                setFilterStatus={setFilterStatus}
-                setFilterKind={setFilterKind}
-              />
+          {quotas.length === 0 && !loading ? (
+            <MobileSectionPanel contentInset={false}>
+              <MobileEmptyState title={t.noQuotas} subtitle={t.emptyListMessage} />
             </MobileSectionPanel>
-
-            {quotas.length === 0 && !loading ? (
-              <MobileSectionPanel contentInset={false}>
-                <MobileEmptyState title={t.noQuotas} subtitle={t.emptyListMessage} />
-              </MobileSectionPanel>
-            ) : (
-              <MobileCardList<QuotaItem>
-                rows={quotas}
-                renderItem={renderItem}
-                getKey={quota => quota.id ?? ""}
-                loading={loading}
-                emptyMessage={t.noQuotas}
-                renderSkeleton={renderSkeletons}
-                layout="edge-to-edge"
-                paginationOptions={buildServerPaginationOptions({
-                  page,
-                  pageSize,
-                  totalCount,
-                  onPageChange: (newPage: number) => setPage(newPage),
-                })}
-              />
-            )}
-          </MobileContentStack>
-        </MobilePageContainer>
+          ) : (
+            <MobileCardList<QuotaItem>
+              rows={quotas}
+              renderItem={renderItem}
+              getKey={quota => quota.id ?? ""}
+              loading={loading}
+              emptyMessage={t.noQuotas}
+              renderSkeleton={renderSkeletons}
+              layout="edge-to-edge"
+              paginationOptions={buildServerPaginationOptions({
+                page,
+                pageSize,
+                totalCount,
+                onPageChange: (newPage: number) => setPage(newPage),
+              })}
+            />
+          )}
+        </MobileContentStack>
 
         <MobileFab icon={<AddOutlined />} label={t.newQuota} onClick={() => router.push("/quotas/new")} />
       </div>

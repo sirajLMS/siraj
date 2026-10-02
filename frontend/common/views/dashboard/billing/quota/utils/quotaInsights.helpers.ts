@@ -1,52 +1,14 @@
-import { EventBusyOutlined, Inventory2Outlined, NumbersOutlined } from "@mui/icons-material";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
-import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
+import {
+  type DeliveryRateData,
+  type ExpiredSlippageData,
+  groupQuotasByMonth,
+  type PurchasesOverTimeData,
+  type RedemptionByTypeData,
+} from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsightsChartData";
+import type { QuotaInsightsMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsightsMetrics.types";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
-
-export interface PurchasesOverTimeData {
-  readonly month: string;
-  readonly purchases: number;
-  readonly classes: number;
-}
-
-export interface RedemptionByTypeData {
-  readonly name: string;
-  readonly value: number;
-  readonly pct: number;
-}
-
-export interface DeliveryRateData {
-  readonly name: string;
-  readonly count: number;
-}
-
-export interface ExpiredSlippageData {
-  readonly month: string;
-  readonly cumulativeExpired: number;
-  readonly cumulativeRedeemed: number;
-}
-
-function groupQuotasByMonth<T>(
-  quotas: QuotaItem[],
-  getDate: (q: QuotaItem) => string | null,
-  init: T,
-  accum: (agg: T, q: QuotaItem) => void,
-  monthFormatter: Intl.DateTimeFormat
-): [string, T][] {
-  const monthMap: Map<string, T> = new Map();
-  for (const q of quotas) {
-    const dateStr = getDate(q);
-    if (!dateStr) continue;
-    const d = new Date(dateStr);
-    const key = `${monthFormatter.format(d)} ${d.getFullYear()}`;
-    const existing = monthMap.get(key) ?? structuredClone(init);
-    accum(existing, q);
-    monthMap.set(key, existing);
-  }
-  return Array.from(monthMap.entries()).toSorted((a, b) => a[0].localeCompare(b[0]));
-}
 
 export function buildPurchasesOverTime(
   quotas: QuotaItem[],
@@ -122,14 +84,6 @@ export function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.D
   });
 }
 
-export interface QuotaInsightsMetrics {
-  readonly activeCount: number;
-  readonly totalRemaining: number;
-  readonly totalReserved: number;
-  readonly expiringCount: number;
-  readonly pendingBacklogCount: number;
-}
-
 /**
  * Computes aggregate metrics from quota data.
  *
@@ -190,49 +144,4 @@ export function buildQuotaInsightsCsv(quotas: QuotaItem[], labels: QuotaLabels):
   ]);
   const csvLines = [headers, ...rows].map(row => row.map(escapeCsvCell).join(","));
   return csvLines.join("\n");
-}
-
-export function buildQuotaInsightsMetrics(vm: Readonly<QuotaInsightsViewModel>): readonly MetricItem[] {
-  const { metrics, labels } = vm;
-  return [
-    {
-      key: "activeQuotas",
-      count: metrics.activeQuotasCount,
-      labelKey: "quota.activeQuotas",
-      label: labels.activeQuotasCount(metrics.activeQuotasCount),
-      icon: Inventory2Outlined,
-      variant: "default",
-    },
-    {
-      key: "totalRemaining",
-      count: metrics.totalClassesRemaining,
-      labelKey: "quota.remaining",
-      label: labels.totalClassesRemaining(metrics.totalClassesRemaining),
-      icon: NumbersOutlined,
-      variant: "highlight",
-    },
-    {
-      key: "totalReserved",
-      count: metrics.totalReserved,
-      labelKey: "quota.reserved",
-      label: labels.fields.reservedClasses,
-      icon: Inventory2Outlined,
-      variant: "default",
-    },
-    {
-      key: "pendingBacklog",
-      count: metrics.pendingBacklogCount,
-      labelKey: "quota.pendingBacklog",
-      label: labels.charts.pendingCredits,
-      icon: EventBusyOutlined,
-      variant: metrics.pendingBacklogCount > 0 ? "danger" : "default",
-    },
-  ];
-}
-
-export function quotaInsightsBreadcrumbs(t: { readonly insights: string; readonly breadcrumbLabel: string }) {
-  return [
-    { label: t.breadcrumbLabel, href: "/quotas" },
-    { label: t.insights, current: true },
-  ];
 }

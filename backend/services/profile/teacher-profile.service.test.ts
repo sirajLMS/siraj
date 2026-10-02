@@ -96,8 +96,8 @@ describe("TeacherPortalService own profile", () => {
     const tErrors = ownProfileSetup();
 
     const profile = await TeacherPortalService.getOwnProfile("user-1", tErrors);
-    // Owner sees the full value — NOT the masked "******7890" admin view.
-    expect(profile.nationalId).toBe("1234567890");
+    // Owner sees the full value as an object — NOT the masked admin view.
+    expect(profile.nationalId).toEqual({ countryCode: null, number: "1234567890" });
   });
 });
 
@@ -114,8 +114,8 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
   });
 
   test("accepts a valid Egyptian national ID with EG nationality", async () => {
-    // 2960123 → century 2 (1996), month 01, day 23; check digit computed by Luhn.
-    const validEgId = "29601234567818";
+    // 2960123 → century 2 (1996), month 01, day 23; weighted mod-11 check digit.
+    const validEgId = "29601234567813";
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
@@ -126,11 +126,16 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
     await toPromise(() =>
-      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
+      TeacherPortalService.updateOwnProfile(
+        "user-1",
+        "teacher-1",
+        { nationalId: { countryCode: "EG", number: validEgId } },
+        tErrors
+      )
     );
     expect(TeacherRepository.updateTeacherProfile).toHaveBeenCalledWith(
       "teacher-1",
-      expect.objectContaining({ nationalId: validEgId })
+      expect.objectContaining({ nationalId: `EG:${validEgId}` })
     );
   });
 
@@ -145,7 +150,12 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     let caughtErr: Error | undefined;
     try {
       await toPromise(() =>
-        TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
+        TeacherPortalService.updateOwnProfile(
+          "user-1",
+          "teacher-1",
+          { nationalId: { countryCode: "EG", number: "not-a-valid-id" } },
+          tErrors
+        )
       );
       throw new Error("Expected updateOwnProfile to throw");
     } catch (err) {
@@ -155,11 +165,11 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     expect(TeacherRepository.updateTeacherProfile).not.toHaveBeenCalled();
   });
 
-  test("falls back to the teacher's existing nationality when input omits it", async () => {
-    const validEgId = "29601234567818";
+  test("falls back to the teacher's existing nationality when the ID omits its country", async () => {
+    const validEgId = "29601234567813";
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-    // Existing teacher nationality is EG; input does not pass nationality.
+    // Existing teacher nationality is EG; the ID object carries no country code.
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
       ...baseTeacher,
       nationality: "EG",
@@ -168,7 +178,12 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
     const result = await toPromise(() =>
-      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
+      TeacherPortalService.updateOwnProfile(
+        "user-1",
+        "teacher-1",
+        { nationalId: { countryCode: null, number: validEgId } },
+        tErrors
+      )
     );
     expect(result).toBeDefined();
   });

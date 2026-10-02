@@ -1,4 +1,5 @@
 import type { PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
+import { NationalIdInputPothosObject } from "@/backend/graphql/pothos/shared/national-id.pothos";
 
 const MAX_LENGTH = {
   PHONE: 50,
@@ -46,7 +47,7 @@ export function profileSocialInputFields(t: PothosInputFieldBuilder) {
 export function teacherSpecificInputFields(t: PothosInputFieldBuilder) {
   return {
     countryCode: constrainedString(t, MAX_LENGTH.COUNTRY_CODE),
-    nationalId: constrainedString(t, MAX_LENGTH.NATIONAL_ID),
+    nationalId: t.field({ type: NationalIdInputPothosObject, required: false }),
     dateOfBirth: constrainedString(t, MAX_LENGTH.DATE_OF_BIRTH),
     qualifications: constrainedString(t, MAX_LENGTH.QUALIFICATIONS),
   };

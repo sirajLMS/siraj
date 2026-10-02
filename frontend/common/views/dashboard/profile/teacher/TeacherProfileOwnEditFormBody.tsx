@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Stack, TextField } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
+import { NationalIdFormField } from "@/frontend/common/components/ui/input";
 import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
@@ -90,13 +91,13 @@ export function TeacherProfileOwnEditFormBody({
           />
         ) : null}
         {canEdit("teacher_professional") ? (
-          <TextField
-            {...register("nationalId")}
+          <NationalIdFormField
+            name="nationalId"
+            control={control}
             label={nationalIdLabel}
             required
             error={Boolean(nationalIdError)}
             helperText={nationalIdError}
-            fullWidth
             size="small"
           />
         ) : null}

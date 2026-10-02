@@ -6,3 +6,4 @@ export * from "./teacher-availability-bootstrap.repository";
 export * from "./teacher-due.repository";
 export * from "./teacher-notes.repository";
 export * from "./teacher-payment.repository";
+export * from "./teacher-profile.repository";

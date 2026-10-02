@@ -1,137 +1,19 @@
 "use client";
 
-import { DeleteOutlined, EditOutlined, VisibilityOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Fade,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Stack,
-  Tooltip,
-} from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import Link from "next/link";
 import { useMemo } from "react";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter";
-import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
-import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaListViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { buildQuotaListMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";
 import { buildQuotaColumns } from "@/frontend/common/views/dashboard/billing/quota/utils/buildQuotaColumns";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { QuotaListDesktopActions } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaListDesktopActions";
-import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
-
-interface FilterControlsProps {
-  readonly t: QuotaLabels;
-  readonly searchQuery: string;
-  readonly filterStatus: QuotaStatus | null;
-  readonly filterKind: QuotaKind | null;
-  readonly setSearchQuery: (query: string) => void;
-  readonly setFilterStatus: (status: QuotaStatus | null) => void;
-  readonly setFilterKind: (kind: QuotaKind | null) => void;
-}
-
-function FilterControls({
-  t,
-  searchQuery,
-  filterStatus,
-  filterKind,
-  setSearchQuery,
-  setFilterStatus,
-  setFilterKind,
-}: Readonly<FilterControlsProps>) {
-  return (
-    <Stack direction="row" spacing={2} sx={{ flex: 1, flexWrap: "wrap" }}>
-      <SearchBarField value={searchQuery} placeholder={t.listTitle} onChange={setSearchQuery} sx={{ maxWidth: 300 }} />
-
-      <FormControl size="small" sx={{ minWidth: 140 }}>
-        <InputLabel>{t.fields.status}</InputLabel>
-        <Select<QuotaStatus | "">
-          value={filterStatus ?? ""}
-          label={t.fields.status}
-          onChange={(e: SelectChangeEvent<QuotaStatus | "">) => {
-            const val = e.target.value;
-            setFilterStatus(val === "" ? null : val);
-          }}
-        >
-          <MenuItem value="">{t.fields.all}</MenuItem>
-          <MenuItem value={QuotaStatus.Active}>{t.statuses.ACTIVE}</MenuItem>
-          <MenuItem value={QuotaStatus.Expired}>{t.statuses.EXPIRED}</MenuItem>
-          <MenuItem value={QuotaStatus.Archived}>{t.statuses.ARCHIVED}</MenuItem>
-        </Select>
-      </FormControl>
-
-      <FormControl size="small" sx={{ minWidth: 140 }}>
-        <InputLabel>{t.fields.kind}</InputLabel>
-        <Select<QuotaKind | "">
-          value={filterKind ?? ""}
-          label={t.fields.kind}
-          onChange={(e: SelectChangeEvent<QuotaKind | "">) => {
-            const val = e.target.value;
-            setFilterKind(val === "" ? null : val);
-          }}
-        >
-          <MenuItem value="">{t.fields.all}</MenuItem>
-          <MenuItem value={QuotaKind.Package}>{t.kinds.PACKAGE}</MenuItem>
-          <MenuItem value={QuotaKind.Periodic}>{t.kinds.PERIODIC}</MenuItem>
-        </Select>
-      </FormControl>
-    </Stack>
-  );
-}
-
-interface QuotaDesktopGridProps {
-  readonly quotas: readonly QuotaItem[];
-  readonly columns: GridColDef<QuotaItem>[];
-  readonly loading: boolean;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly totalCount: number;
-  readonly setPage: (page: number) => void;
-  readonly setPageSize: (pageSize: number) => void;
-  readonly t: QuotaLabels;
-}
-
-function QuotaDesktopGrid({
-  quotas,
-  columns,
-  loading,
-  page,
-  pageSize,
-  totalCount,
-  setPage,
-  setPageSize,
-  t,
-}: Readonly<QuotaDesktopGridProps>) {
-  return (
-    <Box sx={{ width: "100%", height: 600 }}>
-      <DesktopAppDataGrid<QuotaItem>
-        rows={quotas}
-        columns={columns}
-        loading={loading}
-        ariaLabel={t.listTitle}
-        emptyMessage={t.noQuotas}
-        paginationOptions={buildServerPaginationOptions({
-          page,
-          pageSize,
-          totalCount,
-          onPageChange: (newPage: number) => setPage(newPage),
-          onPageSizeChange: (newPageSize: number) => setPageSize(newPageSize),
-        })}
-      />
-    </Box>
-  );
-}
+import { QuotaListDesktopFilterControls } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaListDesktopFilterControls";
+import { QuotaListDesktopGrid } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaListDesktopGrid";
+import { QuotaListDesktopRowActions } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaListDesktopRowActions";
 
 export function QuotaListDesktop(props: Readonly<QuotaListViewModel>) {
   const {
@@ -159,34 +41,7 @@ export function QuotaListDesktop(props: Readonly<QuotaListViewModel>) {
       headerName: "",
       width: 130,
       sortable: false,
-      renderCell: params => (
-        <Stack direction="row" spacing={0.5}>
-          <Tooltip title={t.actions.viewLedger}>
-            <Link href={`/quotas/${params.row.id}`} style={{ textDecoration: "none" }}>
-              <IconButton size="small" aria-label={t.actions.view}>
-                <VisibilityOutlined fontSize="small" />
-              </IconButton>
-            </Link>
-          </Tooltip>
-          <Tooltip title={t.actions.edit}>
-            <Link href={`/quotas/${params.row.id}/edit`} style={{ textDecoration: "none" }}>
-              <IconButton size="small" aria-label={t.actions.edit}>
-                <EditOutlined fontSize="small" />
-              </IconButton>
-            </Link>
-          </Tooltip>
-          <Tooltip title={t.actions.delete}>
-            <IconButton
-              size="small"
-              aria-label={t.actions.delete}
-              color="error"
-              onClick={() => handleDelete(params.row.id ?? "")}
-            >
-              <DeleteOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
+      renderCell: params => <QuotaListDesktopRowActions t={t} quotaId={params.row.id ?? ""} onDelete={handleDelete} />,
     });
     return baseCols;
   }, [t, handleDelete]);
@@ -200,50 +55,53 @@ export function QuotaListDesktop(props: Readonly<QuotaListViewModel>) {
     (searchQuery.trim() !== "" || filterStatus !== null || filterKind !== null);
 
   return (
-    <Fade in timeout={300}>
-      <div>
-        <DesktopPageContainer>
-          <DesktopPageHeader
-            title={t.title}
-            breadcrumbs={[{ label: t.title, current: true }]}
-            actions={<QuotaListDesktopActions t={t} />}
-          />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
+    >
+      <DesktopMetricCardGrid metrics={metrics} size={{ md: 4, lg: 4 }} />
 
-          <DesktopMetricCardGrid metrics={metrics} size={{ md: 4, lg: 4 }} />
-
-          <DesktopSectionPanel
-            contentPadding={false}
-            title={t.listTitle}
-            actions={
-              <FilterControls
-                t={t}
-                searchQuery={searchQuery}
-                filterStatus={filterStatus}
-                filterKind={filterKind}
-                setSearchQuery={setSearchQuery}
-                setFilterStatus={setFilterStatus}
-                setFilterKind={setFilterKind}
-              />
-            }
+      <DesktopSectionPanel
+        contentPadding={false}
+        title={t.listTitle}
+        actions={
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ flex: 1, flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end" }}
           >
-            {hasError ? (
-              <ErrorState message={t.emptyListMessage} embedded />
-            ) : (
-              <QuotaDesktopGrid
-                quotas={quotas}
-                columns={columns}
-                loading={loading}
-                page={page}
-                pageSize={pageSize}
-                totalCount={totalCount}
-                setPage={setPage}
-                setPageSize={setPageSize}
-                t={t}
-              />
-            )}
-          </DesktopSectionPanel>
-        </DesktopPageContainer>
-      </div>
-    </Fade>
+            <QuotaListDesktopFilterControls
+              t={t}
+              searchQuery={searchQuery}
+              filterStatus={filterStatus}
+              filterKind={filterKind}
+              setSearchQuery={setSearchQuery}
+              setFilterStatus={setFilterStatus}
+              setFilterKind={setFilterKind}
+            />
+            <QuotaListDesktopActions t={t} />
+          </Stack>
+        }
+      >
+        {hasError ? (
+          <ErrorState message={t.emptyListMessage} embedded />
+        ) : (
+          <QuotaListDesktopGrid
+            quotas={quotas}
+            columns={columns}
+            loading={loading}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            setPage={setPage}
+            setPageSize={setPageSize}
+            t={t}
+          />
+        )}
+      </DesktopSectionPanel>
+    </Box>
   );
 }

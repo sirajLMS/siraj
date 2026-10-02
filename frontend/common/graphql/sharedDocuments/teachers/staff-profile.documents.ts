@@ -43,7 +43,10 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       name
       email
       phone
-      nationalId
+      nationalId {
+        countryCode
+        number
+      }
       nationality
       countryCode
       dateOfBirth

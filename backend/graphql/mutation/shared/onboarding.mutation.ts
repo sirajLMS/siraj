@@ -1,4 +1,5 @@
 import { ManagerAccountType } from "@/backend/enum";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ManagerOnboardingInputPothosObject,
@@ -19,7 +20,13 @@ import {
   StudentOnboardingService,
   TeacherOnboardingService,
 } from "@/backend/services";
-import type { UserPaymentMethodSubmitInput } from "@/backend/types";
+import type {
+  ManagerOnboardingInput,
+  ParentOnboardingGqlInput,
+  StudentOnboardingInput,
+  TeacherOnboardingGqlInput,
+  UserPaymentMethodSubmitInput,
+} from "@/backend/types";
 
 function mapInitialPaymentMethodInput(
   input:
@@ -46,6 +53,114 @@ function mapInitialPaymentMethodInput(
   };
 }
 
+async function resolveCreateTeacher(
+  _root: unknown,
+  args: {
+    input: Omit<TeacherOnboardingGqlInput, "initialPayoutMethod"> & {
+      initialPayoutMethod?: Exclude<Parameters<typeof mapInitialPaymentMethodInput>[0], undefined>;
+    };
+  },
+  ctx: BaseContext
+) {
+  const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
+  return await TeacherOnboardingService.createTeacher(
+    userId,
+    {
+      name: args.input.name,
+      email: args.input.email.value,
+      password: args.input.password,
+      nationality: args.input.nationality ?? null,
+      nationalId: args.input.nationalId
+        ? { countryCode: args.input.nationalId.countryCode ?? null, number: args.input.nationalId.number }
+        : null,
+      phone: args.input.phone ?? null,
+      dateOfBirth: args.input.dateOfBirth ?? null,
+      gender: args.input.gender ?? null,
+      address: args.input.address ?? null,
+      qualifications: args.input.qualifications ?? null,
+      countryCode: args.input.countryCode ?? null,
+      timezone: args.input.timezone,
+      hourlyRate: args.input.hourlyRate ?? null,
+      rateCurrency: args.input.rateCurrency ?? null,
+      initialPayoutMethod: mapInitialPaymentMethodInput(args.input.initialPayoutMethod),
+    },
+    tErrors,
+    ctx.locale
+  );
+}
+
+async function resolveCreateParent(
+  _root: unknown,
+  args: {
+    input: Omit<ParentOnboardingGqlInput, "initialPayinMethod"> & {
+      initialPayinMethod?: Exclude<Parameters<typeof mapInitialPaymentMethodInput>[0], undefined>;
+    };
+  },
+  ctx: BaseContext
+) {
+  const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
+  return await ParentOnboardingService.createParent(
+    userId,
+    {
+      name: args.input.name,
+      email: args.input.email.value,
+      password: args.input.password,
+      phone: args.input.phone ?? null,
+      nationality: args.input.nationality ?? null,
+      address: args.input.address ?? null,
+      facebook: args.input.facebook ?? null,
+      whatsapp: args.input.whatsapp ?? null,
+      twitter: args.input.twitter ?? null,
+      invoiceType: args.input.invoiceType ?? null,
+      feeAmount: args.input.feeAmount ?? null,
+      currency: args.input.currency ?? null,
+      timezone: args.input.timezone,
+      initialPayinMethod: mapInitialPaymentMethodInput(args.input.initialPayinMethod),
+    },
+    tErrors
+  );
+}
+
+async function resolveCreateStudent(_root: unknown, args: { input: StudentOnboardingInput }, ctx: BaseContext) {
+  const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
+  return await StudentOnboardingService.createStudent(userId, args.input, tErrors, ctx.locale);
+}
+
+async function resolveCreateManager(
+  _root: unknown,
+  args: { input: Omit<ManagerOnboardingInput, "email"> & { email: string } },
+  ctx: BaseContext
+) {
+  const userId = await requireAuth(ctx);
+  return await ManagerOnboardingService.createManager(
+    userId,
+    {
+      ...args.input,
+      email: args.input.email,
+    },
+    ctx.locale
+  );
+}
+
+async function resolveCreateSupervisor(
+  _root: unknown,
+  args: { input: Omit<ManagerOnboardingInput, "email"> & { email: string } },
+  ctx: BaseContext
+) {
+  const userId = await requireAuth(ctx);
+  return await ManagerOnboardingService.createManager(
+    userId,
+    {
+      name: args.input.name,
+      email: args.input.email,
+      password: args.input.password,
+      phone: args.input.phone ?? null,
+      accountType: ManagerAccountType.supervisor,
+    },
+    ctx.locale
+  );
+}
+
 gqlSchemaBuilder.mutationFields(t => ({
   createTeacher: t.field({
     type: TeacherOnboardingPothosObject,
@@ -54,31 +169,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: TeacherOnboardingInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
-      return await TeacherOnboardingService.createTeacher(
-        userId,
-        {
-          name: args.input.name,
-          email: args.input.email.value,
-          password: args.input.password,
-          nationality: args.input.nationality ?? null,
-          nationalId: args.input.nationalId ?? null,
-          phone: args.input.phone ?? null,
-          dateOfBirth: args.input.dateOfBirth ?? null,
-          gender: args.input.gender ?? null,
-          address: args.input.address ?? null,
-          qualifications: args.input.qualifications ?? null,
-          countryCode: args.input.countryCode ?? null,
-          timezone: args.input.timezone,
-          hourlyRate: args.input.hourlyRate ?? null,
-          rateCurrency: args.input.rateCurrency ?? null,
-          initialPayoutMethod: mapInitialPaymentMethodInput(args.input.initialPayoutMethod),
-        },
-        tErrors,
-        ctx.locale
-      );
-    },
+    resolve: resolveCreateTeacher,
   }),
 
   createParent: t.field({
@@ -88,29 +179,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: ParentOnboardingInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
-      return await ParentOnboardingService.createParent(
-        userId,
-        {
-          name: args.input.name,
-          email: args.input.email.value,
-          password: args.input.password,
-          phone: args.input.phone ?? null,
-          nationality: args.input.nationality ?? null,
-          address: args.input.address ?? null,
-          facebook: args.input.facebook ?? null,
-          whatsapp: args.input.whatsapp ?? null,
-          twitter: args.input.twitter ?? null,
-          invoiceType: args.input.invoiceType ?? null,
-          feeAmount: args.input.feeAmount ?? null,
-          currency: args.input.currency ?? null,
-          timezone: args.input.timezone,
-          initialPayinMethod: mapInitialPaymentMethodInput(args.input.initialPayinMethod),
-        },
-        tErrors
-      );
-    },
+    resolve: resolveCreateParent,
   }),
 
   createStudent: t.field({
@@ -120,10 +189,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: StudentOnboardingInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
-      return await StudentOnboardingService.createStudent(userId, args.input, tErrors, ctx.locale);
-    },
+    resolve: resolveCreateStudent,
   }),
 
   createManager: t.field({
@@ -133,17 +199,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: ManagerOnboardingInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return await ManagerOnboardingService.createManager(
-        userId,
-        {
-          ...args.input,
-          email: args.input.email,
-        },
-        ctx.locale
-      );
-    },
+    resolve: resolveCreateManager,
   }),
 
   createSupervisor: t.field({
@@ -153,19 +209,6 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: ManagerOnboardingInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return await ManagerOnboardingService.createManager(
-        userId,
-        {
-          name: args.input.name,
-          email: args.input.email,
-          password: args.input.password,
-          phone: args.input.phone ?? null,
-          accountType: ManagerAccountType.supervisor,
-        },
-        ctx.locale
-      );
-    },
+    resolve: resolveCreateSupervisor,
   }),
 }));

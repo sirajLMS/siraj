@@ -1,9 +1,10 @@
 "use client";
 
-import { Stack, TextField } from "@mui/material";
-import type { UseFormRegister } from "react-hook-form";
+import { Stack } from "@mui/material";
+import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
+import { NationalIdFormField } from "@/frontend/common/components/ui/input";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AccountStatusSelect } from "@/frontend/common/views/dashboard/profile/shared/AccountStatusSelect";
 import { AdminStatusSection } from "@/frontend/common/views/dashboard/profile/shared/AdminStatusSection";
@@ -24,6 +25,7 @@ type AdminOnlySectionProps = {
     }
   | {
       readonly mode: "edit";
+      readonly control: Control<TeacherAdminEditFormData>;
       readonly register: UseFormRegister<TeacherAdminEditFormData>;
     }
 );
@@ -36,7 +38,7 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
     return (
       <SectionPanel title={t.sections.adminOnly}>
         <Stack spacing={2}>
-          <TextField label={t.fields.nationalId} fullWidth size="small" {...props.register("nationalId")} />
+          <NationalIdFormField name="nationalId" control={props.control} label={t.fields.nationalId} size="small" />
           <AccountStatusSelect
             name="status"
             label={t.fields.status}
@@ -69,7 +71,10 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
         accountStatus: adminData.status,
       }}
       extraViewFields={
-        <LabeledField label={t.fields.nationalId} value={toDisplayValue(adminData.nationalId, tc.notSet)} />
+        <LabeledField
+          label={t.fields.nationalId}
+          value={toDisplayValue(adminData.nationalId?.number ?? null, tc.notSet)}
+        />
       }
     />
   );

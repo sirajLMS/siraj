@@ -1,18 +1,14 @@
 "use client";
 
 import { DownloadOutlined } from "@mui/icons-material";
-import { Box, Fade, Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import type { ReactElement } from "react";
 import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
-import {
-  buildQuotaInsightsMetrics,
-  quotaInsightsBreadcrumbs,
-} from "@/frontend/common/views/dashboard/billing/quota/utils";
+import { buildQuotaInsightsMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";
 import { MobileExportButton } from "@/frontend/mobile/components/ui/button";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container/MobileSectionPanel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import { MobileErrorState, MobileLoadingState } from "@/frontend/mobile/components/ui/state";
 import { QuotaInsightsChartsMobile } from "@/frontend/mobile/views/dashboard/billing/quota/components/QuotaInsightsChartsMobile";
 
@@ -57,37 +53,27 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
 
   if (loading && vm.quotas.length === 0) {
     return (
-      <MobilePageContainer>
-        <MobilePageHeader title={labels.insightsTitle} breadcrumbs={quotaInsightsBreadcrumbs(labels)} />
-        <Box aria-busy="true">
-          <MobileLoadingState />
-        </Box>
-      </MobilePageContainer>
+      <Box aria-busy="true">
+        <MobileLoadingState />
+      </Box>
     );
   }
 
   return (
-    <Fade in timeout={300}>
-      <div>
-        <MobilePageContainer>
-          <MobilePageHeader
-            title={labels.insightsTitle}
-            breadcrumbs={quotaInsightsBreadcrumbs(labels)}
-            actions={
-              <MobileExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
-                {labels.actions.exportCsv}
-              </MobileExportButton>
-            }
-          />
-
-          <Box aria-busy={loading}>
-            <MobileMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
-          </Box>
-
-          {/* Charts */}
+    <Box aria-busy={loading}>
+      <MobileMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
+      <MobileContentStack gap={3}>
+        <MobileSectionPanel
+          title={labels.insightsTitle}
+          actions={
+            <MobileExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
+              {labels.actions.exportCsv}
+            </MobileExportButton>
+          }
+        >
           {renderMobileChartContent(loading, vm.quotas.length, chartData, metrics, labels)}
-        </MobilePageContainer>
-      </div>
-    </Fade>
+        </MobileSectionPanel>
+      </MobileContentStack>
+    </Box>
   );
 }

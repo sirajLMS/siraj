@@ -1,5 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPaymentMethodInitialInputPothos } from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import { NationalIdInputPothosObject } from "@/backend/graphql/pothos/shared";
 import {
   CountryCodePothosObject,
   CurrencyCodePothosObject,
@@ -32,9 +33,9 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Teacher nationality (country code)",
         directives: { constraint: { maxLength: 512 } },
       }),
-      nationalId: t.string({
-        description: "Teacher national ID (encrypted)",
-        directives: { constraint: { maxLength: 512 } },
+      nationalId: t.field({
+        type: NationalIdInputPothosObject,
+        description: "Teacher national ID with its country of issuance (encrypted)",
       }),
       phone: t.string({ description: "Teacher phone number", directives: { constraint: { maxLength: 50 } } }),
       dateOfBirth: t.string({

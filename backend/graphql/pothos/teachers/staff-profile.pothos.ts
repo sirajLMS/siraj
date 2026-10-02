@@ -1,12 +1,14 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { NationalIdInputPothosObject, NationalIdPothosObject } from "@/backend/graphql/pothos/shared";
 import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInput } from "@/backend/types";
+import { parseNationalId } from "@/shared/lib/national-id";
 
 export const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
 
@@ -21,8 +23,10 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
       authScopes: (_parent, _args, ctx) =>
         ctx.isSuperAdmin || ctx.permissions.includes(AppPermission.PROFILE_CORE_CONTACT_VIEW_OTHER),
     }),
-    nationalId: t.exposeString("nationalId", {
+    nationalId: t.field({
+      type: NationalIdPothosObject,
       nullable: true,
+      resolve: parent => parseNationalId(parent.nationalId),
       authScopes: (_parent, _args, ctx) =>
         ctx.isSuperAdmin || ctx.permissions.includes(AppPermission.PROFILE_TEACHER_IDENTITY_VIEW_OTHER),
     }),
@@ -64,7 +68,7 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<TeacherProfileUpdateInput>("TeacherProfileUpdateInput")
   .implement({
     fields: t => ({
-      nationalId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      nationalId: t.field({ type: NationalIdInputPothosObject, required: false }),
       nationality: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       countryCode: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),

@@ -28,6 +28,7 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     phone: "رقم الهاتف",
     address: "العنوان السكني",
     timezone: "المنطقة الزمنية",
+    nationality: "الجنسية",
     nationalId: "رقم الهوية",
     dateOfBirth: "تاريخ الميلاد",
     gender: "الجنس",

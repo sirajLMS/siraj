@@ -216,7 +216,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           dateOfBirth: "1990-01-01",
           gender: Gender.Male,
           hourlyRate: "20",
-          nationalId: "12345",
+          nationalId: { countryCode: null, number: "12345" },
           phone: "+1111111111",
           qualifications: "None",
           rateCurrency: CurrencyCode.Usd,
@@ -273,7 +273,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           dateOfBirth: "1985-05-15",
           gender: Gender.Male,
           hourlyRate: "50",
-          nationalId: "999888",
+          nationalId: { countryCode: null, number: "999888" },
           phone: null,
           qualifications: "Certified Instructor",
           rateCurrency: CurrencyCode.Usd,
@@ -384,12 +384,12 @@ describe("GraphQL Teacher Integration Tests", () => {
     const newNationalId = "ID-UPD-998877";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ nationalId: newNationalId, timezone: IanaTimezone.UTC }),
+      input: makeUpdateInput({ nationalId: { countryCode: null, number: newNationalId }, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
-    // nationalId is masked by maskNationalId() in StaffProfileService
+    // nationalId number is masked by maskNationalId() in StaffProfileService
     // "ID-UPD-998877" (13 chars) → first 8 chars masked → "********" + last 4 "8877"
-    expect(result.updateTeacherProfile?.nationalId).toBe("********8877");
+    expect(result.updateTeacherProfile?.nationalId?.number).toBe("********8877");
   });
 
   test("updateTeacherProfile — can update nationality only", async () => {
@@ -446,7 +446,7 @@ describe("GraphQL Teacher Integration Tests", () => {
         dateOfBirth: "1991-09-09",
         gender: Gender.Female,
         hourlyRate: "99.00",
-        nationalId: "FULL-999",
+        nationalId: { countryCode: null, number: "FULL-999" },
         nationality: CountryCode.Gb,
         countryCode: CountryCode.Gb,
         phone: "+44-20-7946-0958",
@@ -462,7 +462,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     expect(result.updateTeacherProfile?.gender).toBe(Gender.Female);
     expect(result.updateTeacherProfile?.hourlyRate).toBe("99.00");
     // nationalId is masked: "FULL-999" (8 chars) → first 4 chars masked → "****" + last 4 "-999"
-    expect(result.updateTeacherProfile?.nationalId).toBe("****-999");
+    expect(result.updateTeacherProfile?.nationalId?.number).toBe("****-999");
     expect(result.updateTeacherProfile?.nationality).toBe(CountryCode.Gb);
     expect(result.updateTeacherProfile?.countryCode).toBe(CountryCode.Gb);
     expect(result.updateTeacherProfile?.phone).toBe("+44-20-7946-0958");

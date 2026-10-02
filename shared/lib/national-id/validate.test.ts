@@ -1,36 +1,37 @@
 import { describe, expect, test } from "bun:test";
 import {
   isValidEgyptianNationalId,
+  isValidNationalId,
   isValidNationalIdForCountry,
   NATIONAL_ID_MAX_LENGTH,
+  parseNationalId,
+  serializeNationalId,
 } from "@/shared/lib/national-id";
 
-/** Compute the Luhn check digit for a 13-digit payload (Egyptian ID). */
-function luhnCheckDigit(payload: string): number {
-  const digits = payload
+/**
+ * Compute the weighted mod-11 check digit for a 13-digit payload (Egyptian ID).
+ * Weights [2,7,6,5,4,3,2,7,6,5,4,3,2]; remainder 0 -> 0, remainder 1 -> 10
+ * (invalid as a single digit).
+ */
+function checksumDigit(payload: string): number {
+  const weights = [2, 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  const sum = payload
     .split("")
     .map(Number)
-    .filter(n => !Number.isNaN(n));
-  let sum = 0;
-  for (let i = 0; i < digits.length; i += 1) {
-    let d = digits[i];
-    // For a 13-digit payload, double digits at even indices from the left
-    // (which become "every second digit from the right" once the check digit
-    // is appended).
-    if (i % 2 === 0) {
-      d *= 2;
-      if (d > 9) {
-        d -= 9;
-      }
-    }
-    sum += d;
+    .reduce((acc, d, i) => acc + d * weights[i], 0);
+  const remainder = sum % 11;
+  if (remainder === 0) {
+    return 0;
   }
-  return (10 - (sum % 10)) % 10;
+  if (remainder === 1) {
+    return 10;
+  }
+  return 11 - remainder;
 }
 
-/** Build a 14-digit Egyptian ID with a valid Luhn check digit from a 13-digit payload. */
+/** Build a 14-digit Egyptian ID with a valid checksum digit from a 13-digit payload. */
 function buildValidEgId(payload: string): string {
-  return `${payload}${luhnCheckDigit(payload)}`;
+  return `${payload}${checksumDigit(payload)}`;
 }
 
 describe("national ID validation", () => {
@@ -59,6 +60,14 @@ describe("national ID validation", () => {
   describe("isValidEgyptianNationalId", () => {
     // 2960123 → century 2 (1900s), year 96 (1996), month 01 (Jan), day 23.
     const validEgId = buildValidEgId("2960123456781");
+
+    test("accepts real-world Egyptian national IDs", () => {
+      // Production-verified IDs.
+      for (const realId of ["30001011521216", "25007070200537", "27101221500329"]) {
+        expect(isValidEgyptianNationalId(realId)).toBe(true);
+        expect(isValidNationalIdForCountry(realId, "EG")).toBe(true);
+      }
+    });
 
     test("accepts a valid Egyptian national ID", () => {
       expect(isValidEgyptianNationalId(validEgId)).toBe(true);
@@ -90,7 +99,7 @@ describe("national ID validation", () => {
     });
 
     test("rejects a wrong check digit", () => {
-      // Corrupt the final digit so the Luhn checksum fails.
+      // Corrupt the final digit so the checksum fails.
       const lastDigit = Number.parseInt(validEgId.slice(-1), 10);
       const corrupted = `${validEgId.slice(0, -1)}${(lastDigit + 1) % 10}`;
       expect(isValidEgyptianNationalId(corrupted)).toBe(false);
@@ -101,6 +110,53 @@ describe("national ID validation", () => {
       const withCheck = buildValidEgId("3000123456781");
       expect(isValidEgyptianNationalId(withCheck)).toBe(true);
       expect(isValidNationalIdForCountry(withCheck, "EG")).toBe(true);
+    });
+  });
+});
+
+describe("national ID value object", () => {
+  const validEgId = buildValidEgId("2960123456781");
+
+  describe("isValidNationalId", () => {
+    test("validates against the object's own country code", () => {
+      expect(isValidNationalId({ countryCode: "EG", number: validEgId })).toBe(true);
+      expect(isValidNationalId({ countryCode: "EG", number: "12345678901234" })).toBe(false);
+    });
+
+    test("rejects null or empty values", () => {
+      expect(isValidNationalId(null)).toBe(false);
+      expect(isValidNationalId(undefined)).toBe(false);
+      expect(isValidNationalId({ countryCode: "EG", number: "" })).toBe(false);
+    });
+
+    test("falls back to lenient validation when the object carries no country", () => {
+      expect(isValidNationalId({ countryCode: null, number: "any-value" })).toBe(true);
+    });
+  });
+
+  describe("serializeNationalId / parseNationalId", () => {
+    test("round-trips a national ID object", () => {
+      const value = { countryCode: "EG", number: validEgId };
+      const stored = serializeNationalId(value);
+      expect(stored).toBe(`EG:${validEgId}`);
+      expect(parseNationalId(stored)).toEqual(value);
+    });
+
+    test("serializes an object without a country code as a plain number", () => {
+      expect(serializeNationalId({ countryCode: null, number: validEgId })).toBe(validEgId);
+      expect(parseNationalId(validEgId)).toEqual({ countryCode: null, number: validEgId });
+    });
+
+    test("returns null for empty or whitespace values", () => {
+      expect(serializeNationalId(null)).toBeNull();
+      expect(serializeNationalId(undefined)).toBeNull();
+      expect(serializeNationalId({ countryCode: "EG", number: "  " })).toBeNull();
+      expect(parseNationalId(null)).toBeNull();
+      expect(parseNationalId("")).toBeNull();
+    });
+
+    test("parses a country code containing extra content before the separator", () => {
+      expect(parseNationalId("SA:1234567890")).toEqual({ countryCode: "SA", number: "1234567890" });
     });
   });
 });

@@ -7,7 +7,7 @@ import { resolveActiveTabLabel } from "@/frontend/common/views/dashboard/lib/tab
 
 interface TabbedPageLabels {
   readonly title: string;
-  readonly subtitle: string;
+  readonly subtitle?: string;
   readonly tabNavAriaLabel: string;
 }
 

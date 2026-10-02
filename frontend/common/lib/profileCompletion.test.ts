@@ -12,13 +12,13 @@ describe("isTeacherNationalIdComplete", () => {
   test("returns false for null, undefined, empty, and whitespace-only values", () => {
     expect(isTeacherNationalIdComplete(null)).toBe(false);
     expect(isTeacherNationalIdComplete(undefined)).toBe(false);
-    expect(isTeacherNationalIdComplete("")).toBe(false);
-    expect(isTeacherNationalIdComplete("   ")).toBe(false);
+    expect(isTeacherNationalIdComplete({ countryCode: "EG", number: "" })).toBe(false);
+    expect(isTeacherNationalIdComplete({ countryCode: "EG", number: "   " })).toBe(false);
   });
 
   test("returns true when nationalId has non-whitespace content", () => {
-    expect(isTeacherNationalIdComplete("1234567890")).toBe(true);
-    expect(isTeacherNationalIdComplete(" 123 ")).toBe(true);
+    expect(isTeacherNationalIdComplete({ countryCode: "EG", number: "1234567890" })).toBe(true);
+    expect(isTeacherNationalIdComplete({ countryCode: "EG", number: " 123 " })).toBe(true);
   });
 });
 

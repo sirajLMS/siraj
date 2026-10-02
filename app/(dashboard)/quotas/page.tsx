@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AppPermission } from "@/backend/enum";
 import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
-import { QuotaContainer } from "@/frontend/common/views/dashboard/billing/quota/QuotaContainer";
+import { QuotaPageContainer } from "@/frontend/common/views/dashboard/billing/quota/tabs/QuotaPageContainer";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
@@ -12,5 +12,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default withPageAuth([AppPermission.QUOTAS_VIEW], async () => {
-  return <QuotaContainer />;
+  return <QuotaPageContainer />;
 });

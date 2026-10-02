@@ -1,7 +1,8 @@
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { caseInsensitiveLike, db, queryDb, queryWithPagination } from "@/backend/db";
+import { TeacherProfileRepository } from "@/backend/db/repo/teachers/teacher-profile.repository";
 import { teachers, users } from "@/backend/db/schema";
-import { AccountStatus, type Gender } from "@/backend/enum";
+import { AccountStatus } from "@/backend/enum";
 import type {
   DBTransaction,
   PaginationArgs,
@@ -9,13 +10,22 @@ import type {
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
   TeacherInsertType,
-  TeacherProfileReturnType,
   TeacherProfileUpdateInput,
   TeacherSelectType,
 } from "@/backend/types";
+
+/**
+ * DB-facing update payload: the repository stores `nationalId` as the
+ * serialized `countryCode:number` string, so callers serialize the
+ * `NationalIdValue` object before calling `updateTeacherProfile`.
+ */
+export type TeacherProfileUpdateRepoInput = Omit<TeacherProfileUpdateInput, "nationalId"> & {
+  readonly nationalId?: string | null;
+};
+
 import { escapeLikeWildcards } from "@/backend/utils";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
+import { parseAccountStatus, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherRepository {
@@ -228,125 +238,8 @@ export namespace TeacherRepository {
     };
   };
 
-  const buildTeacherProfileSelect = () => ({
-    id: teachers.id,
-    userId: teachers.userId,
-    name: users.name,
-    email: users.email,
-    phone: teachers.phone,
-    nationalId: teachers.nationalId,
-    nationality: teachers.nationality,
-    countryCode: teachers.countryCode,
-    dateOfBirth: teachers.dateOfBirth,
-    gender: teachers.gender,
-    address: teachers.address,
-    qualifications: teachers.qualifications,
-    timezone: users.timezone,
-    hourlyRate: teachers.hourlyRate,
-    rateCurrency: teachers.rateCurrency,
-    status: users.status,
-    updatedAt: teachers.updatedAt,
-    totalClasses: sql<number>`(
-      SELECT COUNT(*)
-      FROM class_instances
-      WHERE class_instances.teacher_id = ${teachers.id}
-        AND class_instances.outcome = 'TAKEN'
-        AND class_instances.execution_state = 'COMPLETED'
-        AND class_instances.deleted_at IS NULL
-    )`.mapWith(Number),
-    avgEngagementScore: sql<number>`(
-      SELECT COALESCE(AVG(class_instance_performance.engagement_score), 0)
-      FROM class_instance_performance
-      JOIN class_instances ON class_instances.id = class_instance_performance.class_instance_id
-      WHERE class_instances.teacher_id = ${teachers.id}
-        AND class_instance_performance.engagement_score IS NOT NULL
-    )`.mapWith(Number),
-  });
-
-  const mapTeacherProfileRow = (teacher: {
-    id: string;
-    userId: string;
-    name: string;
-    email: string;
-    phone: string | null;
-    nationalId: string | null;
-    nationality: string | null;
-    countryCode: string | null;
-    dateOfBirth: string | Date | null;
-    gender: Gender | null;
-    address: string | null;
-    qualifications: string | null;
-    timezone: string;
-    hourlyRate: string | null;
-    rateCurrency: CurrencyCode | null;
-    status: AccountStatus;
-    updatedAt: Date;
-    totalClasses: number;
-    avgEngagementScore: number;
-  }): TeacherProfileReturnType => ({
-    id: teacher.id,
-    userId: teacher.userId,
-    name: teacher.name,
-    email: teacher.email,
-    phone: teacher.phone,
-    nationalId: teacher.nationalId,
-    nationality: teacher.nationality,
-    countryCode: teacher.countryCode,
-    gender: teacher.gender,
-    address: teacher.address,
-    qualifications: teacher.qualifications,
-    timezone: parseIanaTimezone(teacher.timezone),
-    hourlyRate: teacher.hourlyRate,
-    rateCurrency: teacher.rateCurrency,
-    status: teacher.status,
-    dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth).toISOString() : null,
-    updatedAt: new Date(teacher.updatedAt).toISOString(),
-    totalClasses: teacher.totalClasses,
-    avgEngagementScore: teacher.avgEngagementScore,
-  });
-
-  export const getTeacherProfileForEdit = async (
-    teacherId: string,
-    tx?: DBTransaction
-  ): Promise<TeacherProfileReturnType | null> => {
-    const executor = tx ?? db;
-    const [teacher] = await executor
-      .select(buildTeacherProfileSelect())
-      .from(teachers)
-      .innerJoin(users, eq(teachers.userId, users.id))
-      .where(eq(teachers.id, teacherId))
-      .limit(1);
-
-    if (!teacher) return null;
-
-    return mapTeacherProfileRow({
-      ...teacher,
-      gender: parseGender(teacher.gender),
-      status: parseAccountStatus(teacher.status),
-    });
-  };
-
-  export const updateTeacherProfile = async (
-    teacherId: string,
-    input: TeacherProfileUpdateInput,
-    tx?: DBTransaction
-  ): Promise<boolean> => {
-    const executor = tx ?? db;
-    const now = new Date();
-    const restInput = Object.fromEntries(
-      Object.entries(input).filter(([key]) => key !== "timezone" && key !== "status")
-    ) as Omit<TeacherProfileUpdateInput, "timezone" | "status">;
-    const setInput = {
-      ...restInput,
-      updatedAt: now,
-    };
-    const [updated] = await executor
-      .update(teachers)
-      .set(setInput)
-      .where(eq(teachers.id, teacherId))
-      .returning({ id: teachers.id });
-    return !!updated;
-  };
+  export const getTeacherProfileForEdit = TeacherProfileRepository.getTeacherProfileForEdit;
+  export const updateTeacherProfile = TeacherProfileRepository.updateTeacherProfile;
   export const upsertByUserId = async (
     userId: string,
     extraValues?: { hourlyRate?: string | null; rateCurrency?: CurrencyCode | null },

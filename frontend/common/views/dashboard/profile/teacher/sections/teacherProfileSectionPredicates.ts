@@ -28,5 +28,5 @@ export function hasTeacherPersonalData(teacherData: TeacherViewData): boolean {
 }
 
 export function hasTeacherAdminOnlyData(adminData: TeacherAdminData): boolean {
-  return [adminData.nationalId?.trim(), adminData.status].some(Boolean);
+  return [adminData.nationalId?.number?.trim(), adminData.status].some(Boolean);
 }

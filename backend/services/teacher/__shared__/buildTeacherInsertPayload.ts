@@ -1,4 +1,5 @@
 import type { TeacherInsertType, TeacherOnboardingInput } from "@/backend/types";
+import { serializeNationalId } from "@/shared/lib/national-id";
 
 /**
  * Builds the insert payload for `TeacherRepository.create()` from the
@@ -11,7 +12,7 @@ export function buildTeacherInsertPayload(input: TeacherOnboardingInput, userId:
   return {
     userId,
     nationality: input.nationality ?? null,
-    nationalId: input.nationalId ?? null,
+    nationalId: serializeNationalId(input.nationalId),
     phone: input.phone ?? null,
     dateOfBirth: input.dateOfBirth ?? null,
     gender: input.gender ?? null,

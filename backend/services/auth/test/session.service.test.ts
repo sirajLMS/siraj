@@ -114,7 +114,7 @@ afterEach(() => {
 
 describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
   test("returns nationalIdComplete=true for a teacher with nationalId set", async () => {
-    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "29601234567818" });
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "29601234567813" });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(true);

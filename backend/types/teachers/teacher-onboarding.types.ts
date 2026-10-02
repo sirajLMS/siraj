@@ -2,6 +2,7 @@ import type { CountryCode, Gender } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
 import type { UserPaymentMethodInitialGqlInput, UserPaymentMethodSubmitInput } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import type { NationalIdValue } from "@/shared/lib/national-id";
 
 /**
  * Input for teacher onboarding — canonical interface shared across
@@ -13,7 +14,7 @@ export interface TeacherOnboardingInput {
   readonly password: string;
   readonly avatarUrl?: string | null;
   readonly nationality?: string | null;
-  readonly nationalId?: string | null;
+  readonly nationalId?: NationalIdValue | null;
   readonly phone?: string | null;
   readonly dateOfBirth?: string | null;
   readonly gender?: Gender | null;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AccountStatus, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
-import { isValidNationalIdForCountry } from "@/shared/lib/national-id";
+import { isValidNationalId } from "@/shared/lib/national-id";
 
 const coreSchema = z.object({
   name: z.string().min(1),
@@ -40,14 +40,15 @@ const timezoneField = (invalidTimezone: string) =>
  * Build the own-profile edit schema with translated validation messages.
  *
  * `nationalId` is required for a teacher to operate on the system (enforced on
- * first login via the dashboard guard). Its format is validated against the
- * selected `nationality` via `isValidNationalIdForCountry`.
+ * first login via the dashboard guard). It is an object `{ countryCode, number }`
+ * whose format is validated against its own `countryCode` (falling back to the
+ * selected `nationality`) via `isValidNationalId`.
  *
  * Note: `nationalId` is declared `.optional()` so the inferred form type keeps
- * it as `string | undefined` — this preserves structural compatibility with the
- * shared `AccountSection`/`ContactSection` controls (which expect a subset of
- * fields). Required-ness is enforced via `.min(1, ...)` which only fires when a
- * value is present, plus the `superRefine` below rejects empty/whitespace.
+ * it optional — this preserves structural compatibility with the shared
+ * `AccountSection`/`ContactSection` controls (which expect a subset of fields).
+ * Required-ness is enforced via the `superRefine` below, which rejects
+ * missing/empty values.
  */
 export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabels) =>
   z
@@ -56,13 +57,17 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
       ...ownTeacherSchemaBase.shape,
       timezone: timezoneField(labels.invalidTimezone),
       nationalId: z
-        .string()
-        .optional()
-        .refine(value => value?.trim() !== "", { message: labels.nationalIdRequired }),
+        .object({
+          countryCode: z.string().nullable().optional(),
+          number: z.string(),
+        })
+        .nullable()
+        .optional(),
     })
     .superRefine((data, ctx) => {
-      // Enforce required: empty/whitespace/missing nationalId is invalid.
-      if (!data.nationalId || data.nationalId.trim() === "") {
+      // Enforce required: missing/empty nationalId is invalid.
+      const nationalId = data.nationalId;
+      if (!nationalId || nationalId.number.trim() === "") {
         ctx.addIssue({
           code: "custom" as const,
           path: ["nationalId"],
@@ -70,7 +75,12 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
         });
         return;
       }
-      if (!isValidNationalIdForCountry(data.nationalId, data.nationality)) {
+      if (
+        !isValidNationalId({
+          countryCode: nationalId.countryCode ?? data.nationality ?? null,
+          number: nationalId.number,
+        })
+      ) {
         ctx.addIssue({
           code: "custom" as const,
           path: ["nationalId"],
@@ -80,7 +90,13 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
     });
 
 const adminTeacherSchemaBase = ownTeacherSchemaBase.extend({
-  nationalId: z.string().optional(),
+  nationalId: z
+    .object({
+      countryCode: z.string().nullable().optional(),
+      number: z.string(),
+    })
+    .nullable()
+    .optional(),
   hourlyRate: z.string().optional(),
   rateCurrency: z.enum(CurrencyCode).optional(),
   status: z.enum(AccountStatus).optional().nullable(),
@@ -102,7 +118,8 @@ export type TeacherEditData = {
   readonly avatarUrl?: string | null;
   readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
-  readonly nationalId?: string | null;
+  /** Prefill-friendly national ID object; `number` may be masked in admin views. */
+  readonly nationalId?: { readonly countryCode?: string | null; readonly number?: string | null } | null;
   readonly nationality?: string | null;
   readonly countryCode?: string | null;
   readonly dateOfBirth?: string | null;

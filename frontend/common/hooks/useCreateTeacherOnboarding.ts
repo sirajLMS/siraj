@@ -19,7 +19,9 @@ function buildTeacherInput(formData: TeacherOnboardingFormData): TeacherOnboardi
     password: formData.password,
     avatarUrl: formData.avatarUrl ?? null,
     nationality: formData.nationality ?? null,
-    nationalId: formData.nationalId ?? null,
+    nationalId: formData.nationalId
+      ? { countryCode: formData.nationalId.countryCode ?? null, number: formData.nationalId.number }
+      : null,
     phone: formData.phone ?? null,
     dateOfBirth: formData.dateOfBirth ?? null,
     gender: formData.gender,

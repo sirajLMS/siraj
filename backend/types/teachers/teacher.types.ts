@@ -9,6 +9,7 @@ import type {
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import type { NationalIdValue } from "@/shared/lib/national-id";
 
 export type TeacherSelectType = typeof teachers.$inferSelect;
 export type TeacherInsertType = typeof teachers.$inferInsert;
@@ -98,13 +99,15 @@ export type TeacherProfileReturnType = Omit<
 };
 
 export type TeacherProfileUpdateInput = Partial<
-  Omit<TeacherInsertType, "id" | "userId" | "createdAt" | "updatedAt" | "gender" | "paymentMethod">
+  Omit<TeacherInsertType, "id" | "userId" | "createdAt" | "updatedAt" | "gender" | "paymentMethod" | "nationalId">
 > & {
   readonly status?: AccountStatus | null;
   readonly gender?: Gender | null;
   readonly timezone?: IanaTimezone | null;
   readonly nationality?: string | null;
   readonly countryCode?: string | null;
+  /** GraphQL-facing object form; serialized to `countryCode:number` before the repository. */
+  readonly nationalId?: NationalIdValue | null;
 };
 
 export type TeacherDirectoryRow = {
@@ -160,9 +163,11 @@ export type TeacherOwnProfileReturnType = {
   /**
    * National ID, returned UNMASKED to the owner (the teacher editing their own
    * profile). Admin/other-scope views go through `StaffProfileService` which
-   * masks the value via `maskNationalId`.
+   * masks the value via `maskNationalId`. Modeled as an object
+   * `{ countryCode, number }` — stored in the DB as a `countryCode:number`
+   * serialized string.
    */
-  nationalId: string | null;
+  nationalId: NationalIdValue | null;
   dateOfBirth: string | null;
   gender: Gender | null;
   address: string | null;
@@ -181,10 +186,11 @@ export type TeacherOwnProfileUpdateInput = {
   /**
    * Teacher's own national ID. Required for a teacher to operate on the system
    * (enforced on first login via the dashboard guard), but admins may leave it
-   * unset at creation time. Format is validated against `nationality` via
-   * `isValidNationalIdForCountry` in `TeacherPortalService.updateOwnProfile`.
+   * unset at creation time. Modeled as an object `{ countryCode, number }`.
+   * Format is validated against the object's `countryCode` (falling back to
+   * `nationality`) via `isValidNationalId` in `TeacherPortalService.updateOwnProfile`.
    */
-  readonly nationalId?: string | null;
+  readonly nationalId?: NationalIdValue | null;
   readonly dateOfBirth?: string | null;
   readonly gender?: Gender | null;
   readonly address?: string | null;

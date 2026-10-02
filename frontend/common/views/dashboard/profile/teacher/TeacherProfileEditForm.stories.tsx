@@ -12,11 +12,12 @@ const ownTeacherData = {
   name: "Ahmed Hassan",
   email: "ahmed.hassan@example.com",
   phone: "+966 50 123 4567",
+  nationalId: { countryCode: "EG", number: "30001011521216" },
 };
 
 const adminTeacherData = {
   ...ownTeacherData,
-  nationalId: "****6789",
+  nationalId: { countryCode: "EG", number: "****6789" },
   dateOfBirth: "1990-05-15",
   gender: null,
   address: "123 King Fahd Rd, Riyadh",

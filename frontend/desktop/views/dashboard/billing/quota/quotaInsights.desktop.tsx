@@ -1,17 +1,13 @@
 "use client";
 
 import { DownloadOutlined } from "@mui/icons-material";
-import { Box, Fade, Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import type { ReactElement } from "react";
 import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
-import {
-  buildQuotaInsightsMetrics,
-  quotaInsightsBreadcrumbs,
-} from "@/frontend/common/views/dashboard/billing/quota/utils";
+import { buildQuotaInsightsMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";
 import { DesktopExportButton } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid/DesktopMetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopErrorState, DesktopLoadingState } from "@/frontend/desktop/components/ui/state";
 import { QuotaInsightsChartsDesktop } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaInsightsChartsDesktop";
 
@@ -50,40 +46,35 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
 
   if (loading && vm.quotas.length === 0) {
     return (
-      <DesktopPageContainer>
-        <DesktopPageHeader title={labels.insightsTitle} breadcrumbs={quotaInsightsBreadcrumbs(labels)} />
-        <Box aria-busy="true">
-          <DesktopLoadingState />
-        </Box>
-      </DesktopPageContainer>
+      <Box aria-busy="true">
+        <DesktopLoadingState />
+      </Box>
     );
   }
 
   return (
-    <Fade in timeout={300}>
-      <div>
-        <DesktopPageContainer>
-          <DesktopPageHeader
-            title={labels.insightsTitle}
-            breadcrumbs={quotaInsightsBreadcrumbs(labels)}
-            actions={
-              <DesktopExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
-                {labels.actions.exportCsv}
-              </DesktopExportButton>
-            }
-          />
+    <Box
+      aria-busy={loading}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
+    >
+      {/* Metric Cards */}
+      <DesktopMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
 
-          <Box aria-busy={loading}>
-            {/* Metric Cards */}
-            <DesktopMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
-          </Box>
-
-          {/* Charts */}
-          <DesktopSectionPanel title={labels.insightsTitle}>
-            {renderChartContent(loading, vm.quotas.length, chartData, metrics, labels)}
-          </DesktopSectionPanel>
-        </DesktopPageContainer>
-      </div>
-    </Fade>
+      {/* Charts */}
+      <DesktopSectionPanel
+        title={labels.insightsTitle}
+        actions={
+          <DesktopExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
+            {labels.actions.exportCsv}
+          </DesktopExportButton>
+        }
+      >
+        {renderChartContent(loading, vm.quotas.length, chartData, metrics, labels)}
+      </DesktopSectionPanel>
+    </Box>
   );
 }

@@ -16,7 +16,7 @@ import type {
   TeacherOwnProfileUpdateInput,
 } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import { isValidNationalIdForCountry } from "@/shared/lib/national-id";
+import { isValidNationalId, parseNationalId, serializeNationalId } from "@/shared/lib/national-id";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace TeacherPortalService {
@@ -72,7 +72,7 @@ export namespace TeacherPortalService {
       countryCode: profile.countryCode,
       // Returned UNMASKED to the owner (the teacher editing their own profile).
       // Admin/other-scope views go through StaffProfileService which masks it.
-      nationalId: profile.nationalId,
+      nationalId: parseNationalId(profile.nationalId),
       dateOfBirth: profile.dateOfBirth,
       gender: profile.gender,
       address: profile.address,
@@ -151,13 +151,13 @@ export namespace TeacherPortalService {
       await UserRepository.updateTimezone(userId, input.timezone);
     }
 
-    // Validate national ID format against the (possibly updated) nationality.
-    // When nationalId is provided we use the incoming nationality if present,
-    // otherwise fall back to the teacher's existing nationality so a teacher
-    // can fix their national ID without first re-selecting their country.
-    if (input.nationalId != null && input.nationalId.trim() !== "") {
-      const effectiveNationality = input.nationality ?? teacher.nationality;
-      if (!isValidNationalIdForCountry(input.nationalId, effectiveNationality)) {
+    // Validate national ID format against the country of issuance. The object
+    // carries its own `countryCode`; when omitted we fall back to the
+    // (possibly updated) nationality so a teacher can fix their national ID
+    // without first re-selecting their country.
+    if (input.nationalId != null) {
+      const effectiveCountry = input.nationalId.countryCode ?? input.nationality ?? teacher.nationality;
+      if (!isValidNationalId({ ...input.nationalId, countryCode: effectiveCountry })) {
         throw new Error(tErrors.invalidNationalId);
       }
     }
@@ -166,7 +166,7 @@ export namespace TeacherPortalService {
       phone: input.phone ?? undefined,
       nationality: input.nationality ?? undefined,
       countryCode: input.countryCode ?? undefined,
-      nationalId: input.nationalId ?? undefined,
+      nationalId: serializeNationalId(input.nationalId) ?? undefined,
       dateOfBirth: input.dateOfBirth ?? undefined,
       gender: input.gender ?? undefined,
       address: input.address ?? undefined,

@@ -12,8 +12,10 @@ export function isTeacherProfileCompletionPath(pathname: string): boolean {
   return TEACHER_PROFILE_COMPLETION_ALLOWED_PATHS.has(pathname);
 }
 
-export function isTeacherNationalIdComplete(nationalId: string | null | undefined): boolean {
-  return Boolean(nationalId?.trim());
+import type { NationalIdValue } from "@/shared/lib/national-id";
+
+export function isTeacherNationalIdComplete(nationalId: NationalIdValue | null | undefined): boolean {
+  return Boolean(nationalId?.number?.trim());
 }
 
 type ForceCompleteSearchParams = URLSearchParams | Readonly<Record<string, string | string[] | undefined>>;

@@ -31,6 +31,11 @@ export default defineConfig({
     // Intentional dialog/field focus is valid a11y; this rule fights modal UX.
     "jsx-a11y/no-autofocus": "off",
     "no-console": "error",
+    // Line-count standards. Tiered limits in `overrides` below: 150 lines for
+    // app/+frontend view files, 100 for TSX functions (JSX inflation). Never
+    // add oxlint-disable comments — fix root cause.
+    "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
+    "max-lines-per-function": ["error", { max: 75, skipBlankLines: true, skipComments: true, IIFEs: false }],
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-namespace": "off",
@@ -60,6 +65,55 @@ export default defineConfig({
     ],
   },
   overrides: [
+    {
+      // Frontend views & app routes: 150-line file convention.
+      files: [
+        "app/**/*.{ts,tsx}",
+        "frontend/common/views/**/*.{ts,tsx}",
+        "frontend/desktop/**/*.{ts,tsx}",
+        "frontend/mobile/**/*.{ts,tsx}",
+      ],
+      rules: {
+        "max-lines": ["error", { max: 150, skipBlankLines: true, skipComments: true }],
+      },
+    },
+    {
+      // JSX layout inflates line counts; components get a looser function cap.
+      files: ["**/*.tsx"],
+      rules: {
+        "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true, IIFEs: false }],
+      },
+    },
+    {
+      // Test/story files: long describe blocks are idiomatic; size rules add no value.
+      files: [
+        "**/*.test.{ts,tsx}",
+        "**/*.spec.{ts,tsx}",
+        "**/*.test-d.{ts,tsx}",
+        "test/**",
+        "**/stories/**",
+        "**/__tests__/**",
+        "backend/db/test/**",
+        "backend/services/**/test/**",
+      ],
+      rules: {
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+      },
+    },
+    {
+      // Translation dictionaries & generated locale-data constants scale with data size.
+      files: [
+        "shared/locale/**",
+        "shared/constants/iana-timezones.ts",
+        "shared/constants/iana-timezone-labels.ts",
+        "shared/constants/iana-timezone-territories.ts",
+        "shared/constants/countries.ts",
+      ],
+      rules: {
+        "max-lines": "off",
+      },
+    },
     {
       files: [
         "frontend/utils/logger.ts",

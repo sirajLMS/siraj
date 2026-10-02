@@ -1,27 +1,18 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
-import { useState } from "react";
-import type {
-  AccountStatus,
-  CurrencyCode,
-  Gender,
-  ProfileByUserIdQuery,
-} from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  profileByUserIdQueryDocument,
-  updateOwnProfileMutationDocument,
-  updateUserProfileMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
-import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
-import { toIanaTimezone } from "@/frontend/common/lib/timezone";
-import { logger } from "@/frontend/common/utils/logger";
+import { useQuery } from "@apollo/client/react";
+import type { CurrencyCode, ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
+import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type {
   TeacherProfileViewLabels,
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import {
+  type TeacherAdminSubmitData,
+  type TeacherOwnSubmitData,
+  useTeacherProfileSubmissions,
+} from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileSubmissions";
 import { type ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
-import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
@@ -33,34 +24,7 @@ function buildEditSource(scope: ProfileScope, profile: ProfileData | null | unde
   return scope === ProfileScope.OWN ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
 
-export type TeacherOwnSubmitData = {
-  name: string;
-  email: string;
-  phone: string;
-  nationalId: string;
-  nationality: string;
-  avatarUrl?: string | null;
-  displayCurrency: CurrencyCode | null;
-  timezone?: string;
-};
-
-export type TeacherAdminSubmitData = {
-  name: string;
-  email: string;
-  phone: string;
-  avatarUrl?: string | null;
-  nationalId: string;
-  nationality: string;
-  dateOfBirth: string;
-  gender: Gender | null;
-  address: string;
-  qualifications: string;
-  timezone: string;
-  hourlyRate: string;
-  rateCurrency: CurrencyCode | undefined;
-  status: AccountStatus | null;
-  displayCurrency: CurrencyCode | null;
-};
+export type { TeacherAdminSubmitData, TeacherOwnSubmitData };
 
 export interface TeacherProfileViewModel {
   readonly labels: TeacherProfileViewLabels;
@@ -101,16 +65,11 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile", forceComplete = false } = props;
   const isAdminScope = scope === ProfileScope.OTHER;
   const activeTab = _activeTab;
-  const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
     fetchPolicy: "cache-and-network",
   });
-
-  const [updateOwnProfile] = useMutation(updateOwnProfileMutationDocument);
-  const [updateUserProfile] = useMutation(updateUserProfileMutationDocument);
 
   const profile = data?.profileByUserId;
   const teacherData = buildEditSource(scope, profile);
@@ -119,82 +78,11 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const profilePhone = profile?.phone;
   const profileTimezone = profile?.timezone;
 
-  const onSubmitOwn = async (formData: TeacherOwnSubmitData) => {
-    setIsSaving(true);
-    try {
-      await updateOwnProfile({
-        variables: {
-          input: {
-            core: {
-              name: formData.name,
-              email: formData.email,
-              avatarUrl: formData.avatarUrl,
-              displayCurrency: formData.displayCurrency,
-            },
-            teacher: {
-              phone: formData.phone || null,
-              nationalId: formData.nationalId || null,
-              nationality: formData.nationality || null,
-              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
-            },
-          },
-        },
-      });
-
-      if (forceComplete && isTeacherNationalIdComplete(formData.nationalId)) {
-        // After completing the required national ID, send the teacher to the dashboard
-        // (the original destination they were blocked from) rather than the profile view.
-        router.replace("/dashboard");
-        router.refresh();
-        return;
-      }
-
-      await refetch();
-    } catch (submitError) {
-      logger.error("Failed to update own teacher profile", { error: submitError });
-      throw submitError;
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const onSubmitAdmin = async (formData: TeacherAdminSubmitData) => {
-    setIsSaving(true);
-    try {
-      await updateUserProfile({
-        variables: {
-          userId: targetUserId,
-          input: {
-            core: {
-              name: formData.name,
-              email: formData.email,
-              avatarUrl: formData.avatarUrl,
-              displayCurrency: formData.displayCurrency,
-            },
-            teacher: {
-              phone: formData.phone || null,
-              nationalId: formData.nationalId || null,
-              nationality: formData.nationality || null,
-              dateOfBirth: formData.dateOfBirth || null,
-              gender: formData.gender,
-              address: formData.address || null,
-              qualifications: formData.qualifications || null,
-              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
-              hourlyRate: formData.hourlyRate || null,
-              rateCurrency: formData.rateCurrency ?? null,
-              status: formData.status,
-            },
-          },
-        },
-      });
-      await refetch();
-    } catch (submitError) {
-      logger.error("Failed to update teacher profile", { error: submitError });
-      throw submitError;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const { isSaving, onSubmitOwn, onSubmitAdmin } = useTeacherProfileSubmissions({
+    targetUserId,
+    forceComplete,
+    refetch,
+  });
 
   return {
     labels,

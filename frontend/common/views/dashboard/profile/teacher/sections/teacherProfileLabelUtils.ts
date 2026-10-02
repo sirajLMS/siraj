@@ -14,7 +14,7 @@ export function toTeacherSectionLabels(labels: TeacherProfileViewLabels) {
 export function toTeacherPersonalFieldLabels(labels: TeacherProfileViewLabels): ProfilePersonalFieldLabels {
   const t = labels.teacher;
   return {
-    nationality: t.fields.nationalId,
+    nationality: t.fields.nationality,
     address: t.fields.address,
     dateOfBirth: t.fields.dateOfBirth,
     gender: t.fields.gender,

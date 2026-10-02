@@ -116,6 +116,7 @@ import { UiLanguageSelector } from "@/shared/locale/namespaces/ui/languageSelect
 import { UiLocalizedString } from "@/shared/locale/namespaces/ui/localizedString.namespace";
 import { UiMeetingConfig } from "@/shared/locale/namespaces/ui/meetingConfig.namespace";
 import { UiMeetingConfigRecurringSchedule } from "@/shared/locale/namespaces/ui/meetingConfigRecurringSchedule.namespace";
+import { UiNationalIdInput } from "@/shared/locale/namespaces/ui/nationalIdInput.namespace";
 import { UiPaymentMethod } from "@/shared/locale/namespaces/ui/paymentMethod.namespace";
 import { UiPhoneInput } from "@/shared/locale/namespaces/ui/phoneInput.namespace";
 import { UiRichText } from "@/shared/locale/namespaces/ui/richText.namespace";
@@ -257,6 +258,7 @@ export const Translation = {
     LanguageSelector: UiLanguageSelector,
     LocalizedString: UiLocalizedString,
     PhoneInput: UiPhoneInput,
+    NationalIdInput: UiNationalIdInput,
     RichText: UiRichText,
     TagInput: UiTagInput,
     TimezoneSelect: UiTimezoneSelect,

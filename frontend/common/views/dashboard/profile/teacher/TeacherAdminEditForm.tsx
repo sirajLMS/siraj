@@ -2,23 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { type UseFormReturn, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
-import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { ProfileEditFormShell } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileEditFormShell";
-import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
-import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
-import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
-import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
-import { ContactSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/ContactSection";
-import {
-  toTeacherPersonalFieldLabels,
-  toTeacherSectionLabels,
-} from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileLabelUtils";
 import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { TeacherAdminEditFormBody } from "@/frontend/common/views/dashboard/profile/teacher/TeacherAdminEditFormBody";
 import {
   type TeacherAdminEditFormData,
   type TeacherEditData,
@@ -26,7 +17,16 @@ import {
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
 import { ProfileScope } from "@/shared/constants/profile.enum";
 
-type FieldScope = ReturnType<typeof useProfileFieldAccess>["canEdit"];
+/** Convert a prefill national ID object into the form's value shape. */
+function toFormNationalId(
+  nationalId: { readonly countryCode?: string | null; readonly number?: string | null } | null | undefined
+): TeacherAdminEditFormData["nationalId"] {
+  const number = nationalId?.number?.trim();
+  if (!number) {
+    return undefined;
+  }
+  return { countryCode: nationalId?.countryCode ?? null, number };
+}
 
 function buildDefaultFormValues(data?: TeacherEditData | null): TeacherAdminEditFormData {
   return {
@@ -34,7 +34,7 @@ function buildDefaultFormValues(data?: TeacherEditData | null): TeacherAdminEdit
     email: data?.email ?? "",
     avatarUrl: data?.avatarUrl ?? null,
     phone: data?.phone ?? "",
-    nationalId: data?.nationalId ?? "",
+    nationalId: toFormNationalId(data?.nationalId),
     nationality: data?.nationality ?? "",
     dateOfBirth: data?.dateOfBirth ?? "",
     gender: data?.gender ?? null,
@@ -59,65 +59,6 @@ function useTeacherEditForm(teacherData: TeacherEditData, labels: { readonly inv
   }, [form, teacherData]);
 
   return form;
-}
-
-interface SectionsProps {
-  readonly labels: TeacherProfileViewLabels;
-  readonly teacherData: TeacherEditData;
-  readonly targetUserId: string;
-  readonly scope: ProfileScope;
-  readonly canEdit: FieldScope;
-  readonly form: UseFormReturn<TeacherAdminEditFormData>;
-}
-
-function TeacherFormSections({ labels, teacherData, targetUserId, scope, canEdit, form }: SectionsProps) {
-  const sectionLabels = toTeacherSectionLabels(labels);
-  const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
-
-  return (
-    <>
-      {canEdit("core_identity") ? (
-        <AccountSection
-          labels={sectionLabels}
-          mode="edit"
-          scope={scope}
-          teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-          register={form.register}
-          control={form.control}
-        />
-      ) : null}
-      {canEdit("core_contact") || canEdit("teacher_identity") ? (
-        <ContactSection
-          labels={sectionLabels}
-          scope={scope}
-          isAdminScope
-          register={form.register}
-          control={form.control}
-        />
-      ) : null}
-      <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} />
-      {canEdit("teacher_professional") ? (
-        <CompensationSection labels={labels} mode="edit" register={form.register} control={form.control} />
-      ) : null}
-      {canEdit("teacher_identity") || canEdit("teacher_professional") ? (
-        <TeacherExtensionProfileSection
-          mode="edit"
-          scope={scope}
-          labels={{
-            teacher: labels.teacher,
-            personalFieldLabels,
-            baseLabels: sectionLabels.baseLabels,
-          }}
-          sectionTitle={labels.teacher.sections.identity}
-          register={form.register}
-          control={form.control}
-        />
-      ) : null}
-      {canEdit("teacher_identity") ? (
-        <AdminOnlySection labels={sectionLabels} mode="edit" register={form.register} />
-      ) : null}
-    </>
-  );
 }
 
 export function TeacherAdminEditForm({
@@ -159,7 +100,7 @@ export function TeacherAdminEditForm({
         ) : null
       }
       sections={
-        <TeacherFormSections
+        <TeacherAdminEditFormBody
           labels={labels}
           teacherData={teacherData}
           targetUserId={targetUserId}

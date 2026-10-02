@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import type { OnboardingSectionTranslations } from "@/frontend/common/components/onboarding/sections/types";
 import {
@@ -11,6 +11,7 @@ import {
   UserPersonalQualificationsField,
 } from "@/frontend/common/components/onboarding/sections/userPersonalFieldComponents";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
+import { NationalIdFormField } from "@/frontend/common/components/ui/input";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
 
@@ -35,13 +36,11 @@ export function TeacherExtensionSection({ register, control, errors, labels }: R
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 6 }}>
-        <TextField
-          {...register("nationalId")}
+        <NationalIdFormField
+          name="nationalId"
+          control={control}
           label={labels.fields.nationalId}
           placeholder={labels.placeholders.nationalId}
-          error={!!errors.nationalId}
-          helperText={errors.nationalId?.message}
-          fullWidth
           sx={outlinedInputSx}
         />
       </Grid>
