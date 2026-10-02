@@ -50,19 +50,35 @@ export function validateEntry<T = unknown>(entry: unknown): entry is CacheEntry<
   );
 }
 
+/**
+ * Produces a deterministic JSON representation of an arbitrary value, ensuring key-order
+ * stability across object serializations for cache keys.
+ *
+ * Performance optimization:
+ * Uses `Object.keys().sort((a, b) => a.localeCompare(b))` and pre-allocated indexed arrays to
+ * eliminate `Object.entries()` tuple allocations (`[key, value]`), `.toSorted()` shallow array
+ * copies, and intermediate `.map()` array allocations during cache key generation.
+ */
 export function stableStringify(value: unknown): string {
   if (value === null || typeof value !== "object") {
     return JSON.stringify(value);
   }
   if (Array.isArray(value)) {
-    const items = value.map(stableStringify).join(",");
-    return `[${items}]`;
+    const len = value.length;
+    const items = new Array(len);
+    for (let i = 0; i < len; i++) {
+      items[i] = stableStringify(value[i]);
+    }
+    return `[${items.join(",")}]`;
   }
-  const entries = Object.entries(value)
-    .toSorted((a, b) => a[0].localeCompare(b[0]))
-    .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`)
-    .join(",");
-  return `{${entries}}`;
+  const keys = Object.keys(value).sort((a, b) => a.localeCompare(b));
+  const len = keys.length;
+  const entries = new Array(len);
+  for (let i = 0; i < len; i++) {
+    const k = keys[i];
+    entries[i] = `${JSON.stringify(k)}:${stableStringify((value as Record<string, unknown>)[k])}`;
+  }
+  return `{${entries.join(",")}}`;
 }
 
 /** Parses a tag index JSON array from a cache string, returning null on failure. */
