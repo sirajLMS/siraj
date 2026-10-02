@@ -423,7 +423,10 @@ export function getClientIdentifier(request: Request): string {
 
     const realIp = request.headers.get("x-real-ip");
     if (realIp) {
-      return realIp.trim();
+      const trimmed = realIp.trim();
+      if (trimmed && isIP(trimmed) > 0) {
+        return trimmed;
+      }
     }
   }
 
