@@ -208,30 +208,17 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
   },
 ] as const;
 
+/**
+ * Single-pass O(N) map construction to eliminate quadratic O(N^2) array scans
+ * (`PROFILE_FIELD_GROUPS.find(...)` repeated for every key) during module import.
+ */
 function buildGroupByKeyMap(): Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> {
-  const findGroup = (key: ProfileFieldGroupKey): ProfileFieldGroupDefinition => {
-    const group = PROFILE_FIELD_GROUPS.find(g => g.groupKey === key);
-    if (!group) {
-      throw new Error(`Missing profile field group: ${key}`);
-    }
-    return group;
-  };
-  return {
-    core_identity: findGroup("core_identity"),
-    core_contact: findGroup("core_contact"),
-    teacher_professional: findGroup("teacher_professional"),
-    teacher_identity: findGroup("teacher_identity"),
-    parent_social: findGroup("parent_social"),
-    parent_identity: findGroup("parent_identity"),
-    parent_billing: findGroup("parent_billing"),
-    parent_account: findGroup("parent_account"),
-    parent_students: findGroup("parent_students"),
-    teacher_students: findGroup("teacher_students"),
-    staff_role: findGroup("staff_role"),
-    staff_permissions: findGroup("staff_permissions"),
-    payment_methods: findGroup("payment_methods"),
-    meeting_configs: findGroup("meeting_configs"),
-  };
+  const map = {} as Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>;
+  for (let i = 0; i < PROFILE_FIELD_GROUPS.length; i++) {
+    const group = PROFILE_FIELD_GROUPS[i];
+    map[group.groupKey] = group;
+  }
+  return map;
 }
 
 export const PROFILE_FIELD_GROUP_BY_KEY: Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> =
