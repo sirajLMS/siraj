@@ -44,16 +44,15 @@ import type {
   OAuthCallbackConfig,
   OAuthTokenResponse,
 } from "@/backend/types";
+import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
  * Validates that `returnPath` is a safe relative path to prevent open
- * redirect attacks. A valid return path must start with `/` and must
- * NOT start with `//` (protocol-relative URLs like `//evil.com`) or `/\`
- * (backslash open-redirect bypass like `/\evil.com`).
+ * redirect attacks, handling percent/double-encoding, backslashes, and control characters.
  */
 function validateReturnPath(returnPath: string, tErrors: ErrorsLabels): void {
-  if (!returnPath.startsWith("/") || returnPath.startsWith("//") || returnPath.startsWith("/\\")) {
+  if (!isRelativeSafePath(returnPath)) {
     throw new GraphQLError(tErrors.meetingProvider.invalidReturnPath);
   }
 }
