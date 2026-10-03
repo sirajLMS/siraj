@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import { type FC, type ReactNode, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/common/components/ui/input/phoneInput";
@@ -83,16 +84,35 @@ export const NationalIdInput: FC<NationalIdInputProps> = ({
 
   const startAdornment = (
     <InputAdornment position="start" sx={{ marginInlineEnd: 0.5, maxHeight: "unset" }}>
-      <IconButton
-        aria-label={t.selectCountry}
-        aria-expanded={countryPickerOpen}
-        onClick={() => setCountryPickerOpen(open => !open)}
-        disabled={disabled}
-        size="small"
-        sx={{ p: 0.25, flexShrink: 0, paddingInlineEnd: 0.5 }}
-      >
-        <LocaleEmoji emoji={country?.emoji ?? "\u{1F310}"} />
-      </IconButton>
+      <Tooltip title={t.selectCountry}>
+        {disabled ? (
+          <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+            <IconButton
+              aria-label={t.selectCountry}
+              aria-haspopup="listbox"
+              aria-expanded={countryPickerOpen}
+              onClick={() => setCountryPickerOpen(open => !open)}
+              disabled={disabled}
+              size="small"
+              sx={{ p: 0.25, flexShrink: 0, paddingInlineEnd: 0.5 }}
+            >
+              <LocaleEmoji emoji={country?.emoji ?? "\u{1F310}"} />
+            </IconButton>
+          </Box>
+        ) : (
+          <IconButton
+            aria-label={t.selectCountry}
+            aria-haspopup="listbox"
+            aria-expanded={countryPickerOpen}
+            onClick={() => setCountryPickerOpen(open => !open)}
+            disabled={disabled}
+            size="small"
+            sx={{ p: 0.25, flexShrink: 0, paddingInlineEnd: 0.5 }}
+          >
+            <LocaleEmoji emoji={country?.emoji ?? "\u{1F310}"} />
+          </IconButton>
+        )}
+      </Tooltip>
     </InputAdornment>
   );
 

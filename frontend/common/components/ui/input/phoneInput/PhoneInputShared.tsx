@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import type * as React from "react";
 import { usePhoneInput } from "@/frontend/common/hooks/usePhoneInput";
 import type { CountryType } from "@/frontend/common/lib/locale";
@@ -113,21 +114,45 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
       maxHeight: "unset",
     }}
   >
-    <IconButton
-      aria-label={selectCountryLabel}
-      aria-expanded={countryPickerOpen}
-      onClick={onOpenCountryPicker}
-      disabled={disabled}
-      size="small"
-      sx={{
-        p: 0.25,
-        flexShrink: 0,
-        paddingInlineEnd: 0.5,
-        marginInlineEnd: 0,
-      }}
-    >
-      <LocaleEmojiComponent emoji={countryEmoji ?? "\u{1F310}"} />
-    </IconButton>
+    <Tooltip title={selectCountryLabel}>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          <IconButton
+            aria-label={selectCountryLabel}
+            aria-haspopup="listbox"
+            aria-expanded={countryPickerOpen}
+            onClick={onOpenCountryPicker}
+            disabled={disabled}
+            size="small"
+            sx={{
+              p: 0.25,
+              flexShrink: 0,
+              paddingInlineEnd: 0.5,
+              marginInlineEnd: 0,
+            }}
+          >
+            <LocaleEmojiComponent emoji={countryEmoji ?? "\u{1F310}"} />
+          </IconButton>
+        </Box>
+      ) : (
+        <IconButton
+          aria-label={selectCountryLabel}
+          aria-haspopup="listbox"
+          aria-expanded={countryPickerOpen}
+          onClick={onOpenCountryPicker}
+          disabled={disabled}
+          size="small"
+          sx={{
+            p: 0.25,
+            flexShrink: 0,
+            paddingInlineEnd: 0.5,
+            marginInlineEnd: 0,
+          }}
+        >
+          <LocaleEmojiComponent emoji={countryEmoji ?? "\u{1F310}"} />
+        </IconButton>
+      )}
+    </Tooltip>
     <PrefixInputElement
       ref={prefixInputRef}
       value={`+${prefixDigits}`}
