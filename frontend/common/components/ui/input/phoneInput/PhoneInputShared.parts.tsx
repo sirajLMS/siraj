@@ -6,6 +6,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import type * as React from "react";
 import type { PhoneInputState } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared.hooks";
 import type { PhoneInputSlotProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared.types";
@@ -58,19 +59,11 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
   countryCallingCodeLabel,
   LocaleEmojiComponent,
   PrefixInputElement,
-}): React.ReactNode => (
-  <InputAdornment
-    position="start"
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 0.25,
-      marginInlineEnd: 0.5,
-      maxHeight: "unset",
-    }}
-  >
+}): React.ReactNode => {
+  const countrySelectorButton = (
     <IconButton
       aria-label={selectCountryLabel}
+      aria-haspopup="listbox"
       aria-expanded={countryPickerOpen}
       onClick={onOpenCountryPicker}
       disabled={disabled}
@@ -84,28 +77,51 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
     >
       <LocaleEmojiComponent emoji={countryEmoji ?? "\u{1F310}"} />
     </IconButton>
-    <PrefixInputElement
-      ref={prefixInputRef}
-      value={`+${prefixDigits}`}
-      maxLength={maxPrefixDisplayLength}
-      disabled={disabled}
-      onFocus={onPrefixFocus}
-      onKeyDown={onPrefixKeyDown}
-      onInput={onPrefixInput}
-      aria-label={countryCallingCodeLabel}
-      sx={theme => ({
-        ...slotInputSx,
-        // `ch` measures only the normal-weight "0" advance — the bold active slot and the
-        // wider "+" glyph need more room, otherwise the last digit clips by a few px.
-        width: `calc(${Math.max(prefixDigits.length + 1, 2)}ch + 0.5em)`,
-        flexShrink: 0,
-        paddingInlineEnd: 0.25,
-        color: prefixInvalid ? theme.palette.error.main : "inherit",
-        fontWeight: activeSlot === "prefix" ? 600 : 400,
-      })}
-    />
-  </InputAdornment>
-);
+  );
+
+  return (
+    <InputAdornment
+      position="start"
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.25,
+        marginInlineEnd: 0.5,
+        maxHeight: "unset",
+      }}
+    >
+      <Tooltip title={selectCountryLabel}>
+        {disabled ? (
+          <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+            {countrySelectorButton}
+          </Box>
+        ) : (
+          countrySelectorButton
+        )}
+      </Tooltip>
+      <PrefixInputElement
+        ref={prefixInputRef}
+        value={`+${prefixDigits}`}
+        maxLength={maxPrefixDisplayLength}
+        disabled={disabled}
+        onFocus={onPrefixFocus}
+        onKeyDown={onPrefixKeyDown}
+        onInput={onPrefixInput}
+        aria-label={countryCallingCodeLabel}
+        sx={theme => ({
+          ...slotInputSx,
+          // `ch` measures only the normal-weight "0" advance — the bold active slot and the
+          // wider "+" glyph need more room, otherwise the last digit clips by a few px.
+          width: `calc(${Math.max(prefixDigits.length + 1, 2)}ch + 0.5em)`,
+          flexShrink: 0,
+          paddingInlineEnd: 0.25,
+          color: prefixInvalid ? theme.palette.error.main : "inherit",
+          fontWeight: activeSlot === "prefix" ? 600 : 400,
+        })}
+      />
+    </InputAdornment>
+  );
+};
 
 type PhoneTextFieldProps = {
   readonly fullWidth: boolean;

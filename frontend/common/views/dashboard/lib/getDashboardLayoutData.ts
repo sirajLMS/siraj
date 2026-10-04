@@ -37,11 +37,19 @@ export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem
     // The home/supervisor-home/teacher-today/etc. items all share
     // `href: "/dashboard"`, so they're handled by the matcher below.
   }
-  const match = sidebarItems
-    .filter(item => stripped.startsWith(item.href))
-    .toSorted((a, b) => b.href.length - a.href.length)[0];
+  // Single-pass search for the longest matching href. Strict `>` keeps the
+  // first item in list order on href-length ties, matching the previous
+  // stable descending-sort behavior.
+  let bestMatch: NavItem | null = null;
+  let maxMatchLength = -1;
+  for (const item of sidebarItems) {
+    if (stripped.startsWith(item.href) && item.href.length > maxMatchLength) {
+      bestMatch = item;
+      maxMatchLength = item.href.length;
+    }
+  }
 
-  return match?.key ?? null;
+  return bestMatch?.key ?? null;
 }
 
 export function getDashboardLayoutData(

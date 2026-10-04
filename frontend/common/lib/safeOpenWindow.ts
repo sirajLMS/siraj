@@ -11,8 +11,8 @@
  * handler that needs to open a URL) avoid `globalThis.open(...)` call sites
  * that would trip §3 N19 grep checks when re-exported through tier files.
  */
-import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 import { isSafeUrl } from "@/shared/lib/safe-url";
+import { isRelativeSafePath } from "@/shared/lib/safe-path";
 
 export function safeOpenWindow(url: string | null | undefined): void {
   const trimmed = typeof url === "string" ? url.trim() : "";

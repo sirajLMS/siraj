@@ -36,6 +36,37 @@ function itemPermissionAllowsItem(item: Pick<NavItem, "permission">, hasPermissi
 }
 
 /**
+ * Finds the nav item with the longest `href` that prefixes `walkedPrefix`,
+ * skipping `lastHref` (already emitted for a shallower prefix) and items
+ * whose permission gate the user fails. A strict `>` on href length keeps
+ * the first item in list order on ties, matching the previous stable
+ * descending-sort behavior. The single pass avoids copying and sorting the
+ * nav items for every walked path prefix.
+ */
+function findLongestMatchingNavItem(
+  navItems: readonly NavItem[],
+  walkedPrefix: string,
+  lastHref: string,
+  hasPermission: HasPermissionPredicate
+): NavItem | null {
+  let match: NavItem | null = null;
+  let maxMatchLength = -1;
+  for (const item of navItems) {
+    // Don't re-emit the same href twice when walking into deeper segments
+    // that share the same item (e.g. `/billing` → `/billing/invoices`:
+    // both match `billing-admin` at href `/billing`, we only want one).
+    if (!walkedPrefix.startsWith(item.href) || item.href === lastHref) {
+      continue;
+    }
+    if (item.href.length > maxMatchLength && itemPermissionAllowsItem(item, hasPermission)) {
+      match = item;
+      maxMatchLength = item.href.length;
+    }
+  }
+  return match;
+}
+
+/**
  * Walks a Next.js App-Router pathname (already stripped of its locale prefix
  * by {@link stripLocaleFromPath}) and emits a breadcrumb array from the
  * configured {@link SIDEBAR_NAV_ITEMS} + the caller-supplied label resolver.
@@ -75,27 +106,13 @@ export function buildBreadcrumbsForPath(
 
   // 1) Auto-emit crumbs for each nav-item prefix we cross.
   const autoCrumbs: PageHeaderBreadcrumb[] = [];
-  // Sort items by href length descending so the longest matching href per
-  // prefix wins (matches getActiveNavKey's behavior).
-  const sortedItems = [...navItems].toSorted((a, b) => b.href.length - a.href.length);
   let lastHref = "";
   // Walk path prefixes from "/" up to the full pathname in segment steps.
   const segments = normalized.split("/").filter(Boolean);
   let walkedPrefix = "";
   for (const segment of segments) {
     walkedPrefix = `${walkedPrefix}/${segment}`;
-    const match = sortedItems.find(item => {
-      if (!walkedPrefix.startsWith(item.href)) {
-        return false;
-      }
-      // Don't re-emit the same href twice when walking into deeper segments
-      // that share the same item (e.g. `/billing` → `/billing/invoices`:
-      // both match `billing-admin` at href `/billing`, we only want one).
-      if (item.href === lastHref) {
-        return false;
-      }
-      return itemPermissionAllowsItem(item, hasPermission);
-    });
+    const match = findLongestMatchingNavItem(navItems, walkedPrefix, lastHref, hasPermission);
     if (!match) {
       continue;
     }

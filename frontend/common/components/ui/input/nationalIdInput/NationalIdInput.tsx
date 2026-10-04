@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import { type FC, type ReactNode, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/common/components/ui/input/phoneInput";
@@ -31,6 +32,45 @@ export type NationalIdInputProps = {
   readonly hideLabel?: boolean;
   readonly sx?: SxProps<Theme>;
   readonly size?: "small" | "medium";
+};
+
+/**
+ * Flag button for the country-selector start adornment. When the input is
+ * disabled the button is wrapped in a plain `<span>` so the tooltip still
+ * shows on hover (MUI suppresses pointer events on disabled buttons).
+ */
+const CountrySelectorButton: FC<{
+  readonly emoji: string | undefined;
+  readonly label: string;
+  readonly open: boolean;
+  readonly disabled: boolean | undefined;
+  readonly onToggle: () => void;
+}> = ({ emoji, label, open, disabled, onToggle }) => {
+  const button = (
+    <IconButton
+      aria-label={label}
+      aria-haspopup="listbox"
+      aria-expanded={open}
+      onClick={onToggle}
+      disabled={disabled}
+      size="small"
+      sx={{ p: 0.25, flexShrink: 0, paddingInlineEnd: 0.5 }}
+    >
+      <LocaleEmoji emoji={emoji ?? "\u{1F310}"} />
+    </IconButton>
+  );
+
+  return (
+    <Tooltip title={label}>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
+    </Tooltip>
+  );
 };
 
 /**
@@ -83,16 +123,13 @@ export const NationalIdInput: FC<NationalIdInputProps> = ({
 
   const startAdornment = (
     <InputAdornment position="start" sx={{ marginInlineEnd: 0.5, maxHeight: "unset" }}>
-      <IconButton
-        aria-label={t.selectCountry}
-        aria-expanded={countryPickerOpen}
-        onClick={() => setCountryPickerOpen(open => !open)}
+      <CountrySelectorButton
+        emoji={country?.emoji}
+        label={t.selectCountry}
+        open={countryPickerOpen}
         disabled={disabled}
-        size="small"
-        sx={{ p: 0.25, flexShrink: 0, paddingInlineEnd: 0.5 }}
-      >
-        <LocaleEmoji emoji={country?.emoji ?? "\u{1F310}"} />
-      </IconButton>
+        onToggle={() => setCountryPickerOpen(open => !open)}
+      />
     </InputAdornment>
   );
 

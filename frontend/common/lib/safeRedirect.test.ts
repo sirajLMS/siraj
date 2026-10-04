@@ -1,10 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import {
-  buildLoginHref,
-  DEFAULT_POST_LOGIN_PATH,
-  isRelativeSafePath,
-  isSafeRedirect,
-} from "@/frontend/common/lib/safeRedirect";
+import { buildLoginHref, DEFAULT_POST_LOGIN_PATH, isSafeRedirect } from "@/frontend/common/lib/safeRedirect";
+import { isRelativeSafePath } from "@/shared/lib/safe-path";
 
 describe("safeRedirect", () => {
   describe("isRelativeSafePath", () => {

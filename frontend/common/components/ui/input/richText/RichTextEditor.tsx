@@ -210,7 +210,7 @@ function ToolbarButton({
   return (
     <Tooltip title={action.label}>
       {disabled ? (
-        <Box component="span" sx={{ display: "inline-flex" }}>
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
           {button}
         </Box>
       ) : (

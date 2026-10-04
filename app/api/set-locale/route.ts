@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ALLOWED_ORIGINS, resolveTrustedOrigin } from "@/backend/lib";
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 import { getServerTranslations } from "@/shared/locale";
+import { isRelativeSafePath } from "@/shared/lib/safe-path";
 import { locales } from "@/shared/locale/AppLocale";
 
 const envConfig = getEnvironmentConfig();

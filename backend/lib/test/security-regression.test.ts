@@ -100,15 +100,25 @@ describe("H4 — trusted-proxy client identification", () => {
 
 describe("H3 — GraphQL batched-request amplification", () => {
   test("graphql route keeps batching enabled with hard compensating controls", async () => {
-    const src = await readSrc("app/api/graphql/route.ts");
+    // route.ts is now a thin handler — the batching decision and its
+    // compensating controls live in app/api/graphql/shared/.
+    const apolloServerSrc = await readSrc("app/api/graphql/shared/apollo-server.ts");
+    const constantsSrc = await readSrc("app/api/graphql/shared/constants.ts");
+    const pipelineSrc = await readSrc("app/api/graphql/shared/request-pipeline.ts");
+    const routeSrc = await readSrc("app/api/graphql/route.ts");
+
     // Batching stays enabled in all environments (a prior outage forced the
     // revert); the amplification risk is bounded by compensating controls.
-    expect(src).toContain("allowBatchedHttpRequests: true");
+    expect(apolloServerSrc).toContain("allowBatchedHttpRequests: true");
     // Hard cap: batches above MAX_BATCHED_OPERATIONS are rejected (400).
-    expect(src).toMatch(/MAX_BATCHED_OPERATIONS\s*=\s*10/);
-    expect(src).toMatch(/operationCount\s*>\s*MAX_BATCHED_OPERATIONS/);
-    // Operation-aware body guard must be present in withRateLimit.
-    expect(src).toMatch(/Array\.isArray\(body\)/);
+    expect(constantsSrc).toMatch(/MAX_BATCHED_OPERATIONS\s*=\s*10/);
+    expect(pipelineSrc).toMatch(/operationCount\s*>\s*MAX_BATCHED_OPERATIONS/);
+    // Operation-aware body guard must be present in the request pipeline
+    // (validateGraphqlRequestBody, run inside withRateLimit).
+    expect(pipelineSrc).toMatch(/Array\.isArray\(body\)/);
+    // The route must stay wired through the rate-limit pipeline so the
+    // controls above cannot silently detach from the POST handler.
+    expect(routeSrc).toContain("withRateLimit");
   });
 });
 
@@ -189,10 +199,17 @@ describe("M3 — extended RLS migration file", () => {
 });
 
 describe("M11 — storage file responses are sandboxed", () => {
-  test("route.ts sets CSP sandbox header on full and range responses", async () => {
-    const src = await readSrc("app/api/storage/files/[[...path]]/route.ts");
-    expect(src).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
-    expect(src).toContain('"X-Content-Type-Options": "nosniff"');
+  test("file responses set CSP sandbox + nosniff headers on full and range responses", async () => {
+    // The response construction moved out of route.ts into route.responses.ts.
+    // Both the 200 full-file and 206 range responses are built through
+    // buildStreamHeaders, so the sandbox headers there cover every served file.
+    const responsesSrc = await readSrc("app/api/storage/files/[[...path]]/route.responses.ts");
+    expect(responsesSrc).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
+    expect(responsesSrc).toContain('"X-Content-Type-Options": "nosniff"');
+    // The route must delegate through buildFileResponse so the sandboxed
+    // builder cannot silently detach from the GET handler.
+    const routeSrc = await readSrc("app/api/storage/files/[[...path]]/route.ts");
+    expect(routeSrc).toContain("buildFileResponse");
   });
 });
 
@@ -202,6 +219,7 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     const setLocaleSrc = await readSrc("app/api/set-locale/route.ts");
     const logoutSrc = await readSrc("app/logout/route.ts");
     const oauthHandlerSrc = await readSrc("app/api/oauth/shared/oauth-callback-handler.ts");
+    const invoiceDownloadSrc = await readSrc("app/api/invoices/[id]/download/route.ts");
 
     // The helper owns the gating against nextUrl host / allowlist.
     expect(helperSrc).toContain("ALLOWED_ORIGINS.has");
@@ -211,9 +229,13 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     expect(setLocaleSrc).toContain("ALLOWED_ORIGINS.has");
     expect(logoutSrc).toContain("resolveTrustedOrigin");
     expect(oauthHandlerSrc).toContain("resolveTrustedOrigin");
+    expect(invoiceDownloadSrc).toContain("resolveTrustedOrigin");
     // Raw host header or unvalidated url.origin must not be interpolated into redirect targets.
     expect(logoutSrc).not.toMatch(/return host \? `\$\{proto\}:\/\/\$\{host\}`/);
     expect(oauthHandlerSrc).not.toContain("NextResponse.redirect(new URL(returnPath, url.origin)");
+    expect(invoiceDownloadSrc).not.toMatch(
+      /NextResponse\.redirect\(new URL\(`\/api\/storage\/files\/\$\{safeEncodedPath\}`, request\.url\)\)/
+    );
   });
 
   test("logout route sanitizes client IP via the shared ratelimit identifier chain", async () => {

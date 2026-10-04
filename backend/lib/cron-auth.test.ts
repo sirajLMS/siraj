@@ -14,7 +14,7 @@ await mock.module("@/backend/lib/logger", () => ({
 }));
 
 function setEnv(key: string, value: string | undefined): void {
-  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
+  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true, enumerable: true });
 }
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";

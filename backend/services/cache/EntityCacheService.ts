@@ -50,19 +50,33 @@ export function validateEntry<T = unknown>(entry: unknown): entry is CacheEntry<
   );
 }
 
+/**
+ * Canonical JSON serialization for Redis entity cache keys: object keys are sorted
+ * with `localeCompare` for deterministic output. Builds parts with plain loops
+ * instead of `Object.entries()` tuple allocations and `.map()` intermediates.
+ */
 export function stableStringify(value: unknown): string {
   if (value === null || typeof value !== "object") {
     return JSON.stringify(value);
   }
   if (Array.isArray(value)) {
-    const items = value.map(stableStringify).join(",");
-    return `[${items}]`;
+    const len = value.length;
+    if (len === 0) return "[]";
+    const items: string[] = [];
+    for (let i = 0; i < len; i++) {
+      items.push(stableStringify(value[i]));
+    }
+    return `[${items.join(",")}]`;
   }
-  const entries = Object.entries(value)
-    .toSorted((a, b) => a[0].localeCompare(b[0]))
-    .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`)
-    .join(",");
-  return `{${entries}}`;
+  const keys = Object.keys(value).toSorted((a, b) => a.localeCompare(b));
+  const len = keys.length;
+  if (len === 0) return "{}";
+  const parts: string[] = [];
+  for (let i = 0; i < len; i++) {
+    const k = keys[i];
+    parts.push(`${JSON.stringify(k)}:${stableStringify(Reflect.get(value, k))}`);
+  }
+  return `{${parts.join(",")}}`;
 }
 
 /** Parses a tag index JSON array from a cache string, returning null on failure. */

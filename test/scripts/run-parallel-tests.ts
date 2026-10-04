@@ -12,12 +12,22 @@ import { deduplicateLines, renderProgressBar, stripAnsiCodes } from "@/test/scri
 const DEFAULT_TIMEOUT_MS = 60_000;
 const TUI_REFRESH_INTERVAL_MS = 200;
 
-export interface RunParallelTestsConfig {
+export interface TestFileGroup {
+  /** Glob pattern (relative to `cwd`) selecting test files for this group. */
   pattern: string;
+  /** Base directory the glob is scanned from. */
   cwd: string;
+}
+
+export interface RunParallelTestsConfig {
+  /** Single-group shorthand; ignored when `groups` is provided. */
+  pattern?: string;
+  cwd?: string;
   maxWorkers: number;
   label: string;
   timeoutMs?: number;
+  /** Explicit file groups for suites spanning multiple directories. */
+  groups?: TestFileGroup[];
 }
 
 export interface TestRunResult {
@@ -345,32 +355,39 @@ async function processQueue(
   return processQueue(workerId, queue, timeoutMs, coverage, bail, state, activeProcs);
 }
 
+async function discoverGroupFiles(group: TestFileGroup, filterPaths: string[]): Promise<string[]> {
+  const glob = new Glob(group.pattern);
+  const discovered: string[] = [];
+  for await (const file of glob.scan({ cwd: group.cwd })) {
+    const fullPath = `${group.cwd}/${file}`;
+    const matchesFilter = filterPaths.some(p => fullPath.includes(p) || file.includes(p));
+    if (filterPaths.length === 0 || matchesFilter) {
+      discovered.push(fullPath);
+    }
+  }
+  return discovered;
+}
+
 export async function runParallelTests(config: RunParallelTestsConfig): Promise<TestRunResult> {
-  const { pattern, cwd, maxWorkers, label, timeoutMs: defaultTimeout = DEFAULT_TIMEOUT_MS } = config;
+  const { pattern, cwd, maxWorkers, label, timeoutMs: defaultTimeout = DEFAULT_TIMEOUT_MS, groups } = config;
   const { bail, coverage, timeoutMs: cliTimeout, filterPaths } = parseCliArgs(process.argv.slice(2));
   const timeoutMs = cliTimeout ?? defaultTimeout;
 
   return withProcessLock(`test-suite: ${label}`, async () => {
-    const glob = new Glob(pattern);
-    const discoveredFiles: string[] = [];
-
-    for await (const file of glob.scan({ cwd })) {
-      const fullPath = `${cwd}/${file}`;
-      if (filterPaths.length > 0) {
-        const matches = filterPaths.some(p => fullPath.includes(p) || file.includes(p));
-        if (matches) {
-          discoveredFiles.push(fullPath);
-        }
-      } else {
-        discoveredFiles.push(fullPath);
-      }
+    const fileGroups = groups ?? (pattern && cwd ? [{ pattern, cwd }] : []);
+    if (fileGroups.length === 0) {
+      globalThis.console.error(`No test file groups configured for suite "${label}"`);
+      process.exit(1);
     }
+
+    const discoveredFiles = (await Promise.all(fileGroups.map(g => discoverGroupFiles(g, filterPaths)))).flat();
 
     discoveredFiles.sort((a, b) => a.localeCompare(b));
     const totalFiles = discoveredFiles.length;
 
     if (totalFiles === 0) {
-      globalThis.console.log(`\x1b[33mNo test files found matching pattern "${pattern}" in "${cwd}"\x1b[0m`);
+      const groupSummary = fileGroups.map(g => `"${g.pattern}" in "${g.cwd}"`).join(", ");
+      globalThis.console.log(`\x1b[33mNo test files found matching ${groupSummary}\x1b[0m`);
       process.exit(0);
     }
 

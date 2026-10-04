@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
+import { resolveTrustedOrigin } from "@/backend/lib/trusted-origin";
 
 const USER_ID = "user-1";
 const INVOICE_ID = "invoice-1";
@@ -43,6 +44,7 @@ await mock.module("@/backend/lib", () => ({
   NotFoundError,
   getServerUserContext: getServerUserContextMock,
   logger: { log: () => {}, info: () => {}, warn: () => {}, error: () => {}, debug: () => {} },
+  resolveTrustedOrigin,
 }));
 
 await mock.module("@/backend/services", () => ({
@@ -176,5 +178,22 @@ describe("GET /api/invoices/[id]/download", () => {
     expect([302, 307]).toContain(response.status);
     const location = response.headers.get("location");
     expect(location).toBe("http://localhost:3000/api/storage/files/invoices/2026/invoice%20%231%20%26%20draft.pdf");
+  });
+
+  test("redirect target ignores a spoofed X-Forwarded-Host and falls back to the trusted origin", async () => {
+    const headers = new Headers();
+    headers.set("accept-language", "en");
+    headers.set("x-forwarded-host", "evil-attacker.com");
+    const request = new NextRequest(DOWNLOAD_URL, { method: "GET", headers });
+
+    const { GET } = await importRoute();
+    const response = await GET(request, {
+      params: Promise.resolve({ id: INVOICE_ID }),
+    });
+
+    expect([302, 307]).toContain(response.status);
+    const location = response.headers.get("location");
+    expect(location).toBe("http://localhost:3000/api/storage/files/invoices/2026/inv-001.pdf");
+    expect(location).not.toContain("evil-attacker.com");
   });
 });

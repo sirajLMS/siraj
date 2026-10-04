@@ -208,30 +208,60 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
   },
 ] as const;
 
-function buildGroupByKeyMap(): Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> {
-  const findGroup = (key: ProfileFieldGroupKey): ProfileFieldGroupDefinition => {
-    const group = PROFILE_FIELD_GROUPS.find(g => g.groupKey === key);
-    if (!group) {
+/**
+ * Group keys the manifest must define, mirroring the `ProfileFieldGroupKey`
+ * union. The `CompleteGroupKeyMap` guard below turns a missing entry into a
+ * compile error, so this list and the union cannot drift apart.
+ */
+const EXPECTED_GROUP_KEYS = [
+  "core_identity",
+  "core_contact",
+  "teacher_professional",
+  "teacher_identity",
+  "parent_social",
+  "parent_identity",
+  "parent_billing",
+  "parent_account",
+  "parent_students",
+  "teacher_students",
+  "staff_role",
+  "staff_permissions",
+  "payment_methods",
+  "meeting_configs",
+] as const satisfies readonly ProfileFieldGroupKey[];
+
+// Compile-time guard: resolves to the full map type only when EXPECTED_GROUP_KEYS
+// covers every ProfileFieldGroupKey; otherwise it resolves to a placeholder that
+// makes `return map` in buildGroupByKeyMap fail to compile, so the list and the
+// union cannot drift apart silently.
+type CompleteGroupKeyMap =
+  Exclude<ProfileFieldGroupKey, (typeof EXPECTED_GROUP_KEYS)[number]> extends never
+    ? Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>
+    : { readonly missingGroupKey: Exclude<ProfileFieldGroupKey, (typeof EXPECTED_GROUP_KEYS)[number]> };
+
+function assertAllGroupsPresent(
+  map: Partial<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>>
+): asserts map is CompleteGroupKeyMap {
+  for (const key of EXPECTED_GROUP_KEYS) {
+    if (map[key] === undefined) {
       throw new Error(`Missing profile field group: ${key}`);
     }
-    return group;
-  };
-  return {
-    core_identity: findGroup("core_identity"),
-    core_contact: findGroup("core_contact"),
-    teacher_professional: findGroup("teacher_professional"),
-    teacher_identity: findGroup("teacher_identity"),
-    parent_social: findGroup("parent_social"),
-    parent_identity: findGroup("parent_identity"),
-    parent_billing: findGroup("parent_billing"),
-    parent_account: findGroup("parent_account"),
-    parent_students: findGroup("parent_students"),
-    teacher_students: findGroup("teacher_students"),
-    staff_role: findGroup("staff_role"),
-    staff_permissions: findGroup("staff_permissions"),
-    payment_methods: findGroup("payment_methods"),
-    meeting_configs: findGroup("meeting_configs"),
-  };
+  }
+}
+
+/**
+ * Single-pass O(N) map construction to eliminate quadratic O(N^2) array scans
+ * (`PROFILE_FIELD_GROUPS.find(...)` repeated for every key) during module import,
+ * while keeping the import-time fail-fast when a key has no manifest entry.
+ */
+function buildGroupByKeyMap(): Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> {
+  const map: Partial<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> = {};
+  for (let i = 0; i < PROFILE_FIELD_GROUPS.length; i++) {
+    const group = PROFILE_FIELD_GROUPS[i];
+    map[group.groupKey] = group;
+  }
+  assertAllGroupsPresent(map);
+  return map;
 }
 
 export const PROFILE_FIELD_GROUP_BY_KEY: Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> =
