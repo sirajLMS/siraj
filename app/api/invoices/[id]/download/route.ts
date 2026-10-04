@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/backend/lib";
+import { ForbiddenError, getServerUserContext, logger, NotFoundError, resolveTrustedOrigin } from "@/backend/lib";
 import { checkRateLimit, exportRateLimiter } from "@/backend/lib/ratelimit";
 import { BillingManagementService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .map(segment => encodeURIComponent(segment))
       .join("/");
 
-    return NextResponse.redirect(new URL(`/api/storage/files/${safeEncodedPath}`, request.url));
+    return NextResponse.redirect(new URL(`/api/storage/files/${safeEncodedPath}`, resolveTrustedOrigin(request)));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return NextResponse.json({ error: tErrors.invoiceNotFoundShort }, { status: 404 });

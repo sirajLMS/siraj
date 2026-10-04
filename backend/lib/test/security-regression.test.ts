@@ -202,6 +202,7 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     const setLocaleSrc = await readSrc("app/api/set-locale/route.ts");
     const logoutSrc = await readSrc("app/logout/route.ts");
     const oauthHandlerSrc = await readSrc("app/api/oauth/shared/oauth-callback-handler.ts");
+    const invoiceDownloadSrc = await readSrc("app/api/invoices/[id]/download/route.ts");
 
     // The helper owns the gating against nextUrl host / allowlist.
     expect(helperSrc).toContain("ALLOWED_ORIGINS.has");
@@ -211,9 +212,11 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     expect(setLocaleSrc).toContain("ALLOWED_ORIGINS.has");
     expect(logoutSrc).toContain("resolveTrustedOrigin");
     expect(oauthHandlerSrc).toContain("resolveTrustedOrigin");
+    expect(invoiceDownloadSrc).toContain("resolveTrustedOrigin");
     // Raw host header or unvalidated url.origin must not be interpolated into redirect targets.
     expect(logoutSrc).not.toMatch(/return host \? `\$\{proto\}:\/\/\$\{host\}`/);
     expect(oauthHandlerSrc).not.toContain("NextResponse.redirect(new URL(returnPath, url.origin)");
+    expect(invoiceDownloadSrc).not.toContain("NextResponse.redirect(new URL(`/api/storage/files/${safeEncodedPath}`, request.url))");
   });
 
   test("logout route sanitizes client IP via the shared ratelimit identifier chain", async () => {

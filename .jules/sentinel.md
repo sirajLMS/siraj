@@ -1,0 +1,4 @@
+## 2026-10-04 - Enforce `resolveTrustedOrigin` across all absolute redirect API routes
+**Vulnerability:** `NextResponse.redirect(new URL(path, request.url))` constructs the redirect target using `request.url`, which can be influenced by untrusted HTTP `Host` or `X-Forwarded-Host` headers if proxied or misconfigured, leading to host-header injection / open redirect.
+**Learning:** Standard Next.js `request.url` evaluates request headers when deriving origin. In redirect routes that perform server-side redirects (e.g. invoice downloads, locale updates, OAuth callbacks, logout), constructing `new URL(path, request.url)` directly can leak redirect targets or tokens to untrusted origins.
+**Prevention:** Always wrap redirect base origin resolution with `resolveTrustedOrigin(request)` from `@/backend/lib/trusted-origin` when constructing `NextResponse.redirect(new URL(path, origin))`, and maintain static regression checks in `backend/lib/test/security-regression.test.ts`.
