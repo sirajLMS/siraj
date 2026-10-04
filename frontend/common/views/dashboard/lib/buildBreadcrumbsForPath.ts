@@ -75,27 +75,27 @@ export function buildBreadcrumbsForPath(
 
   // 1) Auto-emit crumbs for each nav-item prefix we cross.
   const autoCrumbs: PageHeaderBreadcrumb[] = [];
-  // Sort items by href length descending so the longest matching href per
-  // prefix wins (matches getActiveNavKey's behavior).
-  const sortedItems = [...navItems].toSorted((a, b) => b.href.length - a.href.length);
   let lastHref = "";
   // Walk path prefixes from "/" up to the full pathname in segment steps.
   const segments = normalized.split("/").filter(Boolean);
   let walkedPrefix = "";
   for (const segment of segments) {
     walkedPrefix = `${walkedPrefix}/${segment}`;
-    const match = sortedItems.find(item => {
-      if (!walkedPrefix.startsWith(item.href)) {
-        return false;
+
+    // Single-pass O(N) search for the longest matching nav item prefix per segment,
+    // avoiding array copying and sorting ([...navItems].toSorted(...)) on every path walk.
+    let match: NavItem | null = null;
+    let maxMatchLength = -1;
+
+    for (const item of navItems) {
+      if (walkedPrefix.startsWith(item.href) && item.href !== lastHref) {
+        if (item.href.length > maxMatchLength && itemPermissionAllowsItem(item, hasPermission)) {
+          match = item;
+          maxMatchLength = item.href.length;
+        }
       }
-      // Don't re-emit the same href twice when walking into deeper segments
-      // that share the same item (e.g. `/billing` → `/billing/invoices`:
-      // both match `billing-admin` at href `/billing`, we only want one).
-      if (item.href === lastHref) {
-        return false;
-      }
-      return itemPermissionAllowsItem(item, hasPermission);
-    });
+    }
+
     if (!match) {
       continue;
     }
