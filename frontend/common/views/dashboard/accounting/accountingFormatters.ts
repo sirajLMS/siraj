@@ -7,15 +7,17 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
  * (and any future shared components) can reuse them.
  */
 
+/** Module-level cached `Intl.NumberFormat` instance for en-US money formatting. */
+const enUSMoneyFormat = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 /** "25000.00" → "25,000.00" (grouped, no currency symbol — currency renders beside). */
 export function formatAccountingMoney(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const numeric = typeof value === "string" ? Number(value) : value;
   if (Number.isNaN(numeric)) return String(value);
-  return numeric.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return enUSMoneyFormat.format(numeric);
 }
 
-/** ISO DateTime / date → localized short date (locale-safe for AR via Intl). */
 /** Grid-safe numeric coercion — MUI hands columns untyped `unknown` cells. */
 export function numericCell(value: unknown): number {
   if (typeof value === "number") {
@@ -59,15 +61,39 @@ function resolveAccountingDateLocale(locale: string): string {
   return locale.startsWith("ar") ? "ar" : "en";
 }
 
+/** Cache of `Intl.DateTimeFormat` instances for short date formatting keyed by locale tag. */
+const accountingDateFormatCache = new Map<string, Intl.DateTimeFormat>();
+
+function getAccountingDateFormatter(localeTag: string): Intl.DateTimeFormat {
+  let formatter = accountingDateFormatCache.get(localeTag);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(localeTag, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    accountingDateFormatCache.set(localeTag, formatter);
+  }
+  return formatter;
+}
+
 export function formatAccountingDate(value: string | null | undefined, locale: string): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(resolveAccountingDateLocale(locale), {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return getAccountingDateFormatter(resolveAccountingDateLocale(locale)).format(date);
+}
+
+/** Cache of `Intl.DateTimeFormat` instances for short month formatting keyed by locale tag. */
+const accountingMonthFormatCache = new Map<string, Intl.DateTimeFormat>();
+
+function getAccountingMonthFormatter(localeTag: string): Intl.DateTimeFormat {
+  let formatter = accountingMonthFormatCache.get(localeTag);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(localeTag, { month: "short", year: "numeric" });
+    accountingMonthFormatCache.set(localeTag, formatter);
+  }
+  return formatter;
 }
 
 /**
@@ -80,7 +106,7 @@ export function formatAccountingMonth(value: string | null | undefined, locale: 
   const match = /^(\d{4})-(\d{2})$/.exec(value);
   const date = match === null ? null : new Date(Number(match[1]), Number(match[2]) - 1, 1);
   if (date === null || Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(resolveAccountingDateLocale(locale), { month: "short", year: "numeric" });
+  return getAccountingMonthFormatter(resolveAccountingDateLocale(locale)).format(date);
 }
 
 /**
