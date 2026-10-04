@@ -63,12 +63,26 @@ gqlSchemaBuilder.mutationFields(t => ({
     }),
   }),
 
-  /**
-   * Assign or change the routing purpose of an account. The service rejects
-   * purpose assignment on inactive accounts (`whatsapp.purposeRequiresActive`)
-   * and resets the channel cache so routing picks up the change immediately.
-   * The permission context is taken from ctx (no extra user-context query).
-   */
+  localDeactivateWhatsappAccount: t.field({
+    type: WhatsappAccountPothosObject,
+    description: "Stop using a WhatsApp account: deactivate it. Calls resetWhatsappChannel() on success (S4).",
+    authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
+    args: {
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    },
+    resolve: withAuthResult((actorUserId, args, tErrors) =>
+      WhatsappAccountService.localDeactivateAccount(actorUserId, tErrors, args.id)
+    ),
+  }),
+}));
+
+/**
+ * Routing-purpose and credential management. The purpose mutation rejects
+ * purpose assignment on inactive accounts (`whatsapp.purposeRequiresActive`)
+ * and resets the channel cache so routing picks up the change immediately.
+ * The permission context is taken from ctx (no extra user-context query).
+ */
+gqlSchemaBuilder.mutationFields(t => ({
   updateWhatsappAccountPurpose: t.field({
     type: WhatsappAccountPothosObject,
     description: "Assign or change the routing purpose of a WhatsApp account (active accounts only).",
@@ -88,18 +102,6 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
       return WhatsappAccountService.updateAccountPurpose(actorUserId, context, tErrors, args.accountId, args.purpose);
     },
-  }),
-
-  localDeactivateWhatsappAccount: t.field({
-    type: WhatsappAccountPothosObject,
-    description: "Stop using a WhatsApp account: deactivate it. Calls resetWhatsappChannel() on success (S4).",
-    authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
-    args: {
-      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: withAuthResult((actorUserId, args, tErrors) =>
-      WhatsappAccountService.localDeactivateAccount(actorUserId, tErrors, args.id)
-    ),
   }),
 
   setWhatsappAccessToken: t.field({
@@ -142,17 +144,25 @@ gqlSchemaBuilder.mutationFields(t => ({
       WhatsappAccountService.setTwoStepPin(actorUserId, tErrors, args.id, args.twoStepPin)
     ),
   }),
+}));
 
-  /**
-   * Complete WhatsApp Embedded Signup (coexistence onboarding).
-   *
-   * Exchanges the single-use ES authorization code, resolves + confirms the
-   * phone number (`is_on_biz_app` && `platform_type === "CLOUD_API"`),
-   * attaches the app to the WABA, creates the account with
-   * `onboardingMode: COEXISTENCE`, and enqueues the one-shot contacts/history
-   * sync. Failures surface as `whatsapp.embeddedSignupFailed`; a code replay
-   * fails the Meta exchange (single-use).
-   */
+/**
+ * Onboarding, Meta sync, and per-user notification opt-in.
+ *
+ * Embedded Signup exchanges the single-use ES authorization code, resolves +
+ * confirms the phone number (`is_on_biz_app` && `platform_type === "CLOUD_API"`),
+ * attaches the app to the WABA, creates the account with
+ * `onboardingMode: COEXISTENCE`, and enqueues the one-shot contacts/history
+ * sync. Failures surface as `whatsapp.embeddedSignupFailed`; a code replay
+ * fails the Meta exchange (single-use).
+ *
+ * `setUserWhatsappOptIn` requires WHATSAPP_CONFIG_MANAGE for all callers,
+ * including self-service (userId = "me"). WhatsApp opt-in is an admin-managed
+ * action, not user-self-service. The "me" alias simplifies userId resolution
+ * but does not relax the permission requirement. Non-self toggles additionally
+ * require assertSuperAdmin at the service layer (defense-in-depth).
+ */
+gqlSchemaBuilder.mutationFields(t => ({
   completeWhatsappEmbeddedSignup: t.field({
     type: WhatsappAccountPothosObject,
     description: "Complete WhatsApp Embedded Signup (coexistence) onboarding for a Business-app number.",
@@ -178,14 +188,6 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: withAuthResult((actorUserId, _args, tErrors) => WhatsappAccountService.syncFromMeta(actorUserId, tErrors)),
   }),
 
-  /**
-   * Toggle a user's WhatsApp notification opt-in status.
-   *
-   * Auth design: Requires WHATSAPP_CONFIG_MANAGE for all callers, including self-service
-   * (userId = "me"). WhatsApp opt-in is an admin-managed action, not user-self-service.
-   * The "me" alias simplifies userId resolution but does not relax the permission requirement.
-   * Non-self toggles additionally require assertSuperAdmin at the service layer (defense-in-depth).
-   */
   setUserWhatsappOptIn: t.field({
     type: WhatsappAccountPothosObject,
     description: "Enable or disable WhatsApp notification opt-in for a user (REQ-10/BL1).",

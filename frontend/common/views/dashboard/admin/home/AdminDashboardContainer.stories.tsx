@@ -1,67 +1,23 @@
-import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useMemo, useState } from "react";
-import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
-import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { isAdminMetricKey } from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
-import {
-  MOCK_SCHEDULE,
-  MOCK_TEACHERS,
-} from "@/frontend/common/views/dashboard/admin/home/adminDashboardStoriesFixtures";
-import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
+import { withAdminDashboardStore } from "@/frontend/common/views/dashboard/admin/home/adminDashboardStoriesDecorator";
+import { buildAdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardLabels";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/common/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
-import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { type AdminDashboardLabels, Translation, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function noopSubmit() {}
 
-function buildLabelsBySection(labels: AdminDashboardLabels): AdminDashboardLabelsBySection {
-  return {
-    shell: {
-      todayClasses: labels.todayClasses,
-      scheduleOverview: labels.scheduleOverview,
-      searchPlaceholder: labels.searchPlaceholder,
-      noClasses: labels.noClasses,
-      details: labels.details,
-      loading: labels.loading,
-    },
-    filters: {
-      listOfClassesOn: labels.listOfClassesOn,
-      today: labels.today,
-      previousDay: labels.previousDay,
-      nextDay: labels.nextDay,
-      selectTeacher: labels.selectTeacher,
-      submit: labels.submit,
-    },
-    columns: {
-      className: labels.className,
-      student: labels.student,
-      teacher: labels.teacher,
-      time: labels.time,
-      yourTime: labels.yourTime,
-      teacherTime: labels.teacherTime,
-      studentTime: labels.studentTime,
-      duration: labels.duration,
-      status: labels.status,
-      actions: labels.actions,
-      history: labels.history,
-      joinVideo: labels.joinVideo,
-    },
-    status: buildClassInstanceStatusLabels(labels.statusLabels),
-    metrics: labels.metrics,
-  };
-}
-
 export function MockAdminDashboardContainer() {
   const labels = useAppTranslation(Translation.Dashboard.Admin);
-  const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
+  const labelsBySection = useMemo(() => buildAdminDashboardLabelsBySection(labels), [labels]);
 
   const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
   const filters = useDashboardStore(state => state.filters);
@@ -161,18 +117,6 @@ export function MockAdminDashboardContainer() {
   );
 }
 
-// MockedProvider requires exact query+variables matches; TeacherAutocomplete fires an
-// initial `teachers` query with an empty search on mount.
-const apolloMocks = [
-  {
-    request: {
-      query: teachersQueryDocument,
-      variables: { search: "", limit: USER_SELECT_LIMIT },
-    },
-    result: { data: { teachers: [] } },
-  },
-];
-
 const meta: Meta<typeof MockAdminDashboardContainer> = {
   title: "Views/dashboard/dashboard/AdminDashboardContainer",
   component: MockAdminDashboardContainer,
@@ -188,25 +132,7 @@ const meta: Meta<typeof MockAdminDashboardContainer> = {
       },
     },
   },
-  decorators: [
-    Story => {
-      const MOCK_METRICS = buildAdminDashboardMetrics({
-        id: "metrics-mock",
-        ...computeDailyScheduleMetricsFromRows(MOCK_SCHEDULE),
-      });
-      useDashboardStore.setState({
-        todayClasses: MOCK_METRICS,
-        lastUpdated: "dashboard.admin.updatedMinutesAgo",
-        scheduleRows: MOCK_SCHEDULE,
-        teachers: MOCK_TEACHERS,
-      });
-      return (
-        <MockedProvider mocks={apolloMocks}>
-          <Story />
-        </MockedProvider>
-      );
-    },
-  ],
+  decorators: [withAdminDashboardStore],
 };
 
 export default meta;

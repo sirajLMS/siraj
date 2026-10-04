@@ -1,7 +1,7 @@
 "use client";
 
 import { DownloadOutlined } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useCallback } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
@@ -17,12 +17,15 @@ import type {
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
-import { MobileContentInset, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileContentInset } from "@/frontend/mobile/components/ui";
 import { MobileExportButton } from "@/frontend/mobile/components/ui/button";
-import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container";
 import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
+import {
+  OptInAdminUserCardItemMobile,
+  OptInHistoryCardItemMobile,
+} from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/OptInTab.parts";
 
 /**
  * Mobile wrapper for OptInTab. Renders the shared toggle section plus a
@@ -60,30 +63,7 @@ function MobileHistorySection({
   });
 
   const renderItem = useCallback(
-    (entry: WhatsappOptInAuditEntry) => (
-      <MobileCardListItem
-        variant="rounded"
-        accentBorder={
-          entry.action === "optIn"
-            ? { color: "primary", side: "inline-start" }
-            : { color: "warning", side: "inline-start" }
-        }
-      >
-        <Stack spacing={0.5} sx={{ py: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography variant="labelMd">{entry.date}</Typography>
-            <MobileStatusBadge
-              category="syncStatus"
-              status={entry.action === "optIn" ? "success" : "cancelled"}
-              label={entry.action === "optIn" ? t.optInActionOptedIn : t.optInActionOptedOut}
-            />
-          </Box>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            {t.optInHistoryChangedBy}: {entry.changedBy}
-          </Typography>
-        </Stack>
-      </MobileCardListItem>
-    ),
+    (entry: WhatsappOptInAuditEntry) => <OptInHistoryCardItemMobile entry={entry} labels={t} />,
     [t]
   );
 
@@ -145,28 +125,7 @@ function MobileAdminSection({ labels, adminUsers }: Readonly<OptInTabSharedProps
   const { search, setSearch, filteredUsers } = useAdminUserSearch({ adminUsers });
 
   const renderItem = useCallback(
-    (user: WhatsappOptInUserState) => (
-      <MobileCardListItem
-        variant="rounded"
-        accentBorder={user.optedIn ? { color: "primary", side: "inline-start" } : undefined}
-      >
-        <Stack spacing={0.5} sx={{ py: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography variant="labelMd">{user.userName}</Typography>
-            <MobileStatusBadge
-              category="syncStatus"
-              status={user.optedIn ? "success" : "cancelled"}
-              label={user.optedIn ? t.optInAdminYes : t.optInAdminNo}
-            />
-          </Box>
-          {user.optedInAt && (
-            <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-              {t.optInAdminOptedInAt}: {user.optedInAt}
-            </Typography>
-          )}
-        </Stack>
-      </MobileCardListItem>
-    ),
+    (user: WhatsappOptInUserState) => <OptInAdminUserCardItemMobile user={user} labels={t} />,
     [t]
   );
 

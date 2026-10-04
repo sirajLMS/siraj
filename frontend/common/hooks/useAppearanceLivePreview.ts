@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import {
+  type AppearanceOriginals,
+  applyBrandLogo,
+  applyBrandText,
+  captureAppearanceOriginals,
+  restoreAppearanceState,
+} from "@/frontend/common/hooks/useAppearanceLivePreview.helpers";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 
 /**
@@ -50,62 +57,24 @@ export function useAppearanceLivePreview(): void {
   const lastPublished = useAppearancePreviewStore(s => s.lastPublished);
 
   // Capture the original DOM values on mount so we can restore them on exit.
-  const originalsRef = useRef<{
-    readonly documentTitle: string;
-    readonly metaDescription: string | null;
-    readonly brandNameText: string | null;
-    readonly brandLogoHtml: string | null;
-  } | null>(null);
+  const originalsRef = useRef<AppearanceOriginals | null>(null);
 
   // Capture originals once when customize mode first activates.
   useEffect(() => {
     if (!isCustomizeMode || originalsRef.current) return;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    const brandNameEl = document.querySelector('[data-appearance-target="brand-name"]');
-    const brandLogoEl = document.querySelector('[data-appearance-target="brand-logo"]');
-    originalsRef.current = {
-      documentTitle: document.title,
-      metaDescription: metaDesc?.getAttribute("content") ?? null,
-      brandNameText: brandNameEl?.textContent ?? null,
-      brandLogoHtml: brandLogoEl?.innerHTML ?? null,
-    };
+    originalsRef.current = captureAppearanceOriginals();
   }, [isCustomizeMode]);
 
   // Live-update document.title + meta description + brand name.
   useEffect(() => {
     if (!isCustomizeMode) return;
-    document.title = siteTitle || document.title;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc && siteDescription) {
-      metaDesc.setAttribute("content", siteDescription);
-    }
-    const brandNameEl = document.querySelector('[data-appearance-target="brand-name"]');
-    if (brandNameEl) {
-      brandNameEl.textContent = siteName;
-    }
+    applyBrandText(siteName, siteTitle, siteDescription);
   }, [isCustomizeMode, siteName, siteTitle, siteDescription]);
 
   // Live-update brand logo (swap default icon with uploaded image).
   useEffect(() => {
     if (!isCustomizeMode) return;
-    const brandLogoEl = document.querySelector('[data-appearance-target="brand-logo"]');
-    if (!brandLogoEl) return;
-
-    if (logoUrl) {
-      // Replace the default SchoolOutlined icon with an <img> of the logo.
-      // Preserve the 24px size + centering that the original icon had.
-      const img = document.createElement("img");
-      img.src = logoUrl;
-      img.alt = "Site logo";
-      img.style.width = "24px";
-      img.style.height = "24px";
-      img.style.objectFit = "contain";
-      img.style.borderRadius = "2px";
-      brandLogoEl.replaceChildren(img);
-    } else if (originalsRef.current?.brandLogoHtml) {
-      // Restore the original icon markup (SchoolOutlined SVG).
-      brandLogoEl.innerHTML = originalsRef.current.brandLogoHtml;
-    }
+    applyBrandLogo(logoUrl, originalsRef.current?.brandLogoHtml ?? null);
   }, [isCustomizeMode, logoUrl]);
 
   // Restore published state on customize mode exit. A publish inside the
@@ -116,36 +85,7 @@ export function useAppearanceLivePreview(): void {
     const originals = originalsRef.current;
     if (!originals && !lastPublished) return;
 
-    const restoredTitle = lastPublished?.siteTitle ?? originals?.documentTitle;
-    if (restoredTitle !== undefined) {
-      document.title = restoredTitle;
-    }
-    const restoredDescription = lastPublished?.siteDescription ?? originals?.metaDescription;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc && restoredDescription != null) {
-      metaDesc.setAttribute("content", restoredDescription);
-    }
-    const restoredBrandName = lastPublished?.siteName ?? originals?.brandNameText;
-    const brandNameEl = document.querySelector('[data-appearance-target="brand-name"]');
-    if (brandNameEl && restoredBrandName != null) {
-      brandNameEl.textContent = restoredBrandName;
-    }
-    const brandLogoEl = document.querySelector('[data-appearance-target="brand-logo"]');
-    if (brandLogoEl) {
-      if (lastPublished?.logoUrl) {
-        const img = document.createElement("img");
-        img.src = lastPublished.logoUrl;
-        img.alt = "Site logo";
-        img.style.width = "24px";
-        img.style.height = "24px";
-        img.style.objectFit = "contain";
-        img.style.borderRadius = "2px";
-        brandLogoEl.replaceChildren(img);
-      } else if (originals?.brandLogoHtml != null) {
-        brandLogoEl.innerHTML = originals.brandLogoHtml;
-      }
-    }
-
+    restoreAppearanceState(originals, lastPublished);
     originalsRef.current = null;
   }, [isCustomizeMode, lastPublished]);
 }

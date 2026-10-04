@@ -7,67 +7,24 @@ import { permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { type CustomJWTPayload, generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
+import { assertSessionOwnership } from "@/backend/services/auth/__shared__/simulationBase";
 import {
-  assertSessionOwnership,
-  getSimulationExpiresAt,
-  writeSimulationAuditLog,
-} from "@/backend/services/auth/__shared__/simulationBase";
+  getActiveGroupSimulation,
+  getExpiresAt,
+  type ResolvedGroupSimulation,
+  resolveActiveSessionSimulation,
+  syncGroupSimulation,
+  writeGroupSimulationAuditLog,
+} from "@/backend/services/auth/permission-group-simulation.helpers";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { resolvePreloadedSession } from "@/backend/services/auth/session.service";
 import type * as Types from "@/backend/types";
-import type { RedisGroupSimulationSessionData, SessionSelectType } from "@/backend/types";
+import type { SessionSelectType } from "@/backend/types";
 import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types";
 
-const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
-
 const NON_SIMULATABLE_GROUP_SLUGS = new Set<string>(["system_automated"]);
-
-function getExpiresAt(startedAt: Date): Date {
-  return getSimulationExpiresAt(startedAt, GROUP_SIMULATION_TTL_MS);
-}
-
-async function writeGroupSimulationAuditLog(
-  actorUserId: string,
-  action: Types.GroupSimulationAuditAction,
-  metadata: Record<string, unknown>,
-  ipAddress?: string | null
-): Promise<void> {
-  await writeSimulationAuditLog({
-    actorUserId,
-    targetUserId: actorUserId,
-    action,
-    description:
-      action === "GROUP_SIMULATION_START" ? "Started permission group simulation" : "Ended permission group simulation",
-    metadata,
-    ipAddress,
-  });
-}
-
-async function getActiveGroupSimulation(
-  rawSessionId: string,
-  actorUserId: string
-): Promise<{ data: RedisGroupSimulationSessionData; expiresAt: Date } | null> {
-  const active = await SessionRepository.getSessionGroupSimulation(rawSessionId, actorUserId);
-  if (!active) {
-    return null;
-  }
-
-  if (active.expiresAt.getTime() <= Date.now()) {
-    await SessionRepository.clearSessionGroupSimulation(rawSessionId);
-    return null;
-  }
-
-  return active;
-}
-
-async function syncGroupSimulation(
-  rawSessionId: string,
-  groupSimulation: RedisGroupSimulationSessionData
-): Promise<void> {
-  await SessionRepository.setSessionGroupSimulation(rawSessionId, groupSimulation);
-}
 
 export async function clearOptionalRedisGroupSimulation(rawSessionId: string): Promise<void> {
   await SessionRepository.clearSessionGroupSimulation(rawSessionId);
@@ -265,12 +222,6 @@ export namespace PermissionGroupSimulationService {
     };
   }
 
-  type ResolvedGroupSimulation = {
-    realUserId: string;
-    isSimulatingGroup: boolean;
-    simulatedGroupSlug?: string;
-  };
-
   export async function resolveGroupSimulationFromToken(
     payload: CustomJWTPayload,
     rawSessionId: string | undefined,
@@ -279,28 +230,6 @@ export namespace PermissionGroupSimulationService {
     if (payload.impersonation) {
       return null;
     }
-
-    const resolveActiveSessionSimulation = async (
-      actorUserId: string,
-      sessionId: string
-    ): Promise<ResolvedGroupSimulation | null> => {
-      const serverActive = await getActiveGroupSimulation(sessionId, actorUserId);
-      if (!serverActive) {
-        return null;
-      }
-
-      try {
-        await PermissionsService.getPermissionGroupContext(serverActive.data.groupSlug);
-      } catch {
-        return null;
-      }
-
-      return {
-        realUserId: actorUserId,
-        isSimulatingGroup: true,
-        simulatedGroupSlug: serverActive.data.groupSlug,
-      };
-    };
 
     const hasActiveGroupSimulation = payload.groupSimulation && payload.groupSimulationSlug;
     const noSimulationResult = (): ResolvedGroupSimulation => ({

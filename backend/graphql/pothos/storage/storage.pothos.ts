@@ -1,11 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  FileTypePothosObject,
-  OrderSortDirectionPothosObject,
-  SortByPothosObject,
-  UploadTypePothosObject,
-} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { FileTypePothosObject, UploadTypePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type * as Types from "@/backend/types";
+
+// Input registrations live in a sibling module to keep this file within the
+// max-lines budget. Re-exported so the public module path is unchanged.
+export * from "@/backend/graphql/pothos/storage/storage.inputs.pothos";
 
 // Upload preparation result
 export const UploadPreparationPothosObject = gqlSchemaBuilder
@@ -118,31 +117,6 @@ export const StorageObjectListPothosObject = gqlSchemaBuilder
       limit: t.exposeInt("limit", { nullable: false }),
     }),
   });
-export const ListFileInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.FilesListSearchInput>("FilesListInput")
-  .implement({
-    fields: t => ({
-      path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      limit: t.int({ required: false, directives: { constraint: { min: 0, max: 500 } } }),
-      offset: t.int({ required: false, directives: { constraint: { min: 0, max: 1000000 } } }),
-      searchTerm: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      includeDirectories: t.boolean({ required: false, defaultValue: true }),
-      fileType: t.string({ required: false, directives: { constraint: { maxLength: 128 } } }), // Deprecated: Use fileTypes instead
-      fileTypes: t.field({
-        type: [FileTypePothosObject],
-        required: false,
-      }),
-      contentTypes: t.stringList({ required: false, directives: { constraint: { maxItems: 100, maxLength: 128 } } }),
-      sortDirection: t.field({
-        type: OrderSortDirectionPothosObject,
-        required: false,
-      }),
-      sortBy: t.field({
-        type: SortByPothosObject,
-        required: false,
-      }),
-    }),
-  });
 
 // File type breakdown for storage stats
 export const FileTypeBreakdownPothosObject = gqlSchemaBuilder
@@ -188,15 +162,6 @@ export const FileUsageResultPothosObject = gqlSchemaBuilder
     }),
   });
 
-// Check file usage input
-export const FileUsageCheckInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.FileUsageCheckInput>("FileUsageCheckInput")
-  .implement({
-    fields: t => ({
-      path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-    }),
-  });
-
 // File operation result object
 export const FileOperationResultPothosObject = gqlSchemaBuilder
   .objectRef<Types.FileOperationResult>("FileOperationResult")
@@ -238,110 +203,5 @@ export const BulkOperationResultPothosObject = gqlSchemaBuilder
       successfulItems: t.expose("successfulItems", {
         type: [StorageItemPothosInterface],
       }),
-    }),
-  });
-
-// File rename input
-export const FileRenameInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.FileRenameInput>("FileRenameInput")
-  .implement({
-    fields: t => ({
-      currentPath: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      newName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
-    }),
-  });
-
-// Upload preparation input
-export const UploadPreparationInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.UploadPreparationInput>("UploadPreparationInput")
-  .implement({
-    fields: t => ({
-      path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      fileSize: t.int({ required: true, directives: { constraint: { min: 1, max: 104857600 } } }),
-      contentType: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
-      contentHash: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
-    }),
-  });
-
-// Directory permissions input
-export const DirectoryPermissionsInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.DirectoryPermissions>("DirectoryPermissionsInput")
-  .implement({
-    fields: t => ({
-      allowUploads: t.boolean({ required: true }),
-      allowDelete: t.boolean({ required: true }),
-      allowMove: t.boolean({ required: true }),
-      allowCreateSubDirs: t.boolean({ required: true }),
-      allowDeleteFiles: t.boolean({ required: true }),
-      allowMoveFiles: t.boolean({ required: true }),
-    }),
-  });
-
-// Create folder input
-export const FolderCreateInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.FolderCreateInput>("FolderCreateInput")
-  .implement({
-    fields: t => ({
-      path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      permissions: t.field({
-        type: DirectoryPermissionsInputPothosObject,
-        required: false,
-      }),
-      protected: t.boolean({ required: false }),
-      protectChildren: t.boolean({ required: false }),
-    }),
-  });
-
-// Move storage items input
-export const StorageItemsMoveInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.StorageItemsMoveInput>("StorageItemsMoveInput")
-  .implement({
-    fields: t => ({
-      sourcePaths: t.stringList({ required: true, directives: { constraint: { maxItems: 100, maxLength: 1024 } } }),
-      destinationPath: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-    }),
-  });
-
-// Copy storage items input
-export const StorageItemsCopyInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.StorageItemsCopyInput>("StorageItemsCopyInput")
-  .implement({
-    fields: t => ({
-      sourcePaths: t.stringList({ required: true, directives: { constraint: { maxItems: 100, maxLength: 1024 } } }),
-      destinationPath: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-    }),
-  });
-
-// Delete items input
-export const StorageItemsDeleteInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.StorageItemsDeleteInput>("StorageItemsDeleteInput")
-  .implement({
-    fields: t => ({
-      paths: t.stringList({ required: true, directives: { constraint: { maxItems: 100, maxLength: 1024 } } }),
-      force: t.boolean({ required: false }),
-    }),
-  });
-
-// Update directory permissions input
-export const DirectoryPermissionsUpdateInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.DirectoryPermissionsUpdateInput>("DirectoryPermissionsUpdateInput")
-  .implement({
-    fields: t => ({
-      path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      permissions: t.field({
-        type: DirectoryPermissionsInputPothosObject,
-        required: true,
-      }),
-    }),
-  });
-
-// Set storage item protection input
-export const StorageItemProtectionUpdateInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.StorageItemProtectionUpdateInput>("StorageItemProtectionUpdateInput")
-  .implement({
-    fields: t => ({
-      path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      isProtected: t.boolean({ required: true }),
-      protectChildren: t.boolean({ required: false }),
     }),
   });

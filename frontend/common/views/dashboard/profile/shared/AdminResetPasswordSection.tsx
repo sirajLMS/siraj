@@ -1,13 +1,12 @@
 "use client";
 
 import { KeyOutlined } from "@mui/icons-material";
-import { Box, Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
+import { Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
 import { type Ref, useCallback, useImperativeHandle, useState } from "react";
-import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { SecretTextField } from "@/frontend/common/components/ui/input/secretTextField";
+import { validateAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/adminResetPasswordSection.helpers";
+import { AdminResetPasswordField } from "@/frontend/common/views/dashboard/profile/shared/adminResetPasswordSection.parts";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
 interface AdminResetPasswordData {
   readonly newPassword: string;
@@ -45,22 +44,8 @@ export function AdminResetPasswordSection({
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const validatePassword = useCallback(
-    (password: string, confirm: string): { readonly password?: string; readonly confirm?: string } => {
-      if (password.length === 0) {
-        return { password: t.passwordRequired };
-      }
-      if (password.length < PASSWORD_MIN_LENGTH) {
-        return { password: t.passwordMinLength };
-      }
-      if (countPasswordClasses(password) < 2) {
-        return { password: t.passwordWeakComplexity };
-      }
-      if (password !== confirm) {
-        return { confirm: t.passwordsDoNotMatch };
-      }
-      return {};
-    },
-    [t.passwordRequired, t.passwordMinLength, t.passwordWeakComplexity, t.passwordsDoNotMatch]
+    (password: string, confirm: string) => validateAdminResetPassword(password, confirm, t),
+    [t]
   );
 
   useImperativeHandle(ref, () => ({
@@ -101,48 +86,33 @@ export function AdminResetPasswordSection({
           <KeyOutlined sx={theme => ({ color: theme.palette.primary.main })} />
           <Typography variant="bodyMd">{t.description(userName, userEmail)}</Typography>
         </Stack>
-        <Box>
-          <SecretTextField
-            revealed={showNewPassword}
-            onToggleReveal={() => setShowNewPassword(prev => !prev)}
-            showValueLabel={t.showPassword}
-            hideValueLabel={t.hidePassword}
-            label={t.newPassword}
-            value={newPassword}
-            onChange={e => {
-              setNewPassword(e.target.value);
-              if (newPasswordError) setNewPasswordError("");
-            }}
-            error={newPasswordError.length > 0}
-            helperText={newPasswordError}
-            fullWidth
-            autoComplete="new-password"
-          />
-          <PasswordStrengthMeter
-            password={newPassword}
-            labels={{
-              strength: t.passwordStrength,
-              weak: t.strengthWeak,
-              fair: t.strengthFair,
-              strong: t.strengthStrong,
-            }}
-          />
-        </Box>
-        <SecretTextField
-          revealed={showConfirmPassword}
-          onToggleReveal={() => setShowConfirmPassword(prev => !prev)}
-          showValueLabel={t.showPassword}
-          hideValueLabel={t.hidePassword}
-          label={t.confirmPassword}
-          value={confirmPassword}
-          onChange={e => {
-            setConfirmPassword(e.target.value);
-            if (confirmPasswordError) setConfirmPasswordError("");
+        <AdminResetPasswordField
+          value={newPassword}
+          label={t.newPassword}
+          error={newPasswordError.length > 0}
+          helperText={newPasswordError}
+          revealed={showNewPassword}
+          onToggleReveal={() => setShowNewPassword(prev => !prev)}
+          onValueChange={value => {
+            setNewPassword(value);
+            if (newPasswordError) setNewPasswordError("");
           }}
+          showStrengthMeter
+          labels={t}
+        />
+        <AdminResetPasswordField
+          value={confirmPassword}
+          label={t.confirmPassword}
           error={confirmPasswordError.length > 0 || liveMismatch}
           helperText={confirmHelperText}
-          fullWidth
-          autoComplete="new-password"
+          revealed={showConfirmPassword}
+          onToggleReveal={() => setShowConfirmPassword(prev => !prev)}
+          onValueChange={value => {
+            setConfirmPassword(value);
+            if (confirmPasswordError) setConfirmPasswordError("");
+          }}
+          showStrengthMeter={false}
+          labels={t}
         />
         <FormControlLabel
           control={

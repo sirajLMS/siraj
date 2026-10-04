@@ -1,118 +1,33 @@
-import { and, eq, isNull } from "drizzle-orm";
-import { db, withForUpdate } from "@/backend/db";
-import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
+import { db } from "@/backend/db";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
-import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { StudentRepository } from "@/backend/db/repo/students";
-import { quotas } from "@/backend/db/schema";
-import { AppPermission, OnDemandStatus } from "@/backend/enum";
-import { mapQuotaLedgerToReturnType, mapQuotaToReturnType } from "@/backend/lib";
-import { QuotaNotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { mapQuotaToReturnType } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { listScopedByStudent, manageAndMap, runInTx, txOp } from "@/backend/services/billing/quota.service.helpers";
 import {
-  assertAssociatedOrManage,
-  resolveAssociatedStudentIds,
-  resolveAssociatedViewer,
-  requirePermission as sharedRequirePermission,
-} from "@/backend/services/billing/permission-utils";
+  getQuotaFlow,
+  getQuotaLedgerFlow,
+  getStudentQuotaBalanceFlow,
+  listQuotasFlow,
+} from "@/backend/services/billing/quota.service.reads";
+import { refreshPeriodicFlow } from "@/backend/services/billing/quota.service.rollover";
+import {
+  redeemForInstanceFlow,
+  redeemForInstancesFlow,
+  refreshStudentOndemandInstancesFlow,
+} from "@/backend/services/billing/quota.service.writes";
 import type {
   DBTransaction,
   PaginationArgs,
   QuotaBalanceReturnType,
-  QuotaExpirationBreakdown,
   QuotaLedgerPaginatedResult,
   QuotaPaginatedFilter,
   QuotaReturnType,
-  QuotaSelectType,
   QuotaSubmitInput,
   QuotaUpdateInput,
   ReadExecutor,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace QuotaService {
-  /**
-   * V3-011: Thin wrapper around the shared `requirePermission` from
-   * `permission-utils.ts`. Resolves `tErrors` from the locale and
-   * delegates to the shared helper to avoid duplicating the permission
-   * check logic across services.
-   */
-  async function requirePermission(
-    actorUserId: string | null | undefined,
-    locale: string,
-    permission: AppPermission
-  ): Promise<void> {
-    if (!actorUserId) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new UnauthorizedError(tErrors.unauthorizedAction);
-    }
-    const tErrors = getServerTranslations(locale).errorsTranslations;
-    await sharedRequirePermission(actorUserId, permission, tErrors);
-  }
-
-  /**
-   * Shared transaction executor: runs `runner` against `tx` when provided,
-   * otherwise against a fresh `db.transaction`. Eliminates the repeating
-   * `return tx ? runner(tx) : db.transaction(runner);` boilerplate across
-   * every write method in this service.
-   */
-  async function runInTx<T>(tx: DBTransaction | undefined, runner: (t: DBTransaction) => Promise<T>): Promise<T> {
-    return tx ? runner(tx) : db.transaction(runner);
-  }
-
-  /**
-   * Shared permission + IDOR-scoping gate for student-scoped list reads.
-   * Applies the QUOTAS_VIEW permission check, then verifies the caller is
-   * associated with `studentId` (or holds QUOTAS_MANAGE) before delegating
-   * to `listFn` and mapping the rows. Used by `listStudentOpenQuotas` and
-   * `listStudentQuotas`.
-   */
-  async function listScopedByStudent<T extends Parameters<typeof mapQuotaToReturnType>[0]>(
-    studentId: string,
-    tx: ReadExecutor | undefined,
-    actorUserId: string | null | undefined,
-    locale: string,
-    listFn: (tx: ReadExecutor | undefined, studentId: string) => Promise<T[]>
-  ): Promise<QuotaReturnType[]> {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-    const uid = actorUserId ?? "";
-    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
-    const rows = await listFn(tx, studentId);
-    return rows.map(row => mapQuotaToReturnType(row));
-  }
-
-  /**
-   * Shared QUOTAS_MANAGE write helper: permission gate + transaction + map.
-   * Used by the CRUD write methods (`createQuota`, `updateQuota`,
-   * `deleteQuota`) to collapse their identical scaffolding into a single
-   * call site.
-   */
-  async function manageAndMap(
-    locale: string,
-    actorUserId: string | null | undefined,
-    tx: DBTransaction | undefined,
-    op: (t: DBTransaction) => Promise<Parameters<typeof mapQuotaToReturnType>[0]>
-  ): Promise<QuotaReturnType> {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_MANAGE);
-    return runInTx(tx, async t => mapQuotaToReturnType(await op(t)));
-  }
-
-  /**
-   * Shared transactional idempotent-write helper. Runs an idempotency-keyed
-   * ledger mutation (reserve/release/redeem) inside `runInTx` and casts the
-   * repository result to `QuotaReturnType`. Collapses the repeated
-   * derive-key → repo-op → cast body shared by the recurring-schedule and
-   * per-instance reserve/release methods.
-   */
-  async function txOp(
-    tx: DBTransaction | undefined,
-    op: (t: DBTransaction) => Promise<QuotaReturnType>
-  ): Promise<QuotaReturnType> {
-    return runInTx(tx, op);
-  }
-
   export const createQuota = async (
     input: QuotaSubmitInput,
     actorUserId?: string | null,
@@ -128,31 +43,9 @@ export namespace QuotaService {
     tx?: ReadExecutor,
     actorUserId?: string | null
   ): Promise<QuotaReturnType> => {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-    const quota = await QuotaRepository.findById(tx, id);
-    if (!quota) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new QuotaNotFoundError(tErrors.notFound);
-    }
-
-    // V3-013: IDOR scoping — verify the caller is either associated with
-    // the quota's student or holds QUOTAS_MANAGE (admin/teacher override).
-    const uid = actorUserId ?? "";
-    await assertAssociatedOrManage(uid, quota.studentId, getServerTranslations(locale).errorsTranslations);
-
-    return mapQuotaToReturnType(quota);
+    return getQuotaFlow(id, locale, tx, actorUserId);
   };
 
-  /**
-   * Fetches the paginated ledger entries for a quota, with IDOR scoping.
-   * After the QUOTAS_VIEW permission gate, the calling user must either:
-   *  - be associated with the quota's student via {@link resolveAssociatedViewer}
-   *    (i.e. the student's parent or primary teacher), OR
-   *  - hold `QUOTAS_MANAGE`, which acts as an admin/teacher override.
-   * This prevents a user with QUOTAS_VIEW from reading any quota's ledger
-   * by id alone, closing the insecure-direct-object-reference gap on the
-   * `quotaLedger` GraphQL query.
-   */
   export const getQuotaLedger = async (
     quotaId: string,
     pagination: PaginationArgs | null,
@@ -160,26 +53,7 @@ export namespace QuotaService {
     locale = "en",
     tx?: ReadExecutor
   ): Promise<QuotaLedgerPaginatedResult> => {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-
-    const quota = await QuotaRepository.findById(tx, quotaId);
-    if (!quota) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new QuotaNotFoundError(tErrors.notFound);
-    }
-
-    // V3-013: IDOR scoping — shared helper
-    await assertAssociatedOrManage(actorUserId, quota.studentId, getServerTranslations(locale).errorsTranslations);
-
-    const [rawRows, totalCount] = await Promise.all([
-      QuotaLedgerRepository.findByQuotaId(tx, quotaId, pagination),
-      QuotaLedgerRepository.countByQuotaId(tx, quotaId),
-    ]);
-
-    return {
-      rows: rawRows.map(mapQuotaLedgerToReturnType),
-      totalCount,
-    };
+    return getQuotaLedgerFlow(quotaId, pagination, actorUserId, locale, tx);
   };
 
   export const listQuotas = async (
@@ -189,57 +63,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ) => {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-
-    // IDOR scoping: if the caller holds QUOTAS_MANAGE, return all quotas
-    // (admin override). Otherwise, scope results to students the caller is
-    // associated with (parent or primary teacher). This prevents a user with
-    // QUOTAS_VIEW from listing all quotas via the GraphQL query.
-    const uid = actorUserId ?? "";
-    const hasManage = await PermissionsService.hasPermission(uid, AppPermission.QUOTAS_MANAGE);
-    if (hasManage) {
-      const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
-      return {
-        ...res,
-        rows: res.rows.map(mapQuotaToReturnType),
-      };
-    }
-
-    const associatedStudentIds = await resolveAssociatedStudentIds(uid);
-    if (associatedStudentIds.length === 0) {
-      return { rows: [], totalCount: 0 };
-    }
-
-    // If the filter already specifies a studentId, ensure it belongs to the
-    // caller's associated students; otherwise deny.
-    if (filter?.studentId) {
-      const allowed = await resolveAssociatedViewer(uid, filter.studentId);
-      if (!allowed) {
-        return { rows: [], totalCount: 0 };
-      }
-    } else if (associatedStudentIds.length === 1) {
-      // Single associated student — scope the filter directly for efficiency.
-      filter = { ...filter, studentId: associatedStudentIds[0] };
-    }
-
-    // For multiple associated students without a single-studentId filter,
-    // scope the query in SQL via the repository's student-ID list read so
-    // pagination and totalCount operate on the associated-student set rather
-    // than across all quotas.
-    if (associatedStudentIds.length > 1 && !filter?.studentId) {
-      const scopedRes = await QuotaRepository.listByStudentIdsPaginated(tx, associatedStudentIds, filter, pagination);
-      return {
-        rows: scopedRes.rows.map(mapQuotaToReturnType),
-        totalCount: scopedRes.totalCount,
-      };
-    }
-
-    // Single student or no scoping — use DB pagination directly
-    const res = await QuotaRepository.listAllPaginated(tx, filter, pagination);
-    return {
-      rows: res.rows.map(mapQuotaToReturnType),
-      totalCount: res.totalCount,
-    };
+    return listQuotasFlow(filter, pagination, tx, actorUserId, locale);
   };
 
   export const listStudentOpenQuotas = async (
@@ -248,7 +72,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ): Promise<QuotaReturnType[]> => {
-    // V3-036: IDOR scoping — permission + association gate shared with
+    // IDOR scoping — permission + association gate shared with
     // `listStudentQuotas` via `listScopedByStudent`.
     return listScopedByStudent(studentId, tx, actorUserId, locale, QuotaRepository.listActiveByStudent);
   };
@@ -270,38 +94,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ): Promise<QuotaBalanceReturnType> => {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-    // V3-035: IDOR scoping — ensure the caller is associated with this student
-    // or holds QUOTAS_MANAGE before returning their balance.
-    const uid = actorUserId ?? "";
-    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
-    const activeQuotas = await QuotaRepository.listActiveByStudent(tx, studentId);
-
-    let totalActiveClasses = 0;
-    let totalRemaining = 0;
-    let totalReserved = 0;
-    const breakdownByExpiration: QuotaExpirationBreakdown[] = [];
-
-    for (const q of activeQuotas) {
-      totalActiveClasses += q.totalClasses;
-      totalRemaining += q.remaining;
-      totalReserved += q.reservedClasses;
-
-      breakdownByExpiration.push({
-        quotaId: q.id,
-        quotaName: q.name,
-        validUntil: q.validUntil ? new Date(q.validUntil) : null,
-        remaining: q.remaining,
-      });
-    }
-
-    return {
-      studentId,
-      totalActiveClasses,
-      totalRemaining,
-      totalReserved,
-      breakdownByExpiration,
-    };
+    return getStudentQuotaBalanceFlow(studentId, tx, actorUserId, locale);
   };
 
   export const updateQuota = async (
@@ -403,27 +196,7 @@ export namespace QuotaService {
     tx?: DBTransaction,
     locale = "en"
   ): Promise<QuotaReturnType> => {
-    return runInTx(tx, async t => {
-      let targetQuotaId = quotaId;
-      if (!targetQuotaId) {
-        const fifoQuota = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
-        if (!fifoQuota) {
-          const tErrors = getServerTranslations(locale).errorsTranslations;
-          throw new QuotaNotFoundError(tErrors.quotaNotFound);
-        }
-        targetQuotaId = fifoQuota.id;
-      }
-
-      const idempotencyKey = QuotaRepository.deriveRedeemIdempotencyKey(classInstanceId, targetQuotaId);
-      const updated = await QuotaRepository.redeemForInstance(t, {
-        quotaId: targetQuotaId,
-        studentId,
-        classInstanceId,
-        actorUserId,
-        idempotencyKey,
-      });
-      return mapQuotaToReturnType(updated);
-    });
+    return redeemForInstanceFlow(studentId, classInstanceId, quotaId, actorUserId, tx, locale);
   };
 
   export const redeemForInstances = async (
@@ -435,32 +208,7 @@ export namespace QuotaService {
     tx: DBTransaction,
     locale = "en"
   ): Promise<{ redeemedCount: number; quota: QuotaReturnType | null }> => {
-    return runInTx(tx, async t => {
-      if (classInstanceIds.length === 0) {
-        return { redeemedCount: 0, quota: null };
-      }
-
-      const result = await QuotaRepository.redeemForInstanceBatch(t, {
-        quotaId,
-        studentId,
-        recurringScheduleId,
-        instanceIds: classInstanceIds,
-        actorUserId,
-      });
-
-      if (result.redeemedCount === 0 && !result.quota) {
-        const tErrors = getServerTranslations(locale).errorsTranslations;
-        throw new QuotaNotFoundError(tErrors.quotaNotFound);
-      }
-
-      // If redeemedCount === 0 but quota IS present, all instances were
-      // already redeemed (idempotent dedup) — return gracefully.
-
-      return {
-        redeemedCount: result.redeemedCount,
-        quota: result.quota ? mapQuotaToReturnType(result.quota) : null,
-      };
-    });
+    return redeemForInstancesFlow(studentId, classInstanceIds, quotaId, recurringScheduleId, actorUserId, tx, locale);
   };
 
   export const releaseForInstance = async (
@@ -525,73 +273,7 @@ export namespace QuotaService {
     _actorUserId?: string | null,
     _locale = "en"
   ): Promise<number> => {
-    // Permission check intentionally omitted: this method is called from
-    // internal flows (CreditService, on-demand instance generator, class
-    // lifecycle) where no user session exists. It mutates on-demand instance
-    // states only, not quota data directly.
-    return runInTx(tx, async t => {
-      const creditBalance = await CreditRepository.getBalance(t, studentId);
-      const openQuotas = await QuotaRepository.listActiveByStudent(t, studentId);
-      const totalQuotaRemaining = openQuotas.reduce((sum, q) => sum + q.remaining, 0);
-
-      const availableCredits = creditBalance.classesRemaining + totalQuotaRemaining;
-      if (availableCredits <= 0) return 0;
-
-      const pendingInstances = await SchedulingRepository.getOndemandPendingInstances(t, studentId, availableCredits);
-
-      let flippedCount = 0;
-      const now = new Date();
-
-      // Single batched UPDATE for all pending instances (via repository).
-      // The WHERE clause also guards on ondemandStatus = PENDING_CREDIT to
-      // prevent a TOCTOU race: between the SELECT and UPDATE, a concurrent
-      // transaction (e.g. session start) may have flipped an instance to
-      // AVAILABLE. Without the guard, we'd overwrite it back to AVAILABLE and
-      // over-count the flip, causing a credit leak.
-      if (pendingInstances.length > 0) {
-        const instanceIds = pendingInstances.map(inst => inst.id);
-        flippedCount = await SchedulingRepository.updateOndemandStatusBatch(
-          instanceIds,
-          {
-            executionState: "NOT_ACTIVATED",
-            ondemandStatus: OnDemandStatus.AVAILABLE,
-            updatedAt: now,
-          },
-          OnDemandStatus.PENDING_CREDIT,
-          t
-        );
-      }
-
-      // Deduct from quota for flipped instances to prevent double-counting on refresh.
-      // `deductPendingRefresh` returns the number of classes it actually deducted from
-      // quota. The remainder must come from the student's credit balance — otherwise
-      // credit-only students get free classes (credit leak CR-1).
-      if (flippedCount > 0) {
-        const quotaDeducted = await QuotaRepository.deductPendingRefresh(t, {
-          studentId,
-          count: flippedCount,
-          actorUserId: _actorUserId ?? null,
-        });
-
-        const creditPortion = flippedCount - quotaDeducted;
-        if (creditPortion > 0) {
-          const tErrors = getServerTranslations(_locale).errorsTranslations;
-          if (creditBalance.classesRemaining < creditPortion) {
-            throw new Error(
-              tErrors.insufficientClasses({
-                id: studentId,
-                remaining: creditBalance.classesRemaining,
-                required: creditPortion,
-              })
-            );
-          }
-          await StudentRepository.deductClasses(studentId, tErrors, creditPortion, undefined, t);
-        }
-      }
-
-      logger.info({ studentId, flippedCount }, "Refreshed student on-demand instances");
-      return flippedCount;
-    });
+    return refreshStudentOndemandInstancesFlow(studentId, tx, _actorUserId, _locale);
   };
 
   /**
@@ -617,38 +299,17 @@ export namespace QuotaService {
     });
   };
 
-  // V3-028: Repository already returns QuotaReturnType[] (mapped from raw
+  // The repository already returns QuotaReturnType[] (mapped from raw
   // QuotaSelectType), so the service boundary is type-safe without re-mapping.
   export const listPeriodicForRollover = async (tx: DBTransaction): Promise<QuotaReturnType[]> => {
     return QuotaRepository.listPeriodicForRollover(tx);
   };
 
-  // V3-029: Repository already returns QuotaReturnType (mapped from raw
-  // QuotaSelectType), so the service boundary is type-safe without re-mapping.
   /**
-   * Refresh a single PERIODIC quota for its next period.
-   *
-   * All business rules — validation (kind must be PERIODIC, periodDays > 0),
-   * period expiry check, rollover computation (policy-based), and period
-   * anchor advancement — live here in the service layer.  The repository's
-   * `applyRefreshPeriodic` performs only the version-checked UPDATE and
-   * ledger INSERTs.
-   *
-   * The `rolloverPolicy` column on `quotas` is a JSONB object of shape
-   * `{ maxRolloverPercent: number | null; accumulationCap: number | null }`
-   * (enforced by `quotas_rollover_policy_valid_chk`). When present, the
-   * rollover amount is computed as:
-   *
-   *   rollover = min(floor(remaining * maxRolloverPercent / 100),
-   *                  accumulationCap)
-   *
-   * For backward compatibility with legacy quotas whose `rolloverPolicy` is a
-   * plain `"GRANT" | "EXPIRE"` string, that policy is honored too:
-   *   - "GRANT":  all unused preserved, full replenish
-   *   - "EXPIRE": all unused expired, full replenish
-   *
-   * Idempotent: EXPIRE/GRANT keys are scoped to the ending period, and the
-   * method no-ops (returns the unchanged row) when the period has not ended.
+   * Refresh a single PERIODIC quota for its next period. All business rules
+   * (validation, period expiry, policy-based rollover computation, anchor
+   * advancement) live in `quota.service.rollover.ts`; this boundary keeps the
+   * public signature stable and forwards through the caller's transaction.
    */
   export const refreshPeriodic = async (
     tx: DBTransaction,
@@ -656,112 +317,6 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale: string = "en"
   ): Promise<QuotaReturnType> => {
-    // --- Lock the quota row (data access) ---
-    const tErrors = getServerTranslations(locale).errorsTranslations;
-    const target = await lockQuotaForRefresh(tx, quotaId);
-    if (!target) throw new QuotaNotFoundError(tErrors.quotaNotFound);
-
-    // --- Business rules: validation ---
-    if (target.kind !== "PERIODIC") {
-      throw new ValidationError(tErrors.quota.cannotRefreshNonPeriodic);
-    }
-    if (!target.periodDays || target.periodDays <= 0) {
-      throw new ValidationError(tErrors.quota.noValidPeriodDays);
-    }
-
-    // --- Business rules: period expiry check ---
-    const now = new Date();
-    const periodAnchor = target.periodAnchor ?? target.createdAt;
-    const periodEnd = computePeriodEnd(periodAnchor, target.periodDays);
-    if (now <= periodEnd) {
-      return mapQuotaToReturnType(target);
-    }
-
-    // --- Business rules: rollover computation ---
-    const periodStr = periodEnd.toISOString().slice(0, 10);
-    const unused = Math.max(target.remaining, 0);
-    const rolloverAmount = computeRolloverAmount(target.rolloverPolicy, unused);
-    const newRemaining = rolloverAmount + target.totalClasses;
-    const expiredAmount = unused - rolloverAmount;
-    const newAnchor = advancePeriodAnchor(periodEnd, target.periodDays, now);
-
-    // --- Data access: apply the pre-computed refresh ---
-    return QuotaRepository.applyRefreshPeriodic(tx, target, {
-      newRemaining,
-      newAnchor,
-      expiredAmount,
-      periodStr,
-      actorUserId: actorUserId ?? null,
-    });
+    return refreshPeriodicFlow(tx, quotaId, actorUserId, locale);
   };
-
-  /**
-   * Locks the quota row for refresh (SELECT … FOR UPDATE).
-   * Data-access-only helper used by {@link refreshPeriodic}.
-   */
-  async function lockQuotaForRefresh(tx: DBTransaction, quotaId: string): Promise<QuotaSelectType | null> {
-    const query = tx
-      .select()
-      .from(quotas)
-      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)));
-    const [row] = await withForUpdate(query).limit(1);
-    return row ?? null;
-  }
-
-  /**
-   * Computes the period-end date from an anchor + periodDays.
-   * Business-rule helper used by {@link refreshPeriodic}.
-   */
-  function computePeriodEnd(anchor: Date, periodDays: number): Date {
-    return new Date(anchor.getTime() + periodDays * 24 * 60 * 60 * 1000);
-  }
-
-  /**
-   * Type guard for the rich JSONB rollover policy shape enforced by
-   * `quotas_rollover_policy_valid_chk` (`maxRolloverPercent` +
-   * `accumulationCap`). Returns `false` for legacy plain-string policies
-   * (`"GRANT" | "EXPIRE"`).
-   */
-  function isRichRolloverPolicy(
-    policy: unknown
-  ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } {
-    if (typeof policy === "object" && policy !== null) {
-      return "maxRolloverPercent" in policy && "accumulationCap" in policy;
-    }
-    return false;
-  }
-
-  /**
-   * Computes how many of `unused` classes carry over to the new period,
-   * honoring both the rich JSONB rollover policy and the legacy
-   * plain-string `"GRANT" | "EXPIRE"` policy.  Business-rule helper used by
-   * {@link refreshPeriodic}.
-   */
-  function computeRolloverAmount(rolloverPolicy: QuotaSelectType["rolloverPolicy"], unused: number): number {
-    if (isRichRolloverPolicy(rolloverPolicy)) {
-      const percent = rolloverPolicy.maxRolloverPercent ?? 100;
-      const raw = Math.floor(unused * (percent / 100));
-      const cap = rolloverPolicy.accumulationCap;
-      return Math.min(raw, cap ?? raw);
-    }
-    if (typeof rolloverPolicy === "string") {
-      if (rolloverPolicy === "GRANT") {
-        return unused;
-      }
-      return 0;
-    }
-    return unused;
-  }
-
-  /**
-   * Advances an anchor forward in whole `periodDays` increments until it
-   * sits after `now`.  Business-rule helper used by {@link refreshPeriodic}.
-   */
-  function advancePeriodAnchor(anchor: Date, periodDays: number, now: Date): Date {
-    let next = anchor;
-    while (next <= now) {
-      next = new Date(next.getTime() + periodDays * 24 * 60 * 60 * 1000);
-    }
-    return next;
-  }
 }

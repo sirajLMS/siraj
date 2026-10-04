@@ -7,42 +7,10 @@ import type {
   ProfitLossSummary,
 } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
+import { type CsvColumn, serializeCsvRowset } from "@/shared/lib/csv";
+import { EXPORT_ROW_LIMIT } from "@/shared/lib/csv/export-row-limit";
+import { readTrimmedParam } from "@/shared/lib/query-params.helpers";
 import type { ErrorsLabels } from "@/shared/locale";
-
-/** Server-side ceiling on one P&L tab export; larger months are truncated. */
-const EXPORT_ROW_LIMIT = 10_000;
-/** Spreadsheet formula starters — cells beginning with one of these are neutralized (OWASP CSV-injection guidance: =, +, -, @, tab, CR). */
-const CSV_FORMULA_PREFIXES: readonly string[] = ["=", "+", "-", "@", "\t", "\r"];
-const CSV_LINE_SEPARATOR = "\r\n";
-
-interface CsvColumn<Row> {
-  readonly header: string;
-  readonly pick: (row: Row) => string;
-}
-
-/** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR (including after leading whitespace) get a `'` prefix. */
-function toCsvCell(value: string): string {
-  const trimmed = value.trimStart();
-  const startsFormula = trimmed.length > 0 && CSV_FORMULA_PREFIXES.some(prefix => trimmed.startsWith(prefix));
-  const hardened = startsFormula ? `'${value}` : value;
-  if (hardened.includes(",") || hardened.includes('"') || hardened.includes("\n") || hardened.includes("\r")) {
-    return `"${hardened.replaceAll('"', '""')}"`;
-  }
-  return hardened;
-}
-
-/**
- * Serializes rows into an RFC 4180 CSV string via one column contract: a
- * header line, one CRLF-terminated line per row, and a trailing separator
- * after the final line. Nullable fields serialize as empty cells. Pure and
- * synchronous — safe to call on a large pre-fetched row set from request
- * handlers.
- */
-function serializeCsvRowset<Row>(columns: readonly CsvColumn<Row>[], rows: readonly Row[]): string {
-  const headerLine = columns.map(column => toCsvCell(column.header)).join(",");
-  const dataLines = rows.map(row => columns.map(column => toCsvCell(column.pick(row))).join(","));
-  return `${[headerLine, ...dataLines].join(CSV_LINE_SEPARATOR)}${CSV_LINE_SEPARATOR}`;
-}
 
 /** One CSV column per completed-session row field, in the row-contract declaration order. */
 const PAYMENT_COLUMNS: readonly CsvColumn<ProfitLossPaymentRow>[] = [
@@ -157,12 +125,6 @@ export const PROFIT_LOSS_EXPORT_ROW_LIMIT = EXPORT_ROW_LIMIT;
 /** Currency selector for the export query string: any supported ISO-4217 code. */
 function isSupportedCurrency(value: string): value is CurrencyCode {
   return (Object.values(CurrencyCode) as readonly string[]).includes(value);
-}
-
-/** Reads one query param, trimmed; absent or blank values mean "no value". */
-function readTrimmedParam(searchParams: URLSearchParams, name: string): string | null {
-  const value = searchParams.get(name)?.trim() ?? null;
-  return value === "" ? null : value;
 }
 
 /**

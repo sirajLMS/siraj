@@ -1,8 +1,8 @@
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
-import { db, queryDb, queryWithPagination } from "@/backend/db";
+import { queryDb, queryWithPagination } from "@/backend/db";
+import { runWithTx, toWhatsappMessageReturnType, updateByWamidReturning } from "@/backend/db/repo/whatsapp/__shared__";
 import { whatsappConversations, whatsappMessages } from "@/backend/db/schema";
 import { WhatsappMessageDirection } from "@/backend/enum";
-import { coerceJsonRecord, coerceMessageDirection } from "@/backend/lib";
 import type {
   DBTransaction,
   PaginationArgs,
@@ -10,25 +10,6 @@ import type {
   WhatsappMessageReturnType,
   WhatsappMessageSelectType,
 } from "@/backend/types";
-
-/**
- * Map a raw row to the client-facing shape: `direction` re-applied with enum
- * typing and `content` narrowed to a plain record.
- */
-function toReturnType(row: WhatsappMessageSelectType): WhatsappMessageReturnType {
-  return {
-    ...row,
-    direction: coerceMessageDirection(row.direction),
-    content: coerceJsonRecord(row.content),
-  };
-}
-
-/**
- * Runs a transactional or bare operation depending on whether `tx` is provided.
- */
-async function runWithTx<T>(runner: (t: DBTransaction) => Promise<T>, tx?: DBTransaction): Promise<T> {
-  return tx ? runner(tx) : db.transaction(runner);
-}
 
 /**
  * Shared single-mutation helper: update rows matching one wamid and return the
@@ -39,19 +20,18 @@ async function updateByWamid(
   set: Partial<WhatsappMessageInsertType>,
   tx?: DBTransaction
 ): Promise<WhatsappMessageReturnType | null> {
-  const runner = async (t: DBTransaction) => {
+  const runner = async (t: DBTransaction): Promise<WhatsappMessageSelectType | undefined> => {
     const [row] = await t.update(whatsappMessages).set(set).where(eq(whatsappMessages.wamid, wamid)).returning();
     return row;
   };
-  const row = await runWithTx(runner, tx);
-  return row ? toReturnType(row) : null;
+  return updateByWamidReturning(runner, toWhatsappMessageReturnType, tx);
 }
 
 export namespace WhatsappMessageRepository {
   export async function findByWamid(wamid: string, tx?: DBTransaction): Promise<WhatsappMessageReturnType | null> {
     const q = queryDb(tx);
     const rows = await q.select().from(whatsappMessages).where(eq(whatsappMessages.wamid, wamid)).limit(1);
-    return rows[0] ? toReturnType(rows[0]) : null;
+    return rows[0] ? toWhatsappMessageReturnType(rows[0]) : null;
   }
 
   /**
@@ -72,7 +52,7 @@ export namespace WhatsappMessageRepository {
     const q = queryDb(tx);
     const rows = await q.select().from(whatsappMessages).where(inArray(whatsappMessages.wamid, wamids));
     for (const row of rows) {
-      result.set(row.wamid, toReturnType(row));
+      result.set(row.wamid, toWhatsappMessageReturnType(row));
     }
     return result;
   }
@@ -89,7 +69,7 @@ export namespace WhatsappMessageRepository {
     input: WhatsappMessageInsertType,
     tx?: DBTransaction
   ): Promise<WhatsappMessageReturnType> {
-    const runner = async (t: DBTransaction) => {
+    const runner = async (t: DBTransaction): Promise<WhatsappMessageSelectType> => {
       const [row] = await t
         .insert(whatsappMessages)
         .values(input)
@@ -101,7 +81,7 @@ export namespace WhatsappMessageRepository {
       return row;
     };
     const row = await runWithTx(runner, tx);
-    return toReturnType(row);
+    return toWhatsappMessageReturnType(row);
   }
 
   /**
@@ -194,7 +174,7 @@ export namespace WhatsappMessageRepository {
       .orderBy(sql`${whatsappMessages.sentAt} ASC NULLS LAST`, asc(whatsappMessages.createdAt))
       .$dynamic();
     const rows = await queryWithPagination(baseQuery, pagination);
-    return rows.map(toReturnType);
+    return rows.map(toWhatsappMessageReturnType);
   }
 
   /** Count of messages in one conversation (pair for `listByConversation`). */

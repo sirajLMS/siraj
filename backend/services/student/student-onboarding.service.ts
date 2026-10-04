@@ -1,17 +1,14 @@
-import { randomUUID } from "node:crypto";
-import { ParentRepository } from "@/backend/db/repo/parents";
-import { StudentRepository } from "@/backend/db/repo/students";
-import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
+import {
+  buildOnboardingPreChecks,
+  buildPrimaryTeacherAssignment,
+  buildStudentCoreInput,
+  buildStudentExtensionCreator,
+  buildStudentProfileFields,
+  resolveStudentCredentials,
+} from "@/backend/services/student/student-onboarding.helpers";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
-import type {
-  DBTransaction,
-  StudentOnboardingInput,
-  StudentOnboardingResult,
-  UserCreateCoreInput,
-  UserCreateProfileFieldsInput,
-  UserReturnType,
-} from "@/backend/types";
+import type { DBTransaction, StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
 import { parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -23,79 +20,18 @@ export namespace StudentOnboardingService {
     locale?: string,
     tx?: DBTransaction
   ): Promise<StudentOnboardingResult> {
-    // LMS — every student must have a login account (students.userId is NOT NULL).
-    // Validate email + password are provided before entering the transaction.
-    const email = input.email?.trim() ?? null;
-    if (!email) {
-      throw new Error(tErrors.studentEmailRequired);
-    }
-    const password = input.password ?? null;
-    if (!password) {
-      throw new Error(tErrors.studentPasswordRequired);
-    }
+    const { email, password } = resolveStudentCredentials(input, tErrors);
 
     const result = await UserOnboardingService.createUserOfType(
       {
         actorUserId,
         permission: AppPermission.STUDENTS_CREATE,
-        coreInput: {
-          name: input.name,
-          email,
-          password,
-          ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
-        } satisfies UserCreateCoreInput,
-        profileFields: {
-          phone: input.phone ?? undefined,
-          timezone: input.timezone ?? undefined,
-          displayCurrency: input.displayCurrency ?? undefined,
-        } satisfies UserCreateProfileFieldsInput,
+        coreInput: buildStudentCoreInput(input, email, password),
+        profileFields: buildStudentProfileFields(input),
         groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
-        preChecks: async () => {
-          if (input.parentId) {
-            const parent = await ParentRepository.getParentProfile(input.parentId);
-            if (!parent) {
-              throw new Error(tErrors.parentNotFound);
-            }
-          }
-          if (input.primaryTeacherId) {
-            const teacher = await TeacherRepository.findById(input.primaryTeacherId);
-            if (!teacher) {
-              throw new Error(tErrors.teacherNotFound(input.primaryTeacherId));
-            }
-          }
-        },
-        createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
-          return StudentRepository.create(
-            {
-              parentId: input.parentId ?? null,
-              userId: createdUser.id,
-              name: input.name,
-              dateOfBirth: input.dateOfBirth ?? null,
-              gender: input.gender ?? null,
-              language: input.language ?? null,
-              status: input.status ?? StudentStatus.ON_TRIAL,
-              primaryTeacherId: input.primaryTeacherId ?? null,
-              classesTotal: input.classesTotal ?? 0,
-              classesRemaining: input.classesRemaining ?? 0,
-              idempotencyKey: randomUUID(),
-              ...(input.avatarUrl === undefined ? {} : { avatarUrl: input.avatarUrl }),
-            },
-            tErrors,
-            txObj
-          );
-        },
-        afterExtension: async (_createdUser: UserReturnType, student, txObj: DBTransaction) => {
-          if (input.primaryTeacherId) {
-            await StudentRepository.createTeacherAssignment(
-              {
-                studentId: student.id,
-                teacherId: input.primaryTeacherId,
-                assignedByUserId: actorUserId,
-              },
-              txObj
-            );
-          }
-        },
+        preChecks: buildOnboardingPreChecks(input, tErrors),
+        createExtension: buildStudentExtensionCreator(input, tErrors),
+        afterExtension: buildPrimaryTeacherAssignment(input, actorUserId),
         locale,
         tErrors,
         logTag: "Student",

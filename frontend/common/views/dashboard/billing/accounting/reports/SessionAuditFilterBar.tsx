@@ -1,31 +1,23 @@
 "use client";
 
 import { ClearOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Chip,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-} from "@mui/material";
-import { useMemo, useState } from "react";
-import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
+import { Box, Button } from "@mui/material";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField/SearchBarField";
+import { StudentAutocomplete, TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect";
 import {
-  type PersonOption,
-  StudentAutocomplete,
-  TeacherAutocomplete,
-} from "@/frontend/common/components/ui/input/userSelect";
-import { SessionAuditStatus } from "@/frontend/common/graphql/generated/gql/graphql";
-import type {
-  SessionAuditReportRow,
-  SessionAuditReportsViewModel,
-} from "@/frontend/common/views/dashboard/billing/accounting/reports/useSessionAuditReportsViewModel";
-import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports";
+  isDateRangeInverted,
+  rowStudentId,
+  rowStudentName,
+  rowTeacherId,
+  rowTeacherName,
+  SEARCH_INPUT_MAX_LENGTH,
+} from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditFilterBar.helpers";
+import { usePersonFilterSelection } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditFilterBar.hooks";
+import {
+  DateRangeFilter,
+  StatusFilterSelect,
+} from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditFilterBar.parts";
+import type { SessionAuditReportsViewModel } from "@/frontend/common/views/dashboard/billing/accounting/reports/useSessionAuditReportsViewModel";
 
 /**
  * View-model slice consumed by the session audit filter bar. The raw search
@@ -51,209 +43,6 @@ export type SessionAuditFilterBarProps = Pick<
   | "clearFilters"
   | "hasActiveFilters"
 >;
-
-/** Search length accepted by both the report query and the CSV export route. */
-const SEARCH_INPUT_MAX_LENGTH = 200;
-
-/** Status chips previewed inside the collapsed multi-select before the overflow chip. */
-const STATUS_CHIP_PREVIEW_LIMIT = 2;
-
-const SESSION_AUDIT_STATUS_VALUES: readonly string[] = Object.values(SessionAuditStatus);
-
-function isSessionAuditStatus(value: string): value is SessionAuditStatus {
-  return SESSION_AUDIT_STATUS_VALUES.includes(value);
-}
-
-const rowTeacherId = (row: SessionAuditReportRow): string | null => row.teacherId;
-const rowTeacherName = (row: SessionAuditReportRow): string | null => row.teacherName;
-const rowStudentId = (row: SessionAuditReportRow): string | null => row.studentId;
-const rowStudentName = (row: SessionAuditReportRow): string | null => row.studentName;
-
-function findRowPersonOption(
-  rows: readonly SessionAuditReportRow[],
-  personId: string,
-  idOf: (row: SessionAuditReportRow) => string | null,
-  nameOf: (row: SessionAuditReportRow) => string | null
-): PersonOption | null {
-  const match = rows.find(row => idOf(row) === personId);
-  return match ? { id: personId, name: nameOf(match) ?? "" } : null;
-}
-
-interface PersonFilterSelection {
-  readonly option: PersonOption | null;
-  readonly handleChange: (next: PersonOption | null) => void;
-}
-
-/**
- * Bridges the id-only store filter with the autocomplete's option shape: the
- * freshly picked option is kept in local state, and the report rows provide a
- * display fallback when the stored id no longer matches the local option
- * (initial mount after URL hydration, or an external filter reset).
- */
-function usePersonFilterSelection(
-  personId: string | null,
-  rows: readonly SessionAuditReportRow[],
-  idOf: (row: SessionAuditReportRow) => string | null,
-  nameOf: (row: SessionAuditReportRow) => string | null,
-  setPersonId: (personId: string | null) => void
-): PersonFilterSelection {
-  const [picked, setPicked] = useState<PersonOption | null>(null);
-  const option = useMemo<PersonOption | null>(() => {
-    if (personId === null || personId === "") return null;
-    if (picked?.id === personId) return picked;
-    return findRowPersonOption(rows, personId, idOf, nameOf);
-  }, [rows, personId, picked, idOf, nameOf]);
-  const handleChange = (next: PersonOption | null) => {
-    setPicked(next);
-    setPersonId(next?.id ?? null);
-  };
-  return { option, handleChange };
-}
-
-/** Collapsed multi-select preview: a few status chips, then a "+N" overflow chip. */
-function renderStatusValue(
-  selected: readonly string[],
-  statusLabels: SessionAuditLabels["status"],
-  placeholderLabel: string
-): React.ReactNode {
-  const statuses = selected.filter(isSessionAuditStatus);
-  if (statuses.length === 0) {
-    return <Box sx={theme => ({ color: theme.palette.onSurfaceVariant })}>{placeholderLabel}</Box>;
-  }
-  return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-      {statuses.slice(0, STATUS_CHIP_PREVIEW_LIMIT).map(status => (
-        <Chip key={status} size="small" label={statusLabels[status]} />
-      ))}
-      {statuses.length > STATUS_CHIP_PREVIEW_LIMIT ? (
-        <Chip size="small" label={`+${statuses.length - STATUS_CHIP_PREVIEW_LIMIT}`} />
-      ) : null}
-    </Box>
-  );
-}
-
-/** True when both range bounds are set and the from date follows the to date. */
-function isDateRangeInverted(dateFrom: string | null, dateTo: string | null): boolean {
-  if (dateFrom === null || dateFrom === "" || dateTo === null || dateTo === "") return false;
-  return dateFrom > dateTo;
-}
-
-interface StatusFilterSelectProps {
-  readonly labels: Pick<SessionAuditLabels, "filters" | "status">;
-  readonly currentStatuses: readonly SessionAuditStatus[];
-  readonly setCurrentStatuses: (statuses: SessionAuditStatus[]) => void;
-}
-
-/** Multi-select of audit statuses; chips preview the selection, "all" copy marks an empty one. */
-function StatusFilterSelect({ labels, currentStatuses, setCurrentStatuses }: Readonly<StatusFilterSelectProps>) {
-  const handleChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    const selected = typeof value === "string" ? value.split(",") : value;
-    setCurrentStatuses(selected.filter(isSessionAuditStatus));
-  };
-  return (
-    <FormControl size="small" sx={{ width: { xs: "100%", lg: "auto" }, flex: { lg: "1 1 0" }, minWidth: { lg: 180 } }}>
-      <InputLabel id="session-audit-status-filter-label" shrink>
-        {labels.filters.status}
-      </InputLabel>
-      <Select
-        labelId="session-audit-status-filter-label"
-        label={labels.filters.status}
-        multiple
-        displayEmpty
-        value={[...currentStatuses]}
-        onChange={handleChange}
-        renderValue={selected => renderStatusValue(selected, labels.status, labels.filters.statusPlaceholder)}
-      >
-        {Object.values(SessionAuditStatus).map(status => (
-          <MenuItem key={status} value={status}>
-            {labels.status[status]}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  );
-}
-
-interface DateRangeFilterProps {
-  readonly labels: SessionAuditLabels["filters"];
-  readonly dateFrom: string | null;
-  readonly dateTo: string | null;
-  /** Validation copy shown when the range is inverted; null hides the helper text. */
-  readonly invalidRangeMessage: string | null;
-  readonly onRangeChange: (dateFrom: string, dateTo: string) => void;
-}
-
-/** Date-range picker cell: spans both tablet grid columns and surfaces inverted-range copy inline. */
-function DateRangeFilter({
-  labels,
-  dateFrom,
-  dateTo,
-  invalidRangeMessage,
-  onRangeChange,
-}: Readonly<DateRangeFilterProps>) {
-  const showRangePlaceholder = (dateFrom === null || dateFrom === "") && (dateTo === null || dateTo === "");
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        gridColumn: { sm: "span 2" },
-        width: { xs: "100%", lg: "auto" },
-        flex: { lg: "1 1 0" },
-        minWidth: { lg: 240 },
-        // The read-only range trigger carries no start adornment, so MUI keeps
-        // its label inside the field until a range is picked while the labeled
-        // sibling controls float from the start. Pin the label in the shrunk
-        // position and open the outline notch so the control reads like its
-        // siblings; the RTL Emotion cache flips the translate X exactly as it
-        // does for MUI's own label styles, keeping RTL placement identical.
-        "& .MuiInputLabel-root": {
-          userSelect: "none",
-          pointerEvents: "auto",
-          maxWidth: "calc(133% - 32px)",
-          transform: "translate(14px, -9px) scale(0.75)",
-        },
-        "& .MuiOutlinedInput-notchedOutline legend": {
-          maxWidth: "100%",
-        },
-      }}
-    >
-      <AppDateRangePicker
-        label={labels.dateRange}
-        fromLabel={labels.dateFrom}
-        toLabel={labels.dateTo}
-        fromDate={dateFrom ?? ""}
-        toDate={dateTo ?? ""}
-        onChange={onRangeChange}
-        size="small"
-      />
-      {showRangePlaceholder ? (
-        // The trigger is a read-only input without placeholder support; a
-        // non-interactive overlay aligned with the input's inline start padding
-        // supplies the empty-state hint, hidden as soon as a range is picked.
-        <Box
-          component="span"
-          sx={theme => ({
-            position: "absolute",
-            insetInlineStart: 14,
-            insetBlockStart: "50%",
-            transform: "translateY(-50%)",
-            pointerEvents: "none",
-            color: theme.palette.text.secondary,
-            fontSize: "0.8125rem",
-            maxWidth: "calc(100% - 48px)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          })}
-        >
-          {labels.dateRangePlaceholder}
-        </Box>
-      ) : null}
-      {invalidRangeMessage === null ? null : <FormHelperText error>{invalidRangeMessage}</FormHelperText>}
-    </Box>
-  );
-}
 
 export function SessionAuditFilterBar({
   labels,

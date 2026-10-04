@@ -5,8 +5,9 @@ import ErrorOutlineOutlined from "@mui/icons-material/ErrorOutlineOutlined";
 import RefreshOutlined from "@mui/icons-material/RefreshOutlined";
 import { Box, Button, CircularProgress, Fade, Stack, Typography, useMediaQuery } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { logger } from "@/frontend/common/utils/logger";
+import { useFullScreenErrorRecovery } from "@/frontend/common/views/errors/useFullScreenErrorRecovery.hooks";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface FullScreenErrorViewProps {
@@ -19,15 +20,6 @@ export interface FullScreenErrorViewProps {
    */
   readonly databaseUnavailableHint?: boolean;
 }
-
-const DB_HEALTH_ENDPOINT = "/api/health/db";
-
-/**
- * Auto-retry polling backoff while the database is unreachable: probe the
- * health endpoint on this schedule and re-render the page as soon as it
- * answers 200. The last value repeats for all later attempts.
- */
-const AUTO_RETRY_DELAYS_MS = [5_000, 10_000, 20_000, 30_000] as const;
 
 /**
  * Chrome-free, full-viewport error surface used by the root `app/error.tsx`
@@ -44,72 +36,12 @@ export function FullScreenErrorView({ error, onRetry, databaseUnavailableHint }:
   const t = useAppTranslation(Translation.Errors);
   const labels = t.serviceOutage;
   const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
-  const [isDatabase, setIsDatabase] = useState(databaseUnavailableHint === true);
-  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     logger.error("Root error boundary:", error);
   }, [error]);
 
-  // One-shot reachability probe: a failed probe means the database is down
-  // regardless of what the original error object claims.
-  useEffect(() => {
-    if (isDatabase) return undefined;
-    let cancelled = false;
-
-    const classify = async () => {
-      try {
-        const response = await fetch(DB_HEALTH_ENDPOINT, { cache: "no-store" });
-        if (!cancelled && !response.ok) setIsDatabase(true);
-      } catch {
-        if (!cancelled) setIsDatabase(true);
-      }
-    };
-
-    void classify();
-    return () => {
-      cancelled = true;
-    };
-  }, [isDatabase]);
-
-  // Auto-retry loop while the database is unreachable.
-  useEffect(() => {
-    if (!isDatabase) return undefined;
-
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const scheduleProbe = (attempt: number) => {
-      const delay = AUTO_RETRY_DELAYS_MS[Math.min(attempt, AUTO_RETRY_DELAYS_MS.length - 1)] ?? 30_000;
-      timer = setTimeout(() => {
-        void probe(attempt);
-      }, delay);
-    };
-
-    const probe = async (attempt: number) => {
-      try {
-        const response = await fetch(DB_HEALTH_ENDPOINT, { cache: "no-store" });
-        if (response.ok) {
-          if (!cancelled) onRetry();
-          return;
-        }
-      } catch {
-        // Database still unreachable — keep polling on the backoff schedule.
-      }
-      if (!cancelled) scheduleProbe(attempt + 1);
-    };
-
-    scheduleProbe(0);
-    return () => {
-      cancelled = true;
-      if (timer !== undefined) clearTimeout(timer);
-    };
-  }, [isDatabase, onRetry]);
-
-  const handleRetry = useCallback(() => {
-    setPending(true);
-    onRetry();
-  }, [onRetry]);
+  const { isDatabase, pending, handleRetry } = useFullScreenErrorRecovery({ databaseUnavailableHint, onRetry });
 
   const title = isDatabase ? labels.title : labels.genericTitle;
   const description = isDatabase ? labels.description : labels.genericDescription;

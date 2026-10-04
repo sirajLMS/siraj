@@ -1,10 +1,23 @@
 "use client";
 
-import { HourglassEmptyOutlined, VerifiedUserOutlined } from "@mui/icons-material";
-import { Box, Paper, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { HourglassEmptyOutlined } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
+import {
+  StyledAdminResponseBox,
+  StyledAdminResponseHeader,
+  StyledAdminResponseLabel,
+  StyledAdminResponseText,
+  StyledAdminResponseTime,
+  StyledPendingStatusBox,
+  StyledRecordCardContent,
+  StyledRecordCardHeader,
+  StyledRecordCardPaper,
+  StyledRecordRegardingLabel,
+  StyledRecordSummaryText,
+  StyledVerifiedIcon,
+} from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintRecordCardShared.styled";
 import {
   ComplaintStatus,
   type ParentComplaintRecord,
@@ -36,83 +49,6 @@ interface ComplaintRecordCardSharedProps {
   readonly options: ComplaintRecordCardSharedOptions;
   readonly slots: ComplaintRecordCardSharedSlots;
 }
-
-const StyledRecordCardPaper = styled(Paper)(({ theme }) => ({
-  borderRadius: theme.layout.radius.card,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-  backgroundColor: theme.palette.surfaceContainerLowest,
-  overflow: "hidden",
-  transition: theme.transitions.create("border-color", { duration: 150, easing: "ease" }),
-  "&:hover": { borderColor: theme.palette.primary.main },
-}));
-
-const StyledRecordCardContent = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-}));
-
-const StyledRecordCardHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(2),
-}));
-
-const StyledRecordRegardingLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  textTransform: "uppercase",
-  marginBottom: theme.spacing(0.5),
-}));
-
-const StyledRecordSummaryText = styled(Typography)(({ theme }) => ({
-  fontWeight: 600,
-  color: theme.palette.primary.main,
-}));
-
-const StyledAdminResponseBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.surfaceContainerLow,
-  position: "relative",
-}));
-
-const StyledAdminResponseHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledVerifiedIcon = styled(VerifiedUserOutlined)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontSize: theme.typography.titleLg.fontSize,
-}));
-
-const StyledAdminResponseLabel = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
-
-const StyledAdminResponseTime = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  marginLeft: "auto",
-}));
-
-const StyledAdminResponseText = styled(Typography)(({ theme }) => ({
-  fontStyle: "italic",
-  color: theme.palette.onSurfaceVariant,
-}));
-
-const StyledPendingStatusBox = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1.5),
-  color: theme.palette.text.secondary,
-  paddingTop: theme.spacing(1),
-  paddingBottom: theme.spacing(1),
-  borderTop: `1px dashed ${theme.palette.outlineVariant}`,
-  marginTop: theme.spacing(1),
-}));
 
 function mapStatusForBadge(status: ComplaintStatus): string {
   if (status === ComplaintStatus.Answered) {

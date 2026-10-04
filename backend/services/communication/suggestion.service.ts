@@ -1,8 +1,6 @@
-import { createHash } from "node:crypto";
 import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parents";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
-import { UserRepository } from "@/backend/db/repo/users";
-import { AppPermission, NotificationChannel, NotificationEventType, SuggestionStatus } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
 import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import {
@@ -11,7 +9,18 @@ import {
   resolveEntityById,
   softDeleteEntityLog,
 } from "@/backend/services/communication/__shared__/complaintSuggestionBase";
-import { CommunicationService } from "@/backend/services/communication/communication.service";
+import {
+  anonymizeContributorId,
+  anonymizeContributorName,
+  dispatchSuggestionMarkedDuplicate,
+  dispatchSuggestionResponse,
+  mapAdminSuggestionRow,
+  mapSuggestionSearchResult,
+  mapSuggestionSelectToReturn,
+  normalizeSuggestion,
+  notifySuggestionSubmitted,
+  resolveDuplicateTarget,
+} from "@/backend/services/communication/suggestion.service.helpers";
 import type {
   ParentSuggestionOptions,
   SuggestionContributorStats,
@@ -24,51 +33,11 @@ import type {
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-function isSuggestionStatus(value: string): value is SuggestionStatus {
-  return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
-}
-
-function anonymizeContributorId(rawUserId: string): string {
-  return createHash("sha256").update(rawUserId).digest("hex").slice(0, 12);
-}
-
-function anonymizeContributorName(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return parts.map(part => `${part.charAt(0).toUpperCase()}.`).join(" ");
-}
-
-function normalizeSuggestion(suggestion: SuggestionReturnType): SuggestionReturnType {
-  return {
-    ...suggestion,
-    parentName: suggestion.parentName ?? null,
-    reviewedByUserName: suggestion.reviewedByUserName ?? null,
-    duplicateOfBody: suggestion.duplicateOfBody ?? null,
-    duplicateOfSubmitterName: suggestion.duplicateOfSubmitterName ?? null,
-    responseCount: suggestion.responseCount ?? 0,
-  };
-}
-
 export namespace SuggestionService {
   export function mapSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnType {
-    return normalizeSuggestion({
-      id: result.id,
-      parentId: result.parentId,
-      submitterName: result.submitterName,
-      body: result.body,
-      status: isSuggestionStatus(result.status) ? result.status : SuggestionStatus.PENDING,
-      duplicateOfId: result.duplicateOfId ?? null,
-      adminResponse: result.adminResponse ?? null,
-      reviewedByUserId: result.reviewedByUserId ?? null,
-      reviewedAt: result.reviewedAt ?? null,
-      emailSentAt: result.emailSentAt ?? null,
-      createdAt: result.createdAt,
-      parentName: "",
-      reviewedByUserName: null,
-      duplicateOfBody: null,
-      duplicateOfSubmitterName: null,
-      responseCount: 0,
-    });
+    return mapSuggestionSelectToReturn(result);
   }
+
   export async function submitSuggestion(
     actorUserId: string,
     input: SuggestionSubmitInput,
@@ -87,31 +56,7 @@ export namespace SuggestionService {
         locale
       );
 
-      // Resolve the submitter's email so the email adapter has a valid `to`.
-      // `parent` (from `findByUserId`) is the `parents` row — email lives on
-      // `users`, so fetch via `UserRepository.findSafeById`. Legacy direct-
-      // dispatch path (F1 grandfather): `metadata.to` populated inline.
-      const submitter = await UserRepository.findSafeById(actorUserId);
-      const to = submitter?.email;
-      if (!to) {
-        logger.warn("Suggestion email dispatch skipped: submitter has no email", {
-          actorUserId,
-          suggestionId: created.id,
-        });
-        return created;
-      }
-      const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
-      await CommunicationService.dispatch(
-        {
-          userId: actorUserId,
-          title: tNotifications.newSuggestion.title,
-          body: created.body,
-          channel: NotificationChannel.EMAIL,
-          eventType: NotificationEventType.NEW_SUGGESTION,
-          metadata: { to, entityKind: "suggestion", entityId: created.id },
-        },
-        locale
-      );
+      await notifySuggestionSubmitted(created, actorUserId, locale);
 
       logger.info("Suggestion submitted", {
         actorUserId,
@@ -145,25 +90,7 @@ export namespace SuggestionService {
 
       return {
         id: "admin-suggestion-result",
-        suggestions: result.rows.map(row => ({
-          id: row.id,
-          parentId: row.parentId,
-          parentUserId: row.parentUserId,
-          submitterName: row.submitterName,
-          body: row.body,
-          status: isSuggestionStatus(row.status) ? row.status : SuggestionStatus.PENDING,
-          duplicateOfId: row.duplicateOfId,
-          adminResponse: row.adminResponse,
-          reviewedByUserId: row.reviewedByUserId,
-          reviewedAt: row.reviewedAt,
-          emailSentAt: null,
-          createdAt: row.createdAt,
-          parentName: row.parentName ?? null,
-          reviewedByUserName: row.reviewerName ?? null,
-          duplicateOfBody: row.duplicateOfBody ?? null,
-          duplicateOfSubmitterName: row.duplicateOfSubmitterName ?? null,
-          responseCount: 0,
-        })),
+        suggestions: result.rows.map(mapAdminSuggestionRow),
         metrics: {
           id: "suggestion-metrics",
           pending: metrics.pending,
@@ -248,15 +175,7 @@ export namespace SuggestionService {
     await assertPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW, locale);
 
     try {
-      return (await SuggestionRepository.searchSuggestions(query, excludeId)).map(result => ({
-        id: result.id,
-        parentId: "",
-        submitterName: result.submitterName,
-        body: result.body,
-        status: isSuggestionStatus(result.status) ? result.status : SuggestionStatus.PENDING,
-        createdAt: result.createdAt,
-        parentName: "",
-      }));
+      return (await SuggestionRepository.searchSuggestions(query, excludeId)).map(mapSuggestionSearchResult);
     } catch (error) {
       logger.error("Failed to search suggestions", { actorUserId, query, excludeId, error });
       throw error;
@@ -292,31 +211,7 @@ export namespace SuggestionService {
 
       const parentProfile = await ParentRepository.getParentProfile(suggestion.parentId);
       if (parentProfile) {
-        // `parentProfile.email` is the parent's `users.email` (non-null in
-        // `ParentProfileResult`). Stamp it on the email payload's `metadata.to`
-        // so the email adapter has a valid recipient. Legacy direct-dispatch
-        // path (F1 grandfather): `metadata.to` populated inline.
-        const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
-        await CommunicationService.dispatchMulti(
-          [
-            {
-              userId: parentProfile.userId,
-              title: tNotifications.suggestionResponse.title,
-              body: adminResponse,
-              channel: NotificationChannel.ON_APP,
-              eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
-            },
-            {
-              userId: parentProfile.userId,
-              title: tNotifications.suggestionResponse.title,
-              body: adminResponse,
-              channel: NotificationChannel.EMAIL,
-              eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
-              metadata: { to: parentProfile.email, entityKind: "suggestion", entityId: suggestionId },
-            },
-          ],
-          locale
-        );
+        await dispatchSuggestionResponse(parentProfile, adminResponse, suggestionId, locale);
       }
 
       logger.info("Suggestion responded to", {
@@ -339,29 +234,8 @@ export namespace SuggestionService {
     locale?: string
   ): Promise<SuggestionSelectType> {
     await assertPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW, locale);
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
-    if (suggestionId === duplicateOfId) {
-      throw new ValidationError("SELF_REFERENCE", tErrors.suggestionCannotMarkSelfAsDuplicate);
-    }
-
-    const sourceSuggestion = await SuggestionRepository.getSuggestionById(suggestionId);
-    if (!sourceSuggestion) {
-      throw new NotFoundError("SUGGESTION", tErrors.suggestionNotFound);
-    }
-
-    const targetSuggestion = await SuggestionRepository.getSuggestionById(duplicateOfId);
-    if (!targetSuggestion) {
-      throw new NotFoundError("SUGGESTION", tErrors.suggestionNotFound);
-    }
-
-    if (targetSuggestion.status === "DUPLICATE") {
-      throw new ValidationError("DUPLICATE_TARGET", tErrors.suggestionTargetIsAlreadyDuplicate);
-    }
-
-    if (targetSuggestion.duplicateOfId === suggestionId) {
-      throw new ValidationError("CIRCULAR_DUPLICATE", tErrors.suggestionCircularDuplicate);
-    }
+    const sourceSuggestion = await resolveDuplicateTarget(suggestionId, duplicateOfId, locale);
 
     try {
       const updated = await SuggestionRepository.markAsDuplicate(
@@ -376,17 +250,7 @@ export namespace SuggestionService {
 
       const parentProfile = await ParentRepository.getParentProfile(sourceSuggestion.parentId);
       if (parentProfile) {
-        const tNotifications = getServerTranslations(locale ?? "en").notificationsTranslations;
-        await CommunicationService.dispatch(
-          {
-            userId: parentProfile.userId,
-            title: tNotifications.suggestionMarkedDuplicate.title,
-            body: tNotifications.suggestionMarkedDuplicate.body({ duplicateId: duplicateOfId }),
-            channel: NotificationChannel.ON_APP,
-            eventType: NotificationEventType.SUGGESTION_DUPLICATE_MARKED,
-          },
-          locale
-        );
+        await dispatchSuggestionMarkedDuplicate(parentProfile.userId, duplicateOfId, locale);
       }
 
       logger.info("Suggestion marked as duplicate", {

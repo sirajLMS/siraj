@@ -2,8 +2,8 @@
 
 import { Box, Stack } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
-import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { NationalIdFormField } from "@/frontend/common/components/ui/input";
+import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";

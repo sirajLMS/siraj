@@ -8,9 +8,10 @@
  */
 
 import {
-  buildAuthHeaders,
-  buildGraphUrl,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
+  buildGroupJoinRequestsRequestInit,
+  type GroupJoinRequestFailure,
+  parseGroupJoinRequestsOutcome,
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/__shared__";
 import type { GraphApiRequestContext, GraphApiRequestInit, JoinRequestsOutcome } from "@/backend/types";
 
 /**
@@ -21,33 +22,7 @@ export function buildApproveGroupJoinRequestsRequest(
   ctx: GraphApiRequestContext,
   input: { groupId: string; joinRequestIds: string[] }
 ): GraphApiRequestInit {
-  // Validate inputs before interpolation
-  // These are internal developer-facing validation errors caught by the adapter and wrapped into structured error codes
-  if (!input.groupId || input.groupId.length > 128) {
-    throw new Error("Invalid groupId: must be non-empty and ≤128 chars");
-  }
-  if (!Array.isArray(input.joinRequestIds) || input.joinRequestIds.length === 0) {
-    throw new Error("Invalid joinRequestIds: must be a non-empty array");
-  }
-  if (input.joinRequestIds.some(id => !id || id.length === 0)) {
-    throw new Error("Invalid joinRequestIds: every entry must be a non-empty string");
-  }
-
-  const url = buildGraphUrl(`/${input.groupId}/join_requests`, ctx.apiVersion);
-
-  const body: Record<string, unknown> = {
-    messaging_product: "whatsapp",
-    join_requests: input.joinRequestIds,
-  };
-
-  return {
-    url,
-    init: {
-      method: "POST",
-      headers: buildAuthHeaders(ctx.accessToken, true),
-      body: JSON.stringify(body),
-    },
-  };
+  return buildGroupJoinRequestsRequestInit(ctx, input, "POST");
 }
 
 /**
@@ -58,19 +33,7 @@ export function buildApproveGroupJoinRequestsRequest(
  */
 export function parseApproveGroupJoinRequestsResponse(body: {
   approved_join_requests?: string[];
-  failed_join_requests?: {
-    join_request_id: string;
-    errors?: { code?: number; message?: string }[];
-  }[];
+  failed_join_requests?: GroupJoinRequestFailure[];
 }): JoinRequestsOutcome {
-  return {
-    approved: body.approved_join_requests ?? [],
-    failed: (body.failed_join_requests ?? []).map(failure => ({
-      joinRequestId: failure.join_request_id,
-      errors: (failure.errors ?? []).map(error => ({
-        code: error.code,
-        message: error.message,
-      })),
-    })),
-  };
+  return parseGroupJoinRequestsOutcome(body.approved_join_requests, body.failed_join_requests);
 }

@@ -3,7 +3,8 @@
 import { Box, Chip, InputBase, Paper, styled, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type React from "react";
-import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import type { KeyboardEvent, MouseEvent } from "react";
+import { useTagInputSharedState } from "@/frontend/common/components/ui/input/tagInput/TagInputShared.hooks";
 import { useTagInputDeletion, useTagInputEditing } from "@/frontend/common/hooks/useTagInputEditing";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -152,10 +153,17 @@ export function TagInputShared({
   chipEditInputSxExt,
 }: Readonly<TagInputSharedProps & TagInputSlotProps>): React.ReactNode {
   const t = useAppTranslation(Translation.Ui.TagInput);
-  const [tags, setTags] = useState<string[]>(initialTags);
-  const [inputValue, setInputValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const {
+    tags,
+    setTags,
+    inputValue,
+    inputRef,
+    containerRef,
+    handleContainerClick,
+    handleInputChange,
+    handleInputKeyDown,
+    handleBlur,
+  } = useTagInputSharedState(initialTags, onChange);
   const resolvedLabel = label ?? t.label;
   const resolvedPlaceholder = placeholder ?? t.placeholder;
 
@@ -167,66 +175,6 @@ export function TagInputShared({
     });
   });
   const deletion = useTagInputDeletion(setTags);
-
-  const lastSyncedInitial = useRef<string>(JSON.stringify(initialTags));
-  useEffect(() => {
-    const serializedInitial = JSON.stringify(initialTags);
-    if (serializedInitial !== lastSyncedInitial.current) {
-      lastSyncedInitial.current = serializedInitial;
-      setTags(initialTags);
-    }
-  }, [initialTags]);
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(tags);
-    }
-  }, [tags, onChange]);
-
-  const handleContainerClick = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  }, []);
-
-  const addTag = useCallback(
-    (tag: string) => {
-      const trimmedTag = tag.trim();
-      if (trimmedTag && !tags.includes(trimmedTag)) {
-        setTags([...tags, trimmedTag]);
-        setInputValue("");
-      }
-    },
-    [tags]
-  );
-
-  const handleInputKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if ((e.key === "Enter" || e.key === ",") && inputValue) {
-        e.preventDefault();
-        addTag(inputValue);
-      } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
-        e.preventDefault();
-        const lastTag = tags.at(-1) ?? "";
-        setTags(tags.slice(0, -1));
-        setInputValue(lastTag);
-      }
-    },
-    [inputValue, tags, addTag]
-  );
-
-  const handleBlur = useCallback(
-    (e: React.FocusEvent) => {
-      if (inputValue && !containerRef.current?.contains(e.relatedTarget)) {
-        addTag(inputValue);
-      }
-    },
-    [inputValue, addTag]
-  );
 
   const mergedChipSx = mergeSx(baseChipAnimationSx, chipSxExt);
   const mergedLabelSx = mergeSx(baseLabelSx, labelSxExt);

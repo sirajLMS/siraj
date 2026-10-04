@@ -1,15 +1,18 @@
 "use client";
 
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import { type SxProps, styled, type Theme } from "@mui/material/styles";
-import TextField, { type TextFieldProps } from "@mui/material/TextField";
-import Tooltip from "@mui/material/Tooltip";
-import Typography, { type TypographyProps } from "@mui/material/Typography";
-import type React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SxProps, Theme } from "@mui/material/styles";
+import type { TextFieldProps } from "@mui/material/TextField";
+import type { TypographyProps } from "@mui/material/Typography";
+import { useMemo } from "react";
+import {
+  useEditableTypographyActivation,
+  useEditableTypographyController,
+} from "@/frontend/common/components/ui/input/editableTypography/EditableTypographyShared.hooks";
+import {
+  EditableActionsAdornment,
+  EditableTypographyDisplay,
+  EditableTypographyEditField,
+} from "@/frontend/common/components/ui/input/editableTypography/EditableTypographyShared.parts";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type EditableTypographySharedProps = {
@@ -32,74 +35,6 @@ export type EditableTypographySlotProps = {
   readonly defaultTextFieldSize?: boolean;
 };
 
-/**
- * Display control. It renders as a native `<button>` so keyboard users get Enter/Space
- * activation for free; the resets keep the surrounding text flow intact.
- */
-const HoverButton = styled("button")(({ theme }) => ({
-  cursor: "pointer",
-  font: "inherit",
-  color: "inherit",
-  textAlign: "inherit",
-  background: "none",
-  border: 0,
-  borderRadius: Number(theme.shape.borderRadius),
-  paddingBlock: 0,
-  paddingInline: theme.spacing(0.5),
-  marginBlock: 0,
-  marginInline: theme.spacing(-0.5),
-  transition: theme.transitions.create(["background-color", "outline"]),
-  "&:hover": {
-    background: theme.palette.action.hover,
-  },
-  "&:focus-visible": {
-    outline: `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: 2,
-  },
-}));
-
-function EditableTypographyEditField({
-  textField,
-  inputValue,
-  error,
-  onInputChange,
-  onKeyDown,
-  inputRef,
-  endAdornment,
-  defaultTextFieldSize,
-  textFieldSx,
-}: {
-  readonly textField: TextFieldProps;
-  readonly inputValue: string;
-  readonly error: string | undefined | null;
-  readonly onInputChange: (value: string) => void;
-  readonly onKeyDown: (e: React.KeyboardEvent) => void;
-  readonly inputRef: React.RefObject<HTMLInputElement | null>;
-  readonly endAdornment: React.ReactNode;
-  readonly defaultTextFieldSize?: boolean;
-  readonly textFieldSx?: SxProps<Theme>;
-}) {
-  return (
-    <TextField
-      {...textField}
-      autoFocus
-      size={defaultTextFieldSize ? (textField.size ?? "small") : textField.size}
-      sx={textFieldSx}
-      value={inputValue}
-      onChange={e => onInputChange(e.target.value)}
-      error={!!error}
-      helperText={error}
-      onKeyDown={onKeyDown}
-      inputRef={inputRef}
-      slotProps={{
-        input: {
-          endAdornment,
-        },
-      }}
-    />
-  );
-}
-
 export function EditableTypographyShared({
   typography,
   textField,
@@ -114,104 +49,37 @@ export function EditableTypographyShared({
   textFieldSx,
 }: Readonly<EditableTypographySharedProps & EditableTypographySlotProps>) {
   const t = useAppTranslation(Translation.Ui.EditableTypography);
-  const [isEditing, setIsEditing] = useState(startEditing);
-  const [inputValue, setInputValue] = useState(value);
-  const [error, setError] = useState<string | undefined | null>();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const touchTimeout = useRef<NodeJS.Timeout | null>(null);
-  const [prevStartEditing, setPrevStartEditing] = useState(startEditing);
-  const [prevValue, setPrevValue] = useState(value);
-
-  if (prevStartEditing !== startEditing) {
-    setPrevStartEditing(startEditing);
-    setIsEditing(startEditing);
-  }
-
-  if (prevValue !== value && !isEditing) {
-    setPrevValue(value);
-    setInputValue(value);
-  }
-
-  const handleClick = useCallback(() => {
-    if (!doubleClickToEdit) {
-      setIsEditing(true);
-    }
-  }, [doubleClickToEdit]);
-
-  const handleDoubleClick = useCallback(() => {
-    if (doubleClickToEdit) {
-      setIsEditing(true);
-    }
-  }, [doubleClickToEdit]);
-
-  const handleTouchStart = useCallback(() => {
-    touchTimeout.current = setTimeout(() => {
-      setIsEditing(true);
-    }, 500);
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (touchTimeout.current) {
-      clearTimeout(touchTimeout.current);
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (touchTimeout.current) {
-        clearTimeout(touchTimeout.current);
-      }
-    };
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    if (isValid) {
-      const validationError = isValid(inputValue);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-    }
-    const saveResult = await onSave(inputValue);
-    if (typeof saveResult === "string" && saveResult) {
-      setError(saveResult);
-      return;
-    }
-    setError(undefined);
-    setIsEditing(false);
-  }, [isValid, inputValue, onSave]);
-
-  const handleCancel = useCallback(() => {
-    setInputValue(value);
-    setIsEditing(false);
-    onCancel?.();
-  }, [value, onCancel]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        void handleSave().then(r => r);
-      } else if (e.key === "Escape") {
-        handleCancel();
-      }
-    },
-    [handleSave, handleCancel]
-  );
+  const {
+    isEditing,
+    inputValue,
+    error,
+    inputRef,
+    activate,
+    handleSave,
+    handleCancel,
+    handleKeyDown,
+    handleInputChange,
+  } = useEditableTypographyController({
+    startEditing,
+    value,
+    isValidAction: isValid,
+    onSaveAction: onSave,
+    onCancelAction: onCancel,
+  });
+  const { handleClick, handleDoubleClick, handleTouchStart, handleTouchEnd } = useEditableTypographyActivation({
+    doubleClickToEdit,
+    onActivate: activate,
+  });
 
   const endAdornment = useMemo(
     () => (
-      <InputAdornment position="end">
-        <Tooltip title={t.save}>
-          <IconButton onClick={handleSave} aria-label={t.save} color="success" size={iconButtonSize}>
-            <CheckIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={t.cancel}>
-          <IconButton onClick={handleCancel} aria-label={t.cancel} color="error" size={iconButtonSize}>
-            <CloseIcon />
-          </IconButton>
-        </Tooltip>
-      </InputAdornment>
+      <EditableActionsAdornment
+        onSave={handleSave}
+        onCancel={handleCancel}
+        iconButtonSize={iconButtonSize}
+        saveLabel={t.save}
+        cancelLabel={t.cancel}
+      />
     ),
     [handleSave, handleCancel, iconButtonSize, t.save, t.cancel]
   );
@@ -222,12 +90,7 @@ export function EditableTypographyShared({
         textField={textField}
         inputValue={inputValue}
         error={error}
-        onInputChange={nextValue => {
-          setInputValue(nextValue);
-          if (isValid) {
-            setError(isValid(nextValue));
-          }
-        }}
+        onInputChange={handleInputChange}
         onKeyDown={handleKeyDown}
         inputRef={inputRef}
         endAdornment={endAdornment}
@@ -240,17 +103,14 @@ export function EditableTypographyShared({
   const editHint = doubleClickToEdit ? t.doubleClickToEdit : t.clickToEdit;
 
   return (
-    <Tooltip title={editHint}>
-      <HoverButton
-        type="button"
-        aria-label={`${value} (${editHint})`}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <Typography {...typography}>{value}</Typography>
-      </HoverButton>
-    </Tooltip>
+    <EditableTypographyDisplay
+      value={value}
+      typography={typography}
+      editHint={editHint}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    />
   );
 }

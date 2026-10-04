@@ -1,13 +1,8 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useRef } from "react";
-import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import type { StudentProfileQuery } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  recordStudentProfileEditMutationDocument,
-  studentProfileQueryDocument,
-} from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { useQuery } from "@apollo/client/react";
+import { useMemo } from "react";
+import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
@@ -15,50 +10,24 @@ import {
   type StudentPortalProfileEditDraft,
   useStudentPortalProfileStore,
 } from "@/frontend/common/stores/studentPortalProfileStore";
-import { logger } from "@/frontend/common/utils/logger";
 import {
-  buildStudentProfileEditVariables,
-  profileToDraft,
-} from "@/frontend/common/views/dashboard/student/profile/__shared__/studentProfileDraftHelpers";
+  formatStudentDateOfBirth,
+  mapStudentProfileFromQuery,
+} from "@/frontend/common/views/dashboard/student/profile/studentProfileQueryMapper.helpers";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
-import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
+import {
+  type StudentProfileEditActions,
+  useStudentProfileEditActions,
+} from "@/frontend/common/views/dashboard/student/profile/useStudentProfileEditActions";
+import {
+  type StudentProfileViewLabels,
+  useStudentProfileLabels,
+} from "@/frontend/common/views/dashboard/student/profile/useStudentProfileLabels";
+import { type ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type StudentProfileViewLabels = StudentPortalProfileLabels & {
-  readonly editAvatarTitle: string;
-  readonly accountStatus: string;
-};
-
-function useStudentProfileLabels(t: StudentPortalProfileLabels, editAvatarTitle: string): StudentProfileViewLabels {
-  return useMemo(
-    () => ({
-      pageTitle: t.pageTitle,
-      personalInfo: t.personalInfo,
-      fullName: t.fullName,
-      email: t.email,
-      phone: t.phone,
-      dateOfBirth: t.dateOfBirth,
-      gender: t.gender,
-      language: t.language,
-      avatar: t.avatar,
-      parentInfo: t.parentInfo,
-      parentName: t.parentName,
-      parentEmail: t.parentEmail,
-      parentPhone: t.parentPhone,
-      editProfile: t.editProfile,
-      saveChanges: t.saveChanges,
-      cancel: t.cancel,
-      backToDashboard: t.backToDashboard,
-      loadingMessage: t.loadingMessage,
-      saveSuccess: t.saveSuccess,
-      saveError: t.saveError,
-      editAvatarTitle,
-      accountStatus: t.accountStatus,
-    }),
-    [t, editAvatarTitle]
-  );
-}
+export type { StudentProfileViewLabels };
 
 export interface StudentProfileViewModel {
   readonly profile: StudentProfileRow | null;
@@ -93,40 +62,6 @@ export interface UseStudentProfileViewModelProps {
   readonly activeTab?: string;
 }
 
-function mapStudentProfileFromQuery(profileData: StudentProfileQuery | undefined): StudentProfileRow | null {
-  if (!profileData?.studentProfile) return null;
-  const p = profileData.studentProfile;
-  return {
-    id: p.id ?? "",
-    name: p.name ?? "",
-    status: p.status ?? "",
-    avatarUrl: p.avatarUrl ?? null,
-    dateOfBirth: p.dateOfBirth ?? null,
-    gender: p.gender ?? null,
-    language: p.language ?? null,
-    timezoneOverride: p.timezoneOverride ?? null,
-    email: p.email ?? null,
-    phone: p.phone ?? null,
-    timezone: p.timezone ?? null,
-    displayCurrency: p.displayCurrency ?? null,
-    parentId: p.parentId ?? null,
-    parentUserId: p.parentUserId ?? null,
-    parentName: p.parentName ?? null,
-    parentEmail: p.parentEmail ?? null,
-    parentPhone: p.parentPhone ?? null,
-    isAssociatedViewer: p.isAssociatedViewer ?? false,
-    primaryTeacherId: p.primaryTeacherId ?? null,
-    teacherUserId: p.teacherUserId ?? null,
-    teacherName: p.teacherName ?? null,
-    hoursPerWeek: p.hoursPerWeek ?? null,
-    classesRemaining: p.classesRemaining ?? null,
-    classesTotal: p.classesTotal ?? null,
-    version: p.version ?? 0,
-    createdAt: p.createdAt ?? null,
-    updatedAt: p.updatedAt ?? null,
-  };
-}
-
 export function useStudentProfileViewModel({
   scope,
   mode,
@@ -144,12 +79,8 @@ export function useStudentProfileViewModel({
   const isEditing = useStudentPortalProfileStore(s => s.isEditing);
   const draft = useStudentPortalProfileStore(s => s.draft);
   const snackbar = useStudentPortalProfileStore(s => s.snackbar);
-  const setIsEditing = useStudentPortalProfileStore(s => s.setIsEditing);
-  const setDraft = useStudentPortalProfileStore(s => s.setDraft);
   const patchDraft = useStudentPortalProfileStore(s => s.patchDraft);
-  const showSnackbar = useStudentPortalProfileStore(s => s.showSnackbar);
   const closeSnackbar = useStudentPortalProfileStore(s => s.closeSnackbar);
-  const resetEdit = useStudentPortalProfileStore(s => s.resetEdit);
 
   const {
     data: profileData,
@@ -166,65 +97,21 @@ export function useStudentProfileViewModel({
     fetchPolicy: "cache-first",
   });
 
-  const [recordEdit, { loading: saving }] = useMutation(recordStudentProfileEditMutationDocument);
-
   const profile: StudentProfileRow | null = useMemo(() => mapStudentProfileFromQuery(profileData), [profileData]);
 
-  const storageOwnerKey = profile?.id ?? _targetUserId;
-  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey });
+  const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: profile?.id ?? _targetUserId });
 
   const dateOfBirth = profile?.dateOfBirth ?? null;
-  const formattedDateOfBirth = useMemo(() => {
-    if (!dateOfBirth) return "—";
-    try {
-      return formatDate(dateOfBirth, locale);
-    } catch {
-      return dateOfBirth;
-    }
-  }, [dateOfBirth, locale]);
+  const formattedDateOfBirth = useMemo(() => formatStudentDateOfBirth(dateOfBirth, locale), [dateOfBirth, locale]);
 
-  const profileSyncKey = profile ? `${profile.id}:${profile.updatedAt ?? ""}:${profile.version}` : null;
-  const syncedProfileKeyRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (mode !== ProfileMode.EDIT || isOtherScope || !profileSyncKey || !profile) {
-      return;
-    }
-    if (syncedProfileKeyRef.current === profileSyncKey) {
-      return;
-    }
-    syncedProfileKeyRef.current = profileSyncKey;
-    setDraft(profileToDraft(profile));
-    setIsEditing(true);
-  }, [mode, profileSyncKey, isOtherScope, profile, setDraft, setIsEditing]);
-
-  const onStartEdit = () => {
-    if (!profile) return;
-    setDraft(profileToDraft(profile));
-    setIsEditing(true);
-  };
-
-  const onCancelEdit = () => {
-    resetEdit();
-  };
-
-  const onSave = async () => {
-    try {
-      await recordEdit({
-        variables: buildStudentProfileEditVariables(null, draft),
-      });
-      await refetch();
-      if (mode === ProfileMode.EDIT) {
-        router.push("/profile");
-        return;
-      }
-      resetEdit();
-      showSnackbar(labels.saveSuccess, "success");
-    } catch (error) {
-      logger.error("Failed to save student profile", { error });
-      showSnackbar(labels.saveError, "error");
-    }
-  };
+  const { saving, onStartEdit, onCancelEdit, onSave }: StudentProfileEditActions = useStudentProfileEditActions({
+    profile,
+    mode,
+    isOtherScope,
+    draft,
+    labels,
+    refetch,
+  });
 
   return {
     profile,

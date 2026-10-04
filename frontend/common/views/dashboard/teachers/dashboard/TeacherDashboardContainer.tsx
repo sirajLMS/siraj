@@ -12,16 +12,11 @@ import { TeacherHandbookIsland } from "@/frontend/common/views/dashboard/teacher
 import { TeacherManualEntryIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherManualEntryIsland";
 import { TeacherScheduleActionsIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherScheduleActionsIsland";
 import { TeacherSupportIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherSupportIsland";
+import { buildTeacherDashboardViewModelProps } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer.helpers";
+import { useTeacherDashboardSessionPermissions } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer.hooks";
 import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardView";
-import {
-  type UseTeacherDashboardViewModelProps,
-  useTeacherDashboardTranslations,
-} from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
+import { useTeacherDashboardTranslations } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { useRouter } from "@/shared/i18n/navigation";
-
-const noop = (): void => {};
-const noopManualEntrySubmit: UseTeacherDashboardViewModelProps["onManualEntrySubmit"] = async () => {};
-const noopLessonReportSubmit: UseTeacherDashboardViewModelProps["onLessonReportSubmit"] = async () => {};
 
 /**
  * Thin coordinator over per-feature islands. Each island owns its own Apollo
@@ -32,116 +27,35 @@ const noopLessonReportSubmit: UseTeacherDashboardViewModelProps["onLessonReportS
  * registrations persist.
  */
 export function TeacherDashboardContainer() {
-  const { labels, lessonReportLabels, lastUpdatedLabels } = useTeacherDashboardTranslations();
+  const translations = useTeacherDashboardTranslations();
   const router = useRouter();
-  const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
   const { subjects, loading: subjectsLoading } = useClassSubjects();
-
-  const hasSessionUpdateStatusStart = permissions.includes(AppPermission.SessionUpdateStatusStart);
-  const hasSessionUpdateStatusAbsent = permissions.includes(AppPermission.SessionUpdateStatusAbsent);
-  const hasSessionUpdateStatusLeave = permissions.includes(AppPermission.SessionUpdateStatusLeave);
-  const hasSessionActivateClass = permissions.includes(AppPermission.SessionActivateClass);
-
-  const setSessionPermissionBooleans = useTeacherDashboardStore(state => state.setSessionPermissionBooleans);
-  useEffect(() => {
-    setSessionPermissionBooleans({
-      hasSessionUpdateStatusStart,
-      hasSessionUpdateStatusAbsent,
-      hasSessionUpdateStatusLeave,
-      hasSessionActivateClass,
-    });
-  }, [
-    hasSessionUpdateStatusStart,
-    hasSessionUpdateStatusAbsent,
-    hasSessionUpdateStatusLeave,
-    hasSessionActivateClass,
-    setSessionPermissionBooleans,
-  ]);
-
-  const {
-    filterDate,
-    setFilterDate,
-    page,
-    pageSize,
-    setPage,
-    absentDialogOpen,
-    setAbsentDialogOpen,
-    openAbsentDialogForClass,
-    absentDialogClassInstanceId,
-    manualEntryOpen,
-    manualEntryDefaultActive,
-    handlers,
-    data,
-  } = useTeacherDashboardStore();
+  const sessionPermissions = useTeacherDashboardSessionPermissions();
+  const store = useTeacherDashboardStore();
 
   const ensureFilterDate = useTeacherDashboardStore(state => state.ensureFilterDate);
   useEffect(() => {
     ensureFilterDate();
   }, [ensureFilterDate]);
 
-  const props: UseTeacherDashboardViewModelProps = {
+  const props = buildTeacherDashboardViewModelProps({
     userName,
-    metricItems: data.metricItems,
-    scheduleRows: data.scheduleRows,
-    progressFeed: data.progressFeed,
-    missedAlert: data.missedAlert,
-    welcomeDateSummary: filterDate,
-    activeSessionsCount: Number(data.metricItems.find(m => m.key === "activeSessions")?.count ?? 0),
-    labels,
-    lastUpdated: data.lastUpdated,
-    activationError: data.activationError,
-    canActivate: hasSessionActivateClass,
-    canManualEntry: hasSessionActivateClass,
-    canPrintSchedule: true,
-    loading: data.loading,
-    onPrintSchedule: () => globalThis.print(),
-    onManualEntry: handlers.onManualEntryOpen ?? noop,
-    onNewSession: handlers.onNewSession ?? noop,
-    manualEntryOpen,
-    manualEntryDefaultActive,
-    teacherId: data.teacherId,
+    translations,
+    router,
     subjects,
     subjectsLoading,
-    onManualEntryClose: handlers.onManualEntryClose ?? noop,
-    onManualEntrySubmit: handlers.onManualEntrySubmit ?? noopManualEntrySubmit,
-    onActivate: handlers.onActivate,
-    onStartSession: handlers.onStartSession,
-    onMarkAbsent: handlers.onMarkAbsent,
-    onRequestLeave: handlers.onRequestLeave,
-    onViewAll: () => router.push("/schedule"),
-    onDownloadHandbook: handlers.onDownloadHandbook ?? noop,
-    onContactCoordinator: handlers.onContactCoordinator ?? noop,
-    onSupport: handlers.onSupport ?? noop,
-    dateValue: filterDate,
-    onDateChange: setFilterDate,
-    page,
-    pageSize,
-    totalCount: data.totalCount,
-    onPageChange: setPage,
-    lessonReportDialogOpen: false,
-    lessonReportSelectedClassInstanceId: null,
-    lessonReportLabels,
-    onLessonReportDialogClose: noop,
-    onLessonReportSubmit: noopLessonReportSubmit,
-    hasSessionUpdateStatusStart,
-    hasSessionUpdateStatusAbsent,
-    hasSessionUpdateStatusLeave,
-    hasSessionActivateClass,
-    absentDialogOpen,
-    onAbsentDialogOpen: () => openAbsentDialogForClass(absentDialogClassInstanceId ?? ""),
-    onAbsentDialogOpenForClass: (id: string) => openAbsentDialogForClass(id),
-    onAbsentDialogClose: () => setAbsentDialogOpen(false),
-    onAbsentDialogConfirm: handlers.onAbsentDialogConfirm ?? noop,
-  };
+    ...sessionPermissions,
+    store,
+  });
 
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
-      <TeacherDashboardDataIsland labels={labels} lastUpdatedLabels={lastUpdatedLabels} />
+      <TeacherDashboardDataIsland labels={translations.labels} lastUpdatedLabels={translations.lastUpdatedLabels} />
       <TeacherScheduleActionsIsland />
-      <TeacherManualEntryIsland labels={labels} />
-      <TeacherHandbookIsland labels={labels} />
-      <TeacherSupportIsland labels={labels} />
+      <TeacherManualEntryIsland labels={translations.labels} />
+      <TeacherHandbookIsland labels={translations.labels} />
+      <TeacherSupportIsland labels={translations.labels} />
       <TeacherDashboardView {...props} />
       <TeacherDashboardSnackbarIsland />
     </RequirePermission>

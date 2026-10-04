@@ -5,6 +5,7 @@ import {
   ExpensePagePothosObject,
   ExpensePothosObject,
 } from "@/backend/graphql/pothos/expenses";
+import { reportPageWindow, reportPaginationArgs, reportResolverContext } from "@/backend/graphql/query/__shared__";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ExpenseService } from "@/backend/services";
 import type { ExpenseFilters } from "@/backend/types";
@@ -17,16 +18,10 @@ gqlSchemaBuilder.queryField("expenses", t =>
     authScopes: { permission: AppPermission.ACCOUNTING_EXPENSES_VIEW },
     args: {
       filter: t.arg({ type: ExpenseFilterPothosInput, required: false }),
-      limit: t.arg.int({
-        required: false,
-        defaultValue: 50,
-        description: "Max rows per page (max 200)",
-        directives: { constraint: { min: 1, max: 200 } },
-      }),
-      offset: t.arg.int({ required: false, defaultValue: 0 }),
+      ...reportPaginationArgs(t),
     },
     resolve: async (_root, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
+      const { actorUserId, tErrors } = await reportResolverContext(ctx);
       const filter = args.filter;
       const canManage = ctx.isSuperAdmin || ctx.permissions.includes(AppPermission.ACCOUNTING_EXPENSES_MANAGE);
       // includeDeleted holds for manage-capable callers only; a view-only
@@ -42,12 +37,7 @@ gqlSchemaBuilder.queryField("expenses", t =>
         paymentDateTo: filter?.paymentDateTo ?? null,
         includeDeleted,
       };
-      return ExpenseService.getReport(
-        actorUserId,
-        filters,
-        { limit: args.limit ?? 50, offset: args.offset ?? 0 },
-        ctx.t().errorsTranslations
-      );
+      return ExpenseService.getReport(actorUserId, filters, reportPageWindow(args), tErrors);
     },
   })
 );

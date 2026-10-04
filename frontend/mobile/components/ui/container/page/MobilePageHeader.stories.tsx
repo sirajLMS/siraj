@@ -1,7 +1,12 @@
-import { Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page/MobilePageHeader";
+import {
+  FilterAddActions,
+  MobilePageHeaderAllVariants,
+  ReportActions,
+  StickyScrollDecorator,
+} from "@/frontend/mobile/components/ui/container/page/MobilePageHeader.stories.helpers";
 
 const meta: Meta<typeof MobilePageHeader> = {
   title: "UI/PageHeader/Mobile",
@@ -54,16 +59,7 @@ export const WithActions: Story = {
   args: {
     title: "Reports Management",
     subtitle: "Generate and export institutional reports.",
-    actions: (
-      <>
-        <Button variant="outlined" size="small">
-          Export CSV
-        </Button>
-        <Button variant="contained" size="small">
-          Generate Report
-        </Button>
-      </>
-    ),
+    actions: <ReportActions />,
   },
 };
 
@@ -96,14 +92,7 @@ export const Sticky: Story = {
     },
   },
   decorators: [
-    Story => (
-      <div style={{ height: "200vh", paddingBottom: "100px" }}>
-        <Story />
-        <div style={{ padding: "16px", marginTop: "200px" }}>
-          <p>Scroll down to see the sticky header in action</p>
-        </div>
-      </div>
-    ),
+    Story => <StickyScrollDecorator Story={Story} spacerText="Scroll down to see the sticky header in action" />,
   ],
 };
 
@@ -113,16 +102,7 @@ export const StickyWithActions: Story = {
     subtitle: "Sticky header with action buttons.",
     sticky: true,
     edgeToEdge: true,
-    actions: (
-      <>
-        <Button variant="outlined" size="small">
-          Filter
-        </Button>
-        <Button variant="contained" size="small">
-          Add New
-        </Button>
-      </>
-    ),
+    actions: <FilterAddActions />,
   },
   parameters: {
     viewport: {
@@ -130,61 +110,10 @@ export const StickyWithActions: Story = {
     },
   },
   decorators: [
-    Story => (
-      <div style={{ height: "200vh", paddingBottom: "100px" }}>
-        <Story />
-        <div style={{ padding: "16px", marginTop: "200px" }}>
-          <p>Scroll down to see the sticky header with actions</p>
-        </div>
-      </div>
-    ),
+    Story => <StickyScrollDecorator Story={Story} spacerText="Scroll down to see the sticky header with actions" />,
   ],
 };
 
 export const AllVariants: Story = {
-  render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: "32px", padding: "16px" }}>
-      <div>
-        <h4 style={{ marginBottom: "8px", fontWeight: 600 }}>Default</h4>
-        <MobilePageHeader title="Dashboard" subtitle="Overview" />
-      </div>
-      <div>
-        <h4 style={{ marginBottom: "8px", fontWeight: 600 }}>With Breadcrumbs</h4>
-        <MobilePageHeader
-          title="Edit Profile"
-          breadcrumbs={[
-            { label: "Settings", href: "#" },
-            { label: "Profile", current: true },
-          ]}
-        />
-      </div>
-      <div>
-        <h4 style={{ marginBottom: "8px", fontWeight: 600 }}>With Actions</h4>
-        <MobilePageHeader
-          title="Reports"
-          actions={
-            <>
-              <Button variant="outlined" size="small">
-                Export
-              </Button>
-              <Button variant="contained" size="small">
-                Generate
-              </Button>
-            </>
-          }
-        />
-      </div>
-      <div>
-        <h4 style={{ marginBottom: "8px", fontWeight: 600 }}>Edge-to-Edge</h4>
-        <MobilePageHeader title="Full Width" edgeToEdge={true} />
-      </div>
-      <div>
-        <h4 style={{ marginBottom: "8px", fontWeight: 600 }}>Sticky</h4>
-        <div style={{ height: "100vh" }}>
-          <MobilePageHeader title="Sticky Header" sticky={true} edgeToEdge={true} />
-          <div style={{ padding: "16px", marginTop: "200px" }}>Scroll content...</div>
-        </div>
-      </div>
-    </div>
-  ),
+  render: () => <MobilePageHeaderAllVariants />,
 };

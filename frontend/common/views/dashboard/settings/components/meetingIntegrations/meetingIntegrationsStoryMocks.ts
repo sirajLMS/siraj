@@ -1,8 +1,13 @@
+import { MeetingIntegrationProviderSlug as MeetingIntegrationProviderSlugEnum } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
-  MeetingConnectionTestMode,
-  MeetingIntegrationConnectedAccountStatus,
-  MeetingIntegrationProviderSlug as MeetingIntegrationProviderSlugEnum,
-} from "@/frontend/common/graphql/generated/gql/graphql";
+  connectedAccountFixtures,
+  emptyAccountsByProvider,
+  emptyTestResultsByProvider,
+  googleMeetErrorResult,
+  metadataDialogAccount,
+  providerSummaries,
+  zoomSuccessResult,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks.fixtures";
 import type {
   MeetingIntegrationConnectedAccount,
   MeetingIntegrationProviderSlug,
@@ -15,95 +20,22 @@ import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/da
 
 const ZOOM = MeetingIntegrationProviderSlugEnum.Zoom;
 const GOOGLE_MEET = MeetingIntegrationProviderSlugEnum.GoogleMeet;
-const MICROSOFT_TEAMS = MeetingIntegrationProviderSlugEnum.MicrosoftTeams;
 
 export function createMeetingIntegrationLabelsMock(): SettingsMeetingIntegrationsLabels {
   return dashboardSettingsMeetingIntegrationsEn;
 }
 
 export function createProvidersMock(): readonly MeetingIntegrationProviderSummary[] {
-  return [
-    {
-      id: "p1",
-      slug: MeetingIntegrationProviderSlugEnum.Zoom,
-      kind: "oauth",
-      credentialsHealthy: true,
-      lastTestedAt: new Date("2026-07-30T10:00:00Z"),
-      connectedTeacherCount: 5,
-      reauthNeededCount: 0,
-      endpoints: ["https://zoom.us/oauth", "https://zoom.us/api/v2"],
-    },
-    {
-      id: "p2",
-      slug: MeetingIntegrationProviderSlugEnum.GoogleMeet,
-      kind: "service-account",
-      credentialsHealthy: false,
-      lastTestedAt: null,
-      connectedTeacherCount: 3,
-      reauthNeededCount: 2,
-      endpoints: ["https://www.googleapis.com/calendar/v3"],
-    },
-    {
-      id: "p3",
-      slug: MeetingIntegrationProviderSlugEnum.MicrosoftTeams,
-      kind: "oauth",
-      credentialsHealthy: true,
-      lastTestedAt: new Date("2026-08-01T08:00:00Z"),
-      connectedTeacherCount: 8,
-      reauthNeededCount: 1,
-      endpoints: ["https://graph.microsoft.com/v1.0"],
-    },
-  ];
+  return providerSummaries;
 }
 
 export function createConnectedAccountsMock(): readonly MeetingIntegrationConnectedAccount[] {
-  return [
-    {
-      id: "a1",
-      userId: "user1",
-      name: "Ahmed Hassan",
-      email: "ahmed@example.com",
-      connectedAt: new Date("2026-06-15T09:00:00Z"),
-      expiresAt: new Date("2026-09-15T09:00:00Z"),
-      lastRefreshedAt: new Date("2026-08-01T03:00:00Z"),
-      status: MeetingIntegrationConnectedAccountStatus.Connected,
-    },
-    {
-      id: "a2",
-      userId: "user2",
-      name: "Fatima Ali",
-      email: "fatima@example.com",
-      connectedAt: new Date("2026-05-01T12:00:00Z"),
-      expiresAt: new Date("2026-08-05T12:00:00Z"),
-      lastRefreshedAt: new Date("2026-07-28T12:00:00Z"),
-      status: MeetingIntegrationConnectedAccountStatus.ExpiringSoon,
-    },
-    {
-      id: "a3",
-      userId: "user3",
-      name: "Omar Saeed",
-      email: "omar@example.com",
-      connectedAt: new Date("2026-03-10T14:00:00Z"),
-      expiresAt: new Date("2026-06-10T14:00:00Z"),
-      lastRefreshedAt: new Date("2026-06-10T14:00:00Z"),
-      status: MeetingIntegrationConnectedAccountStatus.ReauthNeeded,
-    },
-  ];
+  return connectedAccountFixtures;
 }
 
 export function createViewModelMock(
   overrides: Partial<MeetingIntegrationsViewModel> & { labels: SettingsMeetingIntegrationsLabels }
 ): MeetingIntegrationsViewModel {
-  const emptyRecord: Readonly<Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]>> = {
-    [ZOOM]: [],
-    [GOOGLE_MEET]: [],
-    [MICROSOFT_TEAMS]: [],
-  };
-  const emptyTestResults: Readonly<Record<MeetingIntegrationProviderSlug, TestMeetingConnectionResult | null>> = {
-    [ZOOM]: null,
-    [GOOGLE_MEET]: null,
-    [MICROSOFT_TEAMS]: null,
-  };
   return {
     labels: overrides.labels,
     locale: "en",
@@ -112,10 +44,10 @@ export function createViewModelMock(
     providers: overrides.providers ?? createProvidersMock(),
     expandedSlug: overrides.expandedSlug ?? null,
     onExpandedSlugChange: overrides.onExpandedSlugChange ?? (() => {}),
-    connectedAccountsByProvider: overrides.connectedAccountsByProvider ?? emptyRecord,
+    connectedAccountsByProvider: overrides.connectedAccountsByProvider ?? emptyAccountsByProvider,
     loadingAccountsFor: overrides.loadingAccountsFor ?? null,
     testingFor: overrides.testingFor ?? null,
-    lastTestResultByProvider: overrides.lastTestResultByProvider ?? emptyTestResults,
+    lastTestResultByProvider: overrides.lastTestResultByProvider ?? emptyTestResultsByProvider,
     canEdit: overrides.canEdit ?? true,
     revokingFor: overrides.revokingFor ?? null,
     metadataDialogAccount: overrides.metadataDialogAccount ?? null,
@@ -131,6 +63,19 @@ export function createViewModelMock(
     canViewProfile: overrides.canViewProfile ?? true,
     refresh: overrides.refresh ?? (async () => {}),
   };
+}
+
+function zoomAccountsRecord(
+  accounts: readonly MeetingIntegrationConnectedAccount[]
+): Record<MeetingIntegrationProviderSlug, readonly MeetingIntegrationConnectedAccount[]> {
+  return { ...emptyAccountsByProvider, [ZOOM]: accounts };
+}
+
+function singleTestResultRecord(
+  slug: MeetingIntegrationProviderSlug,
+  result: TestMeetingConnectionResult
+): Record<MeetingIntegrationProviderSlug, TestMeetingConnectionResult | null> {
+  return { ...emptyTestResultsByProvider, [slug]: result };
 }
 
 export function createViewModelDefault(
@@ -149,11 +94,7 @@ export function createViewModelConnected(
     labels,
     providers,
     expandedSlug: ZOOM,
-    connectedAccountsByProvider: {
-      [ZOOM]: connectedAccounts,
-      [GOOGLE_MEET]: [],
-      [MICROSOFT_TEAMS]: [],
-    },
+    connectedAccountsByProvider: zoomAccountsRecord(connectedAccounts),
   });
 }
 
@@ -165,23 +106,7 @@ export function createViewModelTestResult(
     labels,
     providers,
     expandedSlug: ZOOM,
-    lastTestResultByProvider: {
-      [ZOOM]: {
-        ok: true,
-        latencyMs: 245,
-        mode: MeetingConnectionTestMode.ValidateConfig,
-        testJoinUrl: "https://zoom.us/j/123456789?******",
-        deleted: null,
-        upstreamResponseSummary: "200 OK — scopes verified",
-        errorCode: null,
-        errorMessage: null,
-        rawUpstreamPayload: { token_type: "bearer", scope: "user:write:admin meeting:write" },
-        requiredScopes: ["user:write:admin", "meeting:write"],
-        grantedScopes: ["user:write:admin", "meeting:write", "user:read"],
-      },
-      [GOOGLE_MEET]: null,
-      [MICROSOFT_TEAMS]: null,
-    },
+    lastTestResultByProvider: singleTestResultRecord(ZOOM, zoomSuccessResult),
   });
 }
 
@@ -193,23 +118,7 @@ export function createViewModelError(
     labels,
     providers,
     expandedSlug: GOOGLE_MEET,
-    lastTestResultByProvider: {
-      [GOOGLE_MEET]: {
-        ok: false,
-        latencyMs: 1200,
-        mode: MeetingConnectionTestMode.ValidateConfig,
-        testJoinUrl: null,
-        deleted: null,
-        upstreamResponseSummary: "401 Unauthorized",
-        errorCode: "INVALID_CREDENTIALS",
-        errorMessage: "The provided service account credentials are invalid or expired.",
-        rawUpstreamPayload: { error: "invalid_grant", error_description: "Token has been expired or revoked." },
-        requiredScopes: null,
-        grantedScopes: null,
-      },
-      [ZOOM]: null,
-      [MICROSOFT_TEAMS]: null,
-    },
+    lastTestResultByProvider: singleTestResultRecord(GOOGLE_MEET, googleMeetErrorResult),
   });
 }
 
@@ -222,21 +131,8 @@ export function createViewModelMetadataOpen(
     labels,
     providers,
     expandedSlug: ZOOM,
-    connectedAccountsByProvider: {
-      [ZOOM]: connectedAccounts,
-      [GOOGLE_MEET]: [],
-      [MICROSOFT_TEAMS]: [],
-    },
-    metadataDialogAccount: {
-      id: "a1",
-      userId: "user1",
-      name: "Ahmed Hassan",
-      email: "ahmed@example.com",
-      connectedAt: new Date("2026-06-15T09:00:00Z"),
-      expiresAt: new Date("2026-09-15T09:00:00Z"),
-      lastRefreshedAt: new Date("2026-08-01T03:00:00Z"),
-      status: MeetingIntegrationConnectedAccountStatus.Connected,
-    },
+    connectedAccountsByProvider: zoomAccountsRecord(connectedAccounts),
+    metadataDialogAccount,
     metadataDialogProviderSlug: ZOOM,
   });
 }

@@ -10,6 +10,12 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import type { RecurringScheduleDetailLabelsBySection } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringScheduleDetail.types";
+import {
+  buildBreadcrumbs,
+  buildLabelsBySection,
+  buildScheduleSummary,
+  handleRateUpdate,
+} from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel.helpers";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface RecurringScheduleDetailViewModel {
@@ -28,120 +34,6 @@ export interface RecurringScheduleDetailViewModel {
 
 export interface UseRecurringScheduleDetailViewModelProps {
   readonly onRetry?: () => void;
-}
-
-type RecurringScheduleSummarySource = {
-  readonly studentName?: string | null;
-  readonly teacherName?: string | null;
-  readonly durationMinutes?: number | null;
-  readonly timezone?: string | null;
-};
-
-type RecurringScheduleTranslations = {
-  readonly scheduleSummary: (
-    studentName: string,
-    teacherName: string,
-    durationMinutes: string,
-    timezone: string
-  ) => string;
-  readonly breadcrumbDashboard: string;
-  readonly breadcrumbClasses: string;
-  readonly pageTitle: string;
-  readonly invalidId: string;
-  readonly rateSectionTitle: string;
-  readonly hourlyRateLabel: string;
-  readonly currencyLabel: string;
-  readonly rateSaveLabel: string;
-  readonly rateClearLabel: string;
-  readonly rateSuccessMessage: string;
-  readonly rateErrorMessage: string;
-};
-
-type ManagerTranslations = {
-  readonly loadError: string;
-};
-
-function buildScheduleSummary(schedule: RecurringScheduleSummarySource, t: RecurringScheduleTranslations): string {
-  return t.scheduleSummary(
-    schedule.studentName ?? "",
-    schedule.teacherName ?? "",
-    String(schedule.durationMinutes ?? 0),
-    schedule.timezone ?? ""
-  );
-}
-
-function buildBreadcrumbs(t: RecurringScheduleTranslations) {
-  return [
-    { label: t.breadcrumbDashboard, href: "/dashboard" },
-    { label: t.breadcrumbClasses, href: "/classes" },
-    { label: t.pageTitle },
-  ];
-}
-
-function buildLabelsBySection(
-  t: RecurringScheduleTranslations,
-  tManager: ManagerTranslations,
-  retryLabel: string,
-  summary: string,
-  breadcrumbs: ReturnType<typeof buildBreadcrumbs>
-): RecurringScheduleDetailLabelsBySection {
-  return {
-    shell: {
-      pageTitle: t.pageTitle,
-      subtitle: summary,
-      breadcrumbs,
-      invalidId: t.invalidId,
-      loadError: tManager.loadError,
-      retryLabel,
-    },
-    form: {
-      rate: {
-        title: t.rateSectionTitle,
-        hourlyRateLabel: t.hourlyRateLabel,
-        currencyLabel: t.currencyLabel,
-        saveLabel: t.rateSaveLabel,
-        clearLabel: t.rateClearLabel,
-        successMessage: t.rateSuccessMessage,
-        errorMessage: t.rateErrorMessage,
-      },
-    },
-  };
-}
-
-async function updateRecurringScheduleRate(
-  updateRateMut: ReturnType<typeof useMutation>[0],
-  recurringScheduleId: string,
-  hourlyRate: string | null,
-  rateCurrency: CurrencyCode | null
-): Promise<void> {
-  await updateRateMut({
-    variables: {
-      input: {
-        recurringScheduleId,
-        hourlyRate: hourlyRate ?? null,
-        rateCurrency: rateCurrency ?? null,
-      },
-    },
-  });
-}
-
-async function handleRateUpdate(
-  updateRateMut: ReturnType<typeof useMutation>[0],
-  recurringScheduleId: string,
-  hourlyRate: string | null,
-  rateCurrency: CurrencyCode | null,
-  setRateError: (error: string | null) => void,
-  setRateSuccess: (success: boolean) => void,
-  rateErrorMessage: string
-): Promise<void> {
-  setRateError(null);
-  setRateSuccess(false);
-  try {
-    await updateRecurringScheduleRate(updateRateMut, recurringScheduleId, hourlyRate, rateCurrency);
-    setRateSuccess(true);
-  } catch (err) {
-    setRateError(err instanceof Error ? err.message : rateErrorMessage);
-  }
 }
 
 export function useRecurringScheduleDetailViewModel(

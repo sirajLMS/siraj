@@ -1,289 +1,30 @@
 "use client";
 
-import { addDays, format } from "date-fns";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { DEFAULT_PAGE_SIZE, STORAGE_KEY } from "@/frontend/common/stores/searchScheduleStore.constants";
 import {
-  type AvailabilitySearchInput,
-  AvailabilitySearchSortBy,
-  Gender,
-  type SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers,
-  type SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers_gaps,
-} from "@/frontend/common/graphql/generated/gql/graphql";
+  createClearedSearchScheduleState,
+  createDefaultDraftFilters,
+  createMonthDrawerOpenedState,
+  draftToActiveInput,
+  extractPersistedDraftFilters,
+  mergeDraftWithPersistedFilters,
+  resolveEnsureDraftDates,
+  resolveTeacherNameSearch,
+} from "@/frontend/common/stores/searchScheduleStore.helpers";
+import type {
+  PersistedSearchScheduleState,
+  SearchScheduleState,
+} from "@/frontend/common/stores/searchScheduleStore.types";
+import { isPersistedSearchScheduleState } from "@/frontend/common/stores/searchScheduleStore.validation";
 
-const DATE_FILTER_FORMAT = "yyyy-MM-dd";
-const DEFAULT_PAGE_SIZE = 10;
-const STORAGE_KEY = "search-schedule-storage";
-
-export interface SearchScheduleTeacherOption {
-  readonly id: string;
-  readonly name: string;
-}
-
-// NEW FOR PLAN v5 (newly created for the migration wave): minimal serializable shape for the
-// month-drawer's selected teacher. Matches the runtime subset of SearchScheduleResultItem
-// used by TeacherAvailabilityMonthDrawer (id + name + timezone + gender + availableDaysCount +
-// gaps). Kept in the store so the drawer state survives tier switches. Nullable to structurally
-// satisfy SearchScheduleResultItem's optional-null field shapes from the GraphQL layer.
-export type SearchScheduleGapItem = Pick<
-  SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers_gaps,
-  "id" | "teacherId" | "teacherName" | "teacherGender" | "calendarDate" | "gapStartTime" | "gapEndTime"
-> & {
-  readonly dayOfWeek: string | null;
-  readonly timezone: string | null;
-};
-
-export type SearchScheduleMonthDrawerTeacher = Omit<
-  Pick<
-    SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers,
-    "id" | "name" | "gender" | "timezone" | "availableDaysCount" | "gaps"
-  >,
-  "gender" | "timezone" | "gaps"
-> & {
-  readonly gender: string | null;
-  readonly timezone: string | null;
-  readonly gaps: readonly (SearchScheduleGapItem | null)[] | null;
-};
-
-function getDefaultFromDate(): string {
-  return format(new Date(), DATE_FILTER_FORMAT);
-}
-
-function getDefaultToDate(): string {
-  return format(addDays(new Date(), 7), DATE_FILTER_FORMAT);
-}
-
-export interface SearchScheduleDraftFilters {
-  readonly fromTime: string;
-  readonly toTime: string;
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly gender: Gender | null;
-  readonly minAvailableDays: number | null;
-  readonly minTotalGaps: number | null;
-  readonly daysOfWeek: AvailabilitySearchInput["daysOfWeek"];
-  readonly sortBy: AvailabilitySearchSortBy;
-}
-
-interface PersistedSearchScheduleFilters {
-  readonly gender: Gender | null;
-  readonly minAvailableDays: number | null;
-  readonly minTotalGaps: number | null;
-  readonly daysOfWeek: AvailabilitySearchInput["daysOfWeek"];
-  readonly sortBy: AvailabilitySearchSortBy;
-}
-
-interface PersistedSearchScheduleState {
-  readonly draftFilters: PersistedSearchScheduleFilters;
-  readonly selectedTeacher: SearchScheduleTeacherOption | null;
-  readonly pageSize: number;
-  // Transient UI state (formFilterDrawerOpen, monthDrawerOpen) is intentionally NOT persisted —
-  // it resets to false on rehydrate.
-  readonly monthDrawerAnchorFromDate: string;
-  readonly monthDrawerCurrentMonth: string;
-  readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
-}
-
-function createDefaultDraftFilters(): SearchScheduleDraftFilters {
-  return {
-    fromTime: "08:00",
-    toTime: "17:00",
-    fromDate: "",
-    toDate: "",
-    gender: null,
-    minAvailableDays: null,
-    minTotalGaps: null,
-    daysOfWeek: null,
-    sortBy: AvailabilitySearchSortBy.MostAvailableDays,
-  };
-}
-
-function extractPersistedDraftFilters(draft: SearchScheduleDraftFilters): PersistedSearchScheduleFilters {
-  return {
-    gender: draft.gender,
-    minAvailableDays: draft.minAvailableDays,
-    minTotalGaps: draft.minTotalGaps,
-    daysOfWeek: draft.daysOfWeek,
-    sortBy: draft.sortBy,
-  };
-}
-
-const VALID_SORT_BY_VALUES = [
-  AvailabilitySearchSortBy.MostAvailableDays,
-  AvailabilitySearchSortBy.MostGaps,
-  AvailabilitySearchSortBy.NameAsc,
-  AvailabilitySearchSortBy.NameDesc,
-  AvailabilitySearchSortBy.TimezoneAsc,
-] as const;
-
-const VALID_GENDER_VALUES = [Gender.Female, Gender.Male] as const;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function hasValidTeacherFields(value: unknown): boolean {
-  return isRecord(value) && typeof value.id === "string" && typeof value.name === "string";
-}
-
-function isValidEnumValue<T extends string>(value: unknown, validValues: readonly T[]): value is T {
-  return typeof value === "string" && (validValues as readonly string[]).includes(value);
-}
-
-function isValidNullableNumber(value: unknown): boolean {
-  return value === null || (typeof value === "number" && Number.isFinite(value));
-}
-
-function isPersistedSearchScheduleState(value: unknown): value is PersistedSearchScheduleState {
-  if (!isRecord(value)) {
-    return false;
-  }
-  const v = value;
-
-  // Required top-level keys.
-  const requiredKeys = [
-    "draftFilters",
-    "selectedTeacher",
-    "pageSize",
-    "monthDrawerAnchorFromDate",
-    "monthDrawerCurrentMonth",
-    "monthDrawerTeacher",
-  ] as const;
-  if (!requiredKeys.every(key => key in v)) {
-    return false;
-  }
-
-  // Validate pageSize: finite positive integer.
-  if (typeof v.pageSize !== "number" || !Number.isFinite(v.pageSize) || v.pageSize < 1) {
-    return false;
-  }
-
-  // Validate string-shaped lifted UI state.
-  if (typeof v.monthDrawerAnchorFromDate !== "string" || typeof v.monthDrawerCurrentMonth !== "string") {
-    return false;
-  }
-
-  // Validate selectedTeacher shape (allow null — missing/invalid resets to null on merge).
-  if (v.selectedTeacher !== null && !hasValidTeacherFields(v.selectedTeacher)) {
-    return false;
-  }
-
-  // Validate draftFilters shape — must be a plain object with valid enum values.
-  const draft = v.draftFilters;
-  if (!isRecord(draft)) {
-    return false;
-  }
-
-  // sortBy is required and must be a known enum value (post-JSON.parse string drift protection).
-  if (!isValidEnumValue(draft.sortBy, VALID_SORT_BY_VALUES)) {
-    return false;
-  }
-
-  // gender is nullable — null is valid; non-null must be a known enum value.
-  if (draft.gender !== null && !isValidEnumValue(draft.gender, VALID_GENDER_VALUES)) {
-    return false;
-  }
-
-  // minAvailableDays / minTotalGaps are nullable numbers (or NaN-safe finite check).
-  if (!isValidNullableNumber(draft.minAvailableDays) || !isValidNullableNumber(draft.minTotalGaps)) {
-    return false;
-  }
-
-  // daysOfWeek is nullable; when present must be an array of strings (DayOfWeek enum strings).
-  if (draft.daysOfWeek !== null) {
-    if (!Array.isArray(draft.daysOfWeek) || !draft.daysOfWeek.every((d: unknown) => typeof d === "string")) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function mergeDraftWithPersistedFilters(
-  persistedFilters?: Partial<PersistedSearchScheduleFilters>
-): SearchScheduleDraftFilters {
-  const defaultDraft = createDefaultDraftFilters();
-  if (!persistedFilters) {
-    return defaultDraft;
-  }
-
-  return {
-    ...defaultDraft,
-    ...persistedFilters,
-  };
-}
-
-function resolveTeacherNameSearch(selectedTeacher: SearchScheduleTeacherOption | null): string | null {
-  const name = selectedTeacher?.name?.trim() ?? "";
-  return name.length > 0 ? name : null;
-}
-
-function draftToActiveInput(
-  draft: SearchScheduleDraftFilters,
-  page: number,
-  pageSize: number,
-  teacherNameSearch: string | null
-): AvailabilitySearchInput {
-  return {
-    fromTime: draft.fromTime,
-    toTime: draft.toTime,
-    fromDate: draft.fromDate,
-    toDate: draft.toDate,
-    gender: draft.gender,
-    minAvailableDays: draft.minAvailableDays,
-    minTotalGaps: draft.minTotalGaps,
-    teacherNameSearch,
-    daysOfWeek: draft.daysOfWeek?.length ? draft.daysOfWeek : null,
-    sortBy: draft.sortBy,
-    paginationArgs: {
-      first: pageSize,
-      page: page + 1,
-      skip: null,
-      after: null,
-      before: null,
-      last: null,
-      maxCount: null,
-    },
-  };
-}
-
-interface SearchScheduleState {
-  readonly draft: SearchScheduleDraftFilters;
-  readonly activeInput: AvailabilitySearchInput | null;
-  readonly hasSearched: boolean;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly selectedTeacher: SearchScheduleTeacherOption | null;
-  readonly hasHydrated: boolean;
-  // NEW FOR PLAN v5: form-filter drawer open state (lifted from searchScheduleForm.{mobile,desktop}.tsx).
-  readonly formFilterDrawerOpen: boolean;
-  // NEW FOR PLAN v5: sort menu anchor element (lifted from searchScheduleSortMenu.{mobile,desktop}.tsx).
-  // Non-serializable DOM element — excluded from persist via partialize below.
-  readonly sortMenuAnchorEl: HTMLElement | null;
-  // NEW FOR PLAN v5: month drawer open flag (lifted from teacherAvailabilityGrid.{mobile,desktop}.tsx drawerOpen + teacherAvailabilityMonthDrawer.{mobile,desktop}.tsx open).
-  readonly monthDrawerOpen: boolean;
-  // NEW FOR PLAN v5: anchor ISO date (yyyy-MM-dd) the month drawer opened from.
-  readonly monthDrawerAnchorFromDate: string;
-  // NEW FOR PLAN v5: ISO date (yyyy-MM-dd) representing the month drawer's currently navigated month.
-  readonly monthDrawerCurrentMonth: string;
-  // NEW FOR PLAN v5: teacher selected for the month drawer (lifted from teacherAvailabilityMonthDrawer.{mobile,desktop}.tsx).
-  readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
-  setDraft: (draft: Partial<SearchScheduleDraftFilters>) => void;
-  setSelectedTeacher: (teacher: SearchScheduleTeacherOption | null) => void;
-  setHasHydrated: (hasHydrated: boolean) => void;
-  commitSearch: () => void;
-  setPage: (page: number) => void;
-  clearFilters: () => void;
-  buildActiveInput: () => AvailabilitySearchInput | null;
-  /** Lazily initializes draft.fromDate and draft.toDate on first access. Idempotent. */
-  readonly ensureDraftDates: () => void;
-  // NEW FOR PLAN v5: setters for the lifted drawer/menu/month state.
-  setFormFilterDrawerOpen: (open: boolean) => void;
-  setSortMenuAnchorEl: (anchor: HTMLElement | null) => void;
-  openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void;
-  closeMonthDrawer: () => void;
-  setMonthDrawerCurrentMonth: (isoMonth: string) => void;
-}
+export type {
+  SearchScheduleDraftFilters,
+  SearchScheduleGapItem,
+  SearchScheduleMonthDrawerTeacher,
+  SearchScheduleTeacherOption,
+} from "@/frontend/common/stores/searchScheduleStore.types";
 
 export const useSearchScheduleStore = create<SearchScheduleState>()(
   persist(
@@ -295,10 +36,8 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
       pageSize: DEFAULT_PAGE_SIZE,
       selectedTeacher: null,
       hasHydrated: false,
-      // NEW FOR PLAN v5 (newly created for the migration wave): default values for the lifted
-      // drawer/menu/month state. formFilterDrawerOpen stays false until the toolbar opens it.
-      // sortMenuAnchorEl is a non-serializable DOM element — excluded from persist.
-      // monthDrawer* fields default to closed with empty anchor.
+      // Transient drawer/menu/month UI state — formFilterDrawerOpen stays false until the toolbar
+      // opens it; sortMenuAnchorEl is a non-serializable DOM element excluded from persist.
       formFilterDrawerOpen: false,
       sortMenuAnchorEl: null,
       monthDrawerOpen: false,
@@ -311,22 +50,10 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         })),
       setSelectedTeacher: selectedTeacher => set({ selectedTeacher }),
       setHasHydrated: hasHydrated => set({ hasHydrated }),
-      // NEW FOR PLAN v5: form-filter drawer setter — toggles the mobile/desktop filter drawer.
       setFormFilterDrawerOpen: formFilterDrawerOpen => set({ formFilterDrawerOpen }),
-      // NEW FOR PLAN v5: sort menu anchor setter — opens/closes the popover menu.
       setSortMenuAnchorEl: sortMenuAnchorEl => set({ sortMenuAnchorEl }),
-      // NEW FOR PLAN v5: openMonthDrawer — opens the drawer with the selected teacher and
-      // seeds monthDrawerCurrentMonth from the anchor date.
-      openMonthDrawer: (teacher, anchorFromDate) =>
-        set({
-          monthDrawerOpen: true,
-          monthDrawerTeacher: teacher,
-          monthDrawerAnchorFromDate: anchorFromDate,
-          monthDrawerCurrentMonth: anchorFromDate,
-        }),
-      // NEW FOR PLAN v5: closeMonthDrawer — closes the drawer (keeps the last teacher/month).
+      openMonthDrawer: (teacher, anchorFromDate) => set(createMonthDrawerOpenedState(teacher, anchorFromDate)),
       closeMonthDrawer: () => set({ monthDrawerOpen: false }),
-      // NEW FOR PLAN v5: setMonthDrawerCurrentMonth — advances the drawer's navigated month.
       setMonthDrawerCurrentMonth: monthDrawerCurrentMonth => set({ monthDrawerCurrentMonth }),
       commitSearch: () => {
         const { draft, pageSize, selectedTeacher } = get();
@@ -345,31 +72,11 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           activeInput: draftToActiveInput(draft, page, pageSize, teacherNameSearch),
         });
       },
-      clearFilters: () =>
-        set({
-          draft: createDefaultDraftFilters(),
-          activeInput: null,
-          hasSearched: false,
-          page: 0,
-          selectedTeacher: null,
-          // NEW FOR PLAN v5: also reset all lifted UI state on clearFilters.
-          formFilterDrawerOpen: false,
-          sortMenuAnchorEl: null,
-          monthDrawerOpen: false,
-          monthDrawerAnchorFromDate: "",
-          monthDrawerCurrentMonth: "",
-          monthDrawerTeacher: null,
-        }),
+      clearFilters: () => set(createClearedSearchScheduleState()),
       ensureDraftDates: () => {
-        const { draft } = get();
-        if (draft.fromDate === "" || draft.toDate === "") {
-          set({
-            draft: {
-              ...draft,
-              fromDate: draft.fromDate === "" ? getDefaultFromDate() : draft.fromDate,
-              toDate: draft.toDate === "" ? getDefaultToDate() : draft.toDate,
-            },
-          });
+        const nextDraft = resolveEnsureDraftDates(get().draft);
+        if (nextDraft) {
+          set({ draft: nextDraft });
         }
       },
       buildActiveInput: () => {
@@ -387,8 +94,8 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         draftFilters: extractPersistedDraftFilters(state.draft),
         selectedTeacher: state.selectedTeacher,
         pageSize: state.pageSize,
-        // Transient UI state (formFilterDrawerOpen, monthDrawerOpen) is excluded —
-        // not persisted. sortMenuAnchorEl is excluded (DOM element, non-serializable).
+        // Transient UI state (formFilterDrawerOpen, monthDrawerOpen) and the non-serializable
+        // sortMenuAnchorEl are excluded from persistence.
         monthDrawerAnchorFromDate: state.monthDrawerAnchorFromDate,
         monthDrawerCurrentMonth: state.monthDrawerCurrentMonth,
         monthDrawerTeacher: state.monthDrawerTeacher,
@@ -401,7 +108,6 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           draft: mergeDraftWithPersistedFilters(persisted?.draftFilters),
           selectedTeacher: persisted?.selectedTeacher ?? null,
           pageSize: persisted?.pageSize ?? currentState.pageSize,
-          // Transient UI state resets on rehydrate (not persisted).
           formFilterDrawerOpen: false,
           sortMenuAnchorEl: null,
           monthDrawerOpen: false,

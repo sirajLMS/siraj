@@ -1,51 +1,19 @@
 "use client";
 
 import BoltIcon from "@mui/icons-material/Bolt";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
-import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/common/components/ui";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
-
-interface ActionConfig {
-  readonly key: string;
-  readonly icon: React.ElementType;
-  readonly statusKey: "active" | "cancelled" | "completed";
-  readonly permission?: AppPermission;
-}
-
-const ACTION_CONFIGS: ActionConfig[] = [
-  {
-    key: "activate",
-    icon: PowerSettingsNewIcon,
-    statusKey: "active",
-    permission: AppPermission.SessionActivateClass,
-  },
-  {
-    key: "stop",
-    icon: PauseCircleIcon,
-    statusKey: "cancelled",
-    permission: AppPermission.SessionOverrideActions,
-  },
-  {
-    key: "infoEdit",
-    icon: EditNoteIcon,
-    statusKey: "completed",
-  },
-  {
-    key: "delete",
-    icon: DeleteIcon,
-    statusKey: "cancelled",
-    permission: AppPermission.SessionOverrideActions,
-  },
-];
+import { ACTION_CONFIGS } from "@/frontend/common/views/dashboard/classes/details/teacher/ActionsPanel.constants";
+import {
+  StyledActionsHeader,
+  StyledActionsTitle,
+  StyledHelpContainer,
+  StyledHelpIcon,
+  StyledHelpText,
+} from "@/frontend/common/views/dashboard/classes/details/teacher/ActionsPanel.styles";
 
 interface ActionsPanelProps {
   readonly onActivate: () => void;
@@ -61,38 +29,6 @@ interface ActionsPanelProps {
     readonly contextualHelp: string;
   };
 }
-
-const StyledActionsHeader = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.header,
-  paddingBlock: theme.spacing(2),
-}));
-
-const StyledActionsTitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onHeader,
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-}));
-
-const StyledHelpContainer = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(1.5),
-  padding: theme.spacing(2),
-  backgroundColor: theme.palette.background.default,
-  borderRadius: 1.5,
-  alignItems: "flex-start",
-}));
-
-const StyledHelpText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  lineHeight: 1.6,
-}));
-
-const StyledHelpIcon = styled(HelpOutlinedIcon)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  fontSize: 20,
-  marginTop: theme.spacing(0.25),
-  flexShrink: 0,
-}));
 
 export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels }: ActionsPanelProps) {
   const handlers: Record<string, () => void> = {

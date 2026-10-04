@@ -2,15 +2,19 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import { formatDate, formatDateTime } from "@/frontend/common/components/intl/dateFormat";
 import { supervisorDashboardQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { recentApprovedLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useSupervisorDashboardRecentApprovalsStore } from "@/frontend/common/stores/supervisorDashboardRecentApprovalsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { logger } from "@/frontend/common/utils/logger";
+import {
+  buildPendingDuesSummary,
+  buildRecentApprovalsPaginationArgs,
+  createSupervisorDashboardNavigation,
+  mapRecentApprovals,
+  resolveMonthlySnapshot,
+} from "@/frontend/common/views/dashboard/supervisor/dashboard/supervisorDashboardData.helpers";
 import type {
-  RecentApproval,
   RecentApprovalsPagination,
   SupervisorDashboardViewModel,
   UseSupervisorDashboardViewModelProps,
@@ -32,18 +36,7 @@ export function useSupervisorDashboardViewModel(
   const pageSize = useSupervisorDashboardRecentApprovalsStore(state => state.pageSize);
   const setPage = useSupervisorDashboardRecentApprovalsStore(state => state.setPage);
 
-  const paginationArgs = useMemo(
-    () => ({
-      page: page + 1,
-      first: pageSize,
-      skip: null,
-      after: null,
-      before: null,
-      last: null,
-      maxCount: null,
-    }),
-    [page, pageSize]
-  );
+  const paginationArgs = useMemo(() => buildRecentApprovalsPaginationArgs(page, pageSize), [page, pageSize]);
 
   const { data, loading } = useQuery(supervisorDashboardQueryDocument, {
     fetchPolicy: "cache-and-network",
@@ -62,51 +55,19 @@ export function useSupervisorDashboardViewModel(
   const pendingReviewCount = dashboard?.pendingReviewCount ?? 0;
 
   const pendingDuesSummary = useMemo(
-    () => ({
-      totalCount: dashboard?.pendingDuesSummary?.totalCount ?? 0,
-      totalAmount: dashboard?.pendingDuesSummary?.totalAmount ?? 0,
-      currency: dashboard?.pendingDuesSummary?.currency ?? "USD",
-    }),
+    () => buildPendingDuesSummary(dashboard?.pendingDuesSummary),
     [dashboard?.pendingDuesSummary]
   );
 
-  const monthlySnapshot = useMemo(() => {
-    const snapshot = dashboard?.monthlySnapshot;
-    if (snapshot?.year != null && snapshot.month != null && snapshot.label) {
-      return { year: snapshot.year, month: snapshot.month, label: snapshot.label };
-    }
-    const now = new Date();
-    return {
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
-      label: snapshot?.label ?? "",
-    };
-  }, [dashboard?.monthlySnapshot]);
+  const monthlySnapshot = useMemo(
+    () => resolveMonthlySnapshot(dashboard?.monthlySnapshot),
+    [dashboard?.monthlySnapshot]
+  );
 
-  const recentApprovals: RecentApproval[] = useMemo(() => {
-    const rows = recentApprovalsData?.recentApprovedLessonReports?.rows ?? [];
-    return rows.map(r => ({
-      id: r?.id ?? "",
-      classInstanceId: r?.classInstanceId ?? "",
-      subjectName: r?.subjectName?.trim() ?? "",
-      classAvatarUrl: r?.classAvatarUrl ?? null,
-      lessonDate: r?.lessonDate ? formatDate(r.lessonDate, locale) : "",
-      lessonDateRaw: r?.lessonDate ?? null,
-      durationMinutes: r?.durationMinutes ?? null,
-      completionPercentage: r?.completionPercentage ?? null,
-      status: r?.status ?? null,
-      studentId: r?.studentId ?? "",
-      studentName: r?.studentName?.trim() ?? "",
-      studentAvatarUrl: r?.studentAvatarUrl ?? null,
-      studentUserId: r?.studentUserId ?? null,
-      teacherId: r?.teacherId ?? "",
-      teacherName: r?.teacherName?.trim() ?? "",
-      teacherAvatarUrl: r?.teacherAvatarUrl ?? null,
-      teacherUserId: r?.teacherUserId ?? null,
-      reviewedAt: r?.reviewedAt ? formatDateTime(r.reviewedAt, locale) : "",
-      reviewedAtRaw: r?.reviewedAt ?? null,
-    }));
-  }, [recentApprovalsData?.recentApprovedLessonReports?.rows, locale]);
+  const recentApprovals = useMemo(
+    () => mapRecentApprovals(recentApprovalsData?.recentApprovedLessonReports?.rows, locale),
+    [recentApprovalsData?.recentApprovedLessonReports?.rows, locale]
+  );
 
   const totalCount = recentApprovalsData?.recentApprovedLessonReports?.totalCount ?? 0;
 
@@ -130,21 +91,6 @@ export function useSupervisorDashboardViewModel(
     labels: t,
     loading,
     recentApprovalsLoading,
-    onGoToReviews: () => {
-      router.push("/lesson-reports");
-    },
-    onGoToDues: () => {
-      router.push("/teacher-dues");
-    },
-    onGoToMonthlyReports: () => {
-      router.push("/monthly-reports");
-    },
-    onViewRecentApproval: (id: string) => {
-      if (!id) {
-        logger.warn("onViewRecentApproval called with empty id");
-        return;
-      }
-      router.push(`/lesson-reports/${id}`);
-    },
+    ...createSupervisorDashboardNavigation(router),
   };
 }

@@ -1,26 +1,15 @@
 "use client";
 
-import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { type ComponentProps, type ReactNode, useState } from "react";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ProfileShell } from "@/frontend/common/views/dashboard/profile/core/ProfileShell";
+import {
+  MockProfileActions,
+  MockProfileChildren,
+  StorybookPageFrame,
+  TabbedShellStory,
+} from "@/frontend/common/views/dashboard/profile/core/ProfileShell.fixtures";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
-
-function StorybookPageFrame({ children }: { readonly children: ReactNode }) {
-  return (
-    <Box
-      sx={theme => ({
-        minHeight: "100vh",
-        bgcolor: theme.palette.background.default,
-        px: { xs: 0, md: theme.layout.pageMargin },
-        py: { xs: theme.spacing(2), md: theme.layout.pageMargin },
-      })}
-    >
-      {children}
-    </Box>
-  );
-}
 
 const meta: Meta<typeof ProfileShell> = {
   title: "Views/profile/core/ProfileShell",
@@ -52,35 +41,6 @@ const meta: Meta<typeof ProfileShell> = {
 export default meta;
 type Story = StoryObj<typeof ProfileShell>;
 
-const mockActions = (
-  <Box sx={{ display: "flex", gap: 1 }}>
-    <Button variant="contained" size="small">
-      Edit
-    </Button>
-  </Box>
-);
-
-const mockChildren = (
-  <Box sx={{ p: 2 }}>
-    <Box
-      sx={theme => ({
-        bgcolor: theme.palette.background.paper,
-        p: 2,
-        borderRadius: 1,
-        mb: 2,
-      })}
-    >
-      <h3>Profile Content</h3>
-      <p>This section represents dynamic content rendered based on the selected tab.</p>
-    </Box>
-  </Box>
-);
-
-function TabbedShellStory(args: ComponentProps<typeof ProfileShell>) {
-  const [currentTab, setCurrentTab] = useState(args.currentTab ?? "profile");
-  return <ProfileShell {...args} currentTab={currentTab} onTabChange={setCurrentTab} />;
-}
-
 export const Default: Story = {
   render: args => <TabbedShellStory {...args} />,
   args: {
@@ -91,8 +51,8 @@ export const Default: Story = {
     scope: ProfileScope.OWN,
     mode: ProfileMode.VIEW,
     currentTab: "profile",
-    actions: mockActions,
-    children: mockChildren,
+    actions: <MockProfileActions />,
+    children: <MockProfileChildren />,
   },
 };
 
@@ -106,8 +66,8 @@ export const ParentProfile: Story = {
     scope: ProfileScope.OWN,
     mode: ProfileMode.VIEW,
     currentTab: "profile",
-    actions: mockActions,
-    children: mockChildren,
+    actions: <MockProfileActions />,
+    children: <MockProfileChildren />,
   },
   decorators: [
     Story => {
@@ -127,8 +87,8 @@ export const StaffProfile: Story = {
     scope: ProfileScope.OWN,
     mode: ProfileMode.VIEW,
     currentTab: "profile",
-    actions: mockActions,
-    children: mockChildren,
+    actions: <MockProfileActions />,
+    children: <MockProfileChildren />,
   },
   decorators: [
     Story => {
@@ -165,7 +125,7 @@ export const OtherUserProfile: Story = {
     scope: ProfileScope.OTHER,
     mode: ProfileMode.VIEW,
     currentTab: "profile",
-    actions: mockActions,
-    children: mockChildren,
+    actions: <MockProfileActions />,
+    children: <MockProfileChildren />,
   },
 };

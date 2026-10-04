@@ -1,13 +1,18 @@
 "use client";
 
-import { ArrowBackOutlined, BlockOutlined, HideImageOutlined, LockOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, IconButton, Stack, type Theme, Typography } from "@mui/material";
+import { LockOutlined } from "@mui/icons-material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
-import { WhatsappMessageDirection } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  dayDividerLabel,
+  dayKey,
+} from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/ConversationThread.helpers";
+import {
+  DayDivider,
+  MessageBubble,
+} from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/ConversationThread.parts";
 import type { WhatsappMessageRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
-import { getWhatsappMessageDirectionLabel } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappInboxDirectionLabel";
-import { useAutoScrollToEnd } from "@/frontend/common/views/dashboard/whatsapp/conversations/useAutoScrollToEnd";
+import { ThreadPaneFrame, useThreadAutoScroll } from "@/frontend/common/views/dashboard/whatsapp/__shared__";
 import { useAppLocale } from "@/shared/locale/localeContext";
 import type { WhatsappInboxLabels } from "@/shared/locale/types/whatsappInbox";
 
@@ -20,171 +25,6 @@ export interface ConversationThreadProps {
   readonly formatTimestamp: (iso: string | null) => string;
   /** When provided, a back button renders (mobile single-pane flow). */
   readonly onBack?: () => void;
-}
-
-function messageText(content: unknown): string | null {
-  if (typeof content === "string") {
-    return content.length > 0 ? content : null;
-  }
-  // Persisted rows carry the Meta typed-content envelope (e.g. `{ body, … }` or
-  // an edit envelope `{ body, __edited_type }`) — read the textual body.
-  if (typeof content === "object" && content !== null && "body" in content) {
-    const body = content.body;
-    return typeof body === "string" && body.length > 0 ? body : null;
-  }
-  return null;
-}
-
-function isOutbound(direction: WhatsappMessageDirection | null): boolean {
-  return direction === WhatsappMessageDirection.Echo || direction === WhatsappMessageDirection.ApiOutbound;
-}
-
-function isSameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function dayKey(sentAt: string | null): string | null {
-  if (sentAt === null) {
-    return null;
-  }
-  const date = new Date(sentAt);
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
-
-const MEDIUM_DATE_OPTIONS: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
-
-function dayDividerLabel(sentAt: string | null, labels: WhatsappInboxLabels, locale: string): string {
-  if (sentAt === null) {
-    return "";
-  }
-  const date = new Date(sentAt);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  if (isSameDay(date, today)) {
-    return labels.dayToday;
-  }
-  if (isSameDay(date, yesterday)) {
-    return labels.dayYesterday;
-  }
-  return getDateTimeFormatter(locale === "ar" ? "ar" : "en", MEDIUM_DATE_OPTIONS).format(date);
-}
-
-/** Centered date pill dividing message groups by send day. */
-function DayDivider({ label }: Readonly<{ label: string }>) {
-  return (
-    <Box sx={{ display: "flex", justifyContent: "center" }}>
-      <Typography
-        variant="labelUppercase"
-        sx={{
-          px: 1.5,
-          py: 0.5,
-          borderRadius: 999,
-          bgcolor: theme => theme.palette.surfaceVariant,
-          color: theme => theme.palette.onSurfaceVariant,
-        }}
-      >
-        {label}
-      </Typography>
-    </Box>
-  );
-}
-
-function RevokedMessageBody({ labels }: Readonly<{ labels: WhatsappInboxLabels }>) {
-  return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-      <BlockOutlined fontSize="small" />
-      <Typography variant="bodyMd" sx={{ fontStyle: "italic" }}>
-        {labels.messageRevoked}
-      </Typography>
-    </Stack>
-  );
-}
-
-function renderMessageBody(message: WhatsappMessageRow, labels: WhatsappInboxLabels): ReactNode {
-  if (message.revokedAt !== null) {
-    return <RevokedMessageBody labels={labels} />;
-  }
-  const body = messageText(message.content);
-  if (body !== null) {
-    return (
-      <Typography variant="bodyMd" sx={{ whiteSpace: "pre-wrap" }}>
-        {body}
-      </Typography>
-    );
-  }
-  if (message.mediaPlaceholder === true) {
-    return <MessageMediaPlaceholder labels={labels} />;
-  }
-  return null;
-}
-
-interface MessageBubbleProps {
-  readonly message: WhatsappMessageRow;
-  readonly labels: WhatsappInboxLabels;
-  readonly formatTimestamp: (iso: string | null) => string;
-}
-
-const INBOUND_BUBBLE_SX = (theme: Theme) => ({
-  bgcolor: theme.palette.surfaceVariant,
-  color: theme.palette.onSurfaceVariant,
-});
-
-const OUTBOUND_BUBBLE_SX = (theme: Theme) => ({
-  bgcolor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-});
-
-function MessageBubble({ message, labels, formatTimestamp }: Readonly<MessageBubbleProps>) {
-  const outbound = isOutbound(message.direction);
-  const directionLabel = getWhatsappMessageDirectionLabel(labels, message.direction);
-
-  return (
-    <Stack
-      spacing={0.5}
-      sx={[
-        {
-          alignSelf: outbound ? "flex-end" : "flex-start",
-          maxWidth: "80%",
-          p: 1.5,
-          borderRadius: 2,
-          borderStartStartRadius: outbound ? 8 : 2,
-          borderStartEndRadius: outbound ? 2 : 8,
-        },
-        outbound ? OUTBOUND_BUBBLE_SX : INBOUND_BUBBLE_SX,
-      ]}
-    >
-      {renderMessageBody(message, labels)}
-      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
-        {directionLabel !== "" && (
-          <Typography variant="labelUppercase" sx={{ opacity: 0.7 }}>
-            {directionLabel}
-          </Typography>
-        )}
-        <Typography variant="caption" sx={{ opacity: 0.7, marginInlineStart: "auto" }}>
-          {message.editedAt ? `${labels.editedLabel} · ` : ""}
-          {formatTimestamp(message.sentAt)}
-        </Typography>
-      </Stack>
-    </Stack>
-  );
-}
-function MessageMediaPlaceholder({ labels }: Readonly<{ labels: WhatsappInboxLabels }>) {
-  return (
-    <Stack
-      spacing={1}
-      sx={{
-        border: theme => `1px dashed ${theme.palette.outline}`,
-        borderRadius: 2,
-        p: 2,
-        alignItems: "center",
-        color: theme => theme.palette.onSurfaceVariant,
-      }}
-    >
-      <HideImageOutlined />
-      <Typography variant="bodyMd">{labels.mediaExpired}</Typography>
-    </Stack>
-  );
 }
 
 interface ThreadBodyProps {
@@ -250,27 +90,20 @@ export function ConversationThread({
   onBack,
 }: Readonly<ConversationThreadProps>) {
   const locale = useAppLocale();
-  const lastMessageId = messages.length > 0 ? (messages[messages.length - 1]?.id ?? null) : null;
-  const scrollContainerRef = useAutoScrollToEnd<HTMLElement>(lastMessageId, loading);
+  const scrollContainerRef = useThreadAutoScroll(messages, loading);
   return (
-    <Stack sx={{ borderRadius: 2, overflow: "hidden", border: theme => `1px solid ${theme.palette.outlineVariant}` }}>
-      <Stack
-        direction="row"
-        spacing={1}
-        sx={{ p: 2, alignItems: "center", borderBottom: theme => `1px solid ${theme.palette.outlineVariant}` }}
-      >
-        {onBack && (
-          <IconButton onClick={onBack} aria-label={labels.back} size="small">
-            <ArrowBackOutlined sx={theme => ({ transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)" })} />
-          </IconButton>
-        )}
+    <ThreadPaneFrame
+      backLabel={labels.back}
+      onBack={onBack}
+      header={
         <Box>
           <Typography variant="titleLg">{title}</Typography>
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
             {subtitle}
           </Typography>
         </Box>
-      </Stack>
+      }
+    >
       <Stack
         ref={scrollContainerRef}
         spacing={2}
@@ -300,6 +133,6 @@ export function ConversationThread({
         <LockOutlined fontSize="small" />
         <Typography variant="bodyMd">{labels.readOnlyNotice}</Typography>
       </Stack>
-    </Stack>
+    </ThreadPaneFrame>
   );
 }

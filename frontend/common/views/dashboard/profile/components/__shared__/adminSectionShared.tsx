@@ -1,12 +1,12 @@
 "use client";
 
-import { KeyOutlined } from "@mui/icons-material";
-import { IconButton, Stack, Tooltip } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import type { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { ResetPasswordIconButton } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared.parts";
 import {
   type AccountStatusOption,
   AccountStatusSelect,
@@ -43,31 +43,6 @@ interface AdminSectionSharedProps<TStatus extends string = AccountStatus> {
   readonly extraEditFields?: React.ReactNode;
   readonly renderEditResetPassword?: React.ReactNode;
   readonly resetPasswordRef?: React.RefObject<AdminResetPasswordSectionRef | null>;
-}
-
-function ResetPasswordIconButton({
-  tooltip,
-  onClick,
-  disabled,
-}: {
-  readonly tooltip: string;
-  readonly onClick: () => void;
-  readonly disabled: boolean;
-}) {
-  return (
-    <Tooltip title={tooltip}>
-      <span>
-        <IconButton
-          onClick={onClick}
-          disabled={disabled}
-          aria-label={tooltip}
-          sx={theme => ({ color: theme.palette.primary.main })}
-        >
-          <KeyOutlined />
-        </IconButton>
-      </span>
-    </Tooltip>
-  );
 }
 
 export function AdminSectionShared<TStatus extends string = AccountStatus>(

@@ -1,21 +1,21 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import { AppPermission, type PaginationArgs } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  adminComplaintQueueQueryDocument,
-  deleteComplaintMutationDocument,
-  respondToComplaintMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import { adminComplaintQueueQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAdminComplaintsStore } from "@/frontend/common/stores/adminComplaintsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { logger } from "@/frontend/common/utils/logger";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,
   ComplaintTab,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import {
+  buildAdminComplaintsPaginationArgs,
+  buildAdminComplaintsSummary,
+} from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel.helpers";
+import { useAdminComplaintsActions } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel.hooks";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { mapAdminComplaintRows } from "@/frontend/common/views/dashboard/complaints/utils/mapAdminComplaintRows";
 import { type ComplaintsAdminLabels, Translation, useAppTranslation } from "@/shared/locale";
@@ -72,93 +72,27 @@ export function useAdminComplaintsViewModel(
   const deleteDialogOpen = useAdminComplaintsStore(state => state.deleteDialogOpen);
   const deleteComplaintId = useAdminComplaintsStore(state => state.deleteComplaintId);
 
-  const setSearchQuery = useAdminComplaintsStore(state => state.setSearchQuery);
-  const setActiveTab = useAdminComplaintsStore(state => state.setActiveTab);
-  const setDraftResponse = useAdminComplaintsStore(state => state.setDraftResponse);
-  const setPage = useAdminComplaintsStore(state => state.setPage);
-  const openDeleteDialog = useAdminComplaintsStore(state => state.openDeleteDialog);
-  const closeDeleteDialog = useAdminComplaintsStore(state => state.closeDeleteDialog);
-  const resetResponding = useAdminComplaintsStore(state => state.resetResponding);
-
-  const paginationArgs: PaginationArgs = {
-    first: pageSize,
-    page: page + 1,
-    after: null,
-    before: null,
-    last: null,
-    maxCount: null,
-    skip: null,
-  };
-
   const { data, loading, error, refetch } = useQuery(adminComplaintQueueQueryDocument, {
     variables: {
       filter: {
         search: searchQuery || null,
         status: activeTab === "all" ? null : activeTab,
       },
-      paginationArgs,
+      paginationArgs: buildAdminComplaintsPaginationArgs(page, pageSize),
     },
     fetchPolicy: "cache-and-network",
   });
 
-  const [respondToComplaintMutation] = useMutation(respondToComplaintMutationDocument);
-  const [deleteComplaintMutation] = useMutation(deleteComplaintMutationDocument);
+  const actions = useAdminComplaintsActions({ draftResponses, deleteComplaintId, refetch });
 
   const metrics = data?.adminComplaintQueue?.metrics;
-  const summary: AdminComplaintsSummary = useMemo(
-    () =>
-      metrics
-        ? {
-            unanswered: metrics.unanswered ?? 0,
-            answered: metrics.answered ?? 0,
-            avgResolutionHours: metrics.avgResolutionTime ?? "0.0 Hours",
-          }
-        : { unanswered: 0, answered: 0, avgResolutionHours: "0.0 Hours" },
-    [metrics]
-  );
+  const summary = useMemo(() => buildAdminComplaintsSummary(metrics), [metrics]);
   const rows: readonly AdminComplaintRow[] = useMemo(
     () => mapAdminComplaintRows(data?.adminComplaintQueue?.rows, labels),
     [data?.adminComplaintQueue?.rows, labels]
   );
   const totalCount = data?.adminComplaintQueue?.totalCount ?? 0;
-
   const isDeletingComplaint = false;
-
-  const handleAnswer = async (id: string, _options: { readonly sendEmail: boolean }) => {
-    const draft = draftResponses[id];
-    if (!draft) return;
-
-    try {
-      await respondToComplaintMutation({
-        variables: { input: { complaintId: id, body: draft } },
-      });
-      setDraftResponse(id, "");
-      resetResponding();
-      await refetch();
-    } catch (e) {
-      logger.error("Failed to respond to complaint", { error: e });
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    openDeleteDialog(id);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!deleteComplaintId) return;
-
-    try {
-      await deleteComplaintMutation({ variables: { complaintId: deleteComplaintId } });
-      closeDeleteDialog();
-      await refetch();
-    } catch (e) {
-      logger.error("Failed to delete complaint", { error: e });
-    }
-  };
-
-  const handleRefetch = () => {
-    void refetch();
-  };
 
   return {
     labels,
@@ -177,14 +111,6 @@ export function useAdminComplaintsViewModel(
     isDeletingComplaint,
     loading,
     error: error ?? null,
-    onSearchChange: setSearchQuery,
-    onTabChange: setActiveTab,
-    onDraftChange: setDraftResponse,
-    onAnswer: handleAnswer,
-    onDelete: handleDelete,
-    onPageChange: setPage,
-    onDeleteDialogClose: closeDeleteDialog,
-    onDeleteDialogConfirm: handleDeleteConfirm,
-    onRefetch: handleRefetch,
+    ...actions,
   };
 }

@@ -8,194 +8,39 @@
  *     `getServerTranslations(locale)` — a synchronous lookup against the
  *     compile-time i18n registry in `@/shared/locale`, which is safe.
  *   - LOCALIZED: every title/body flows through the `notifications` namespace
- *     in `shared/locale/notifications/`. NO hardcoded English literals
- *     No hardcoded English literals.
+ *     in `shared/locale/notifications/`. NO hardcoded English literals.
  *   - IDEMPOTENT: same inputs -> same outputs.
  *   - ALL FIVE CHANNELS: every builder emits one payload per channel
- *     (`on_app`, `email`, `sms`, `push`, `whatsapp`). Channel filtering by user prefs +
- *     event allowlist happens in `dispatchWithPreferences`.
+ *     (`on_app`, `email`, `sms`, `push`, `whatsapp`). Channel filtering by user
+ *     prefs + event allowlist happens in `dispatchWithPreferences`.
  *
  * Fan-out strategy: each builder accepts `affectedUserIds[]` and emits
  * up to `5 * affectedUserIds.length` payloads, one per (user, channel). Callers
  * pass the SAME `affectedUserIds` to `dispatchWithPreferences` so prefs are
  * applied per user. For single-recipient events (invoice, payment-method)
  * pass a one-element array. WhatsApp payloads are only emitted for events
- * that have a template in `NOTIFICATION_TEMPLATE_MAP` (B1).
+ * that have a template in `NOTIFICATION_TEMPLATE_MAP`.
  */
 
-import { NotificationChannel, NotificationEventType } from "@/backend/enum";
-import { WhatsappAccountPurpose } from "@/backend/enum/whatsapp/whatsapp-account.enum";
-import type {
-  ClassInstanceSelectType,
-  CommunicationPayload,
-  InvoiceSelectType,
-  NotificationMetadata,
-  WhatsappTemplateMetadata,
-} from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale";
-import type {
-  ClassLifecycleBodyParams,
-  NotificationsLabels,
-  StudentTeacherReassignmentRecipient,
-} from "@/shared/locale/types/notifications";
+import { NotificationEventType } from "@/backend/enum";
+import {
+  buildPerChannel,
+  labelsFor,
+  type PayloadMetadata,
+} from "@/backend/services/notification/notification-payloads.channel.helpers";
+import {
+  renderClassLifecycle,
+  renderStudentLifecycle,
+} from "@/backend/services/notification/notification-payloads.render.helpers";
+import type { ClassInstanceSelectType, CommunicationPayload, InvoiceSelectType } from "@/backend/types";
+import type { ClassLifecycleBodyParams, NotificationsLabels } from "@/shared/locale/types/notifications";
 
-/** Structured notification metadata plus channel-adapter bag fields (`to`, `data`, etc.). */
-type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
-
-// ─── Helpers ───────────────────────────────────────────────────────────
-
-const VALID_REASSIGNMENT_RECIPIENTS: ReadonlySet<string> = new Set(["parent", "oldTeacher", "newTeacher"]);
-
-function isStudentTeacherReassignmentRecipient(value: unknown): value is StudentTeacherReassignmentRecipient {
-  return typeof value === "string" && VALID_REASSIGNMENT_RECIPIENTS.has(value);
-}
-
-const ALL_CHANNELS: readonly NotificationChannel[] = [
-  NotificationChannel.ON_APP,
-  NotificationChannel.EMAIL,
-  NotificationChannel.SMS,
-  NotificationChannel.PUSH,
-  NotificationChannel.WHATSAPP,
-] as const;
-
-/**
- * Per-event canonical WhatsApp template mapping (B1).
- *
- * Each entry maps a `NotificationEventType` to the approved Meta template name
- * and the ordered parameter names that the template body/header expects.
- * `notification-payloads.builders` uses this to stamp
- * `metadata.whatsappTemplate: { name, languageCode, paramsOrder }` on WhatsApp
- * payloads so `dispatchWhatsapp` (6.3) can build the templated send.
- *
- * `languageCode` defaults to `null` so the dispatch layer MUST set it from the
- * recipient's locale — the pure builder has no I/O or locale dependency (r7-020).
- *
- * Only utility events that Meta allows as business-initiated templates are
- * listed here.  Events absent from this map will NOT emit a WhatsApp payload
- * even if `WHATSAPP` is in the event allowlist — the builder simply omits
- * `metadata.whatsappTemplate` and the dispatch layer skips the send.
- *
- * REQ-10 / BL1 — Per-user opt-in gate:
- * Builders are pure (no I/O) so they cannot check the per-user `whatsappEnabled`
- * flag.  The opt-in gate is applied downstream in `dispatchWithPreferences`
- * → `dispatchForUser`, which already checks per-user channel preferences via
- * `NotificationPreferencesRepository`.  When Task 29 adds the dedicated
- * `whatsappEnabled` column, `dispatchForUser` will also check it there.
- * Until then, the existing channel-preference gate serves as the opt-in:
- * a user with WhatsApp disabled in their prefs will not receive WhatsApp
- * payloads.
- */
-export const NOTIFICATION_TEMPLATE_MAP: Readonly<
-  Partial<
-    Record<
-      NotificationEventType,
-      {
-        readonly templateName: string;
-        readonly paramsOrder: readonly string[];
-        /** Routing purpose — the dispatch layer resolves the sending account by it (GENERAL fallback). */
-        readonly purpose: WhatsappAccountPurpose;
-      }
-    >
-  >
-> = {
-  [NotificationEventType.CLASS_REMINDER]: {
-    templateName: "class_reminder_utility_v1",
-    paramsOrder: ["studentName", "scheduledStartAt"],
-    purpose: WhatsappAccountPurpose.STUDENTS,
-  },
-  [NotificationEventType.CLASS_ACTIVATED]: {
-    templateName: "class_activated_utility_v1",
-    paramsOrder: ["studentName", "scheduledStartAt"],
-    purpose: WhatsappAccountPurpose.STUDENTS,
-  },
-  [NotificationEventType.LESSON_REPORT_SUBMITTED]: {
-    templateName: "lesson_report_submitted_utility_v1",
-    paramsOrder: ["reportId", "teacherName"],
-    purpose: WhatsappAccountPurpose.STUDENTS,
-  },
-  [NotificationEventType.LESSON_REPORT_REVIEWED]: {
-    templateName: "lesson_report_reviewed_utility_v1",
-    paramsOrder: ["reportId", "teacherName", "decision"],
-    purpose: WhatsappAccountPurpose.STUDENTS,
-  },
-  [NotificationEventType.INVOICE_GENERATED]: {
-    templateName: "invoice_generated_utility_v1",
-    paramsOrder: ["invoiceId", "amount", "currency"],
-    purpose: WhatsappAccountPurpose.STUDENTS,
-  },
-};
-
-/**
- * Default language code for WhatsApp templates.
- *
- * Set to `null` so the dispatch layer is FORCED to set `languageCode` from the
- * recipient's locale. The dispatch layer (6.3) overrides this from the synced
- * template row's `languageCode` when available (B6). Kept here so pure builders
- * have no I/O dependency.
- *
- * r7-020: Previously hardcoded to `"en"`, which caused Arabic-locale recipients
- * to receive English templates because the dispatch layer never overrode it.
- */
-const DEFAULT_WHATSAPP_LANGUAGE_CODE: string | null = null;
-
-function labelsFor(locale: string | undefined): NotificationsLabels {
-  return getServerTranslations(locale ?? "en").notificationsTranslations;
-}
-
-/**
- * Build one `CommunicationPayload` per channel for the given user/event.
- * `body` is shared across channels (channel adapters handle format
- * differences — see `CommunicationService.dispatch`).
- *
- * For WhatsApp payloads, `metadata.whatsappTemplate` is stamped from
- * `NOTIFICATION_TEMPLATE_MAP` (B1) so `dispatchWhatsapp` (6.3) can build
- * the templated send. Events without a template mapping get no
- * `whatsappTemplate` — the dispatch layer skips the send in that case.
- */
-function buildPerChannel(
-  userId: string,
-  eventType: NotificationEventType,
-  title: string,
-  body: string,
-  metadata: Record<string, unknown>
-): CommunicationPayload[] {
-  if (!userId) return [];
-  const payloads: CommunicationPayload[] = [];
-  for (const channel of ALL_CHANNELS) {
-    if (channel === NotificationChannel.WHATSAPP) {
-      const templateDef = NOTIFICATION_TEMPLATE_MAP[eventType];
-      if (!templateDef) continue; // no approved template for this event — skip WhatsApp
-      if (!templateDef.paramsOrder || templateDef.paramsOrder.length === 0) {
-        // Internal config error — NOTIFICATION_TEMPLATE_MAP misconfigured, not user-facing, no i18n needed
-        throw new Error(`Missing template paramsOrder for event ${eventType}`);
-      }
-      payloads.push({
-        userId,
-        title,
-        body,
-        channel,
-        eventType,
-        metadata: {
-          ...metadata,
-          whatsappTemplate: {
-            name: templateDef.templateName,
-            languageCode: DEFAULT_WHATSAPP_LANGUAGE_CODE,
-            paramsOrder: templateDef.paramsOrder,
-            purpose: templateDef.purpose,
-          } satisfies WhatsappTemplateMetadata,
-        },
-      });
-    } else {
-      payloads.push({ userId, title, body, channel, eventType, metadata });
-    }
-  }
-  return payloads;
-}
+export { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.channel.helpers";
 
 /**
  * Fan out a single rendered `{ title, body }` to every affected user across
- * all four channels. Shared by the multi-recipient lifecycle builders
- * (class, student, lesson-report-submitted, new-complaint) so the
+ * every channel. Shared by the multi-recipient lifecycle builders (class,
+ * student, lesson-report-submitted, new-complaint) so the
  * `for (const userId of affectedUserIds) { ... buildPerChannel(...) }`
  * shape lives in exactly one place.
  */
@@ -224,7 +69,7 @@ function classBodyParams(classInstance: ClassInstanceSelectType, studentName: st
  * Shared skeleton for the class/student lifecycle builders. Encapsulates the
  * common shape — empty-guard → event-set guard → render → assemble metadata →
  * fan out — so each domain builder only supplies its render callback, event
- * set, and base metadata. Eliminates the CodeScene Code Duplication between
+ * set, and base metadata. Eliminates the duplication between
  * `buildClassLifecyclePayloads` and `buildStudentLifecyclePayloads`.
  */
 function buildLifecyclePayloads(
@@ -260,112 +105,6 @@ function formatInvoiceAmount(invoice: InvoiceSelectType): { amount: string; curr
   };
 }
 
-/**
- * Resolve a class-lifecycle event to a localized `{ title, body }` pair.
- * Returns `null` if the `eventType` is not one of the 10 CLASS_* lifecycle
- * events — callers must early-return on `null`.
- *
- * Pure helper — pulled out so the dispatch `switch` can return `{ title, body }`
- * directly (TS narrows cleanly when each `case` returns rather than mutating
- * outer `let`s).
- */
-function renderClassLifecycle(
-  labels: NotificationsLabels,
-  eventType: NotificationEventType,
-  baseParams: ClassLifecycleBodyParams,
-  metadata: Record<string, string> | undefined
-): { title: string; body: string } | null {
-  switch (eventType) {
-    case NotificationEventType.CLASS_SCHEDULED:
-      return { title: labels.classScheduled.title, body: labels.classScheduled.body(baseParams) };
-    case NotificationEventType.CLASS_ACTIVATED:
-      return { title: labels.classActivated.title, body: labels.classActivated.body(baseParams) };
-    case NotificationEventType.CLASS_STARTED:
-      return { title: labels.classStarted.title, body: labels.classStarted.body(baseParams) };
-    case NotificationEventType.CLASS_COMPLETED:
-      return { title: labels.classCompleted.title, body: labels.classCompleted.body(baseParams) };
-    case NotificationEventType.CLASS_MARKED_ABSENT:
-      return { title: labels.classMarkedAbsent.title, body: labels.classMarkedAbsent.body(baseParams) };
-    case NotificationEventType.CLASS_MARKED_MISSED:
-      return { title: labels.classMarkedMissed.title, body: labels.classMarkedMissed.body(baseParams) };
-    case NotificationEventType.CLASS_LEAVE_REQUESTED:
-      return { title: labels.classLeaveRequested.title, body: labels.classLeaveRequested.body(baseParams) };
-    case NotificationEventType.CLASS_RESCHEDULED: {
-      const newStartAt = metadata?.newStartAt ?? baseParams.scheduledStartAt;
-      return {
-        title: labels.classRescheduled.title,
-        body: labels.classRescheduled.body({ ...baseParams, newStartAt }),
-      };
-    }
-    case NotificationEventType.CLASS_CANCELLED:
-      return { title: labels.classCancelled.title, body: labels.classCancelled.body(baseParams) };
-    case NotificationEventType.CLASS_RESET:
-      return { title: labels.classReset.title, body: labels.classReset.body(baseParams) };
-    default:
-      return null;
-  }
-}
-
-/**
- * Resolve a student-lifecycle event to a localized `{ title, body }` pair.
- * Returns `null` if the `eventType` is not one of the 3 STUDENT_* lifecycle
- * events.
- */
-function renderStudentLifecycle(
-  labels: NotificationsLabels,
-  eventType: NotificationEventType,
-  studentName: string,
-  metadata: Record<string, string> | undefined
-): { title: string; body: string } | null {
-  switch (eventType) {
-    case NotificationEventType.STUDENT_TEACHER_REASSIGNED: {
-      const rawRecipient = metadata?.recipient;
-      const safeRecipient: StudentTeacherReassignmentRecipient = isStudentTeacherReassignmentRecipient(rawRecipient)
-        ? rawRecipient
-        : "parent";
-      const variants = labels.studentTeacherReassigned;
-      if (safeRecipient === "newTeacher") {
-        const variant = variants.newTeacher;
-        return {
-          title: variant.title,
-          body: variant.body({ studentName, oldTeacherName: metadata?.oldTeacherName ?? "—" }),
-        };
-      }
-      if (safeRecipient === "oldTeacher") {
-        const variant = variants.oldTeacher;
-        return {
-          title: variant.title,
-          body: variant.body({ studentName, newTeacherName: metadata?.newTeacherName ?? "—" }),
-        };
-      }
-      const variant = variants.parent;
-      return {
-        title: variant.title,
-        body: variant.body({ studentName, newTeacherName: metadata?.newTeacherName ?? "—" }),
-      };
-    }
-    case NotificationEventType.STUDENT_STATUS_CHANGED:
-      return {
-        title: labels.studentStatusChanged.title,
-        body: labels.studentStatusChanged.body({
-          studentName,
-          oldStatus: metadata?.oldStatus ?? "—",
-          newStatus: metadata?.newStatus ?? "—",
-        }),
-      };
-    case NotificationEventType.STUDENT_QUOTA_OVERRIDDEN:
-      return {
-        title: labels.studentQuotaOverridden.title,
-        body: labels.studentQuotaOverridden.body({
-          studentName,
-          newClassesRemaining: Number(metadata?.newClassesRemaining ?? 0),
-        }),
-      };
-    default:
-      return null;
-  }
-}
-
 // ─── Invoice event builders ───────────────────────────────────────────
 
 /**
@@ -374,7 +113,7 @@ function renderStudentLifecycle(
  * @param parentUserId  The parent user receiving the notification.
  * @param invoice       The freshly-generated invoice row.
  * @param locale        Optional locale code (defaults to "en").
- * @returns `CommunicationPayload[]` — one entry per channel (4 total).
+ * @returns `CommunicationPayload[]` — one entry per channel (up to 5 total).
  *          Returns `[]` if `parentUserId` is empty.
  */
 export function buildInvoiceGeneratedPayloads(
@@ -474,10 +213,10 @@ const CLASS_LIFECYCLE_EVENTS: ReadonlySet<NotificationEventType> = new Set([
 ]);
 
 /**
- * Build payloads for a class-lifecycle event. Emits 4 payloads per affected
- * user (one per channel). The caller passes the SAME `affectedUserIds` to
- * `dispatchWithPreferences` so per-user prefs + the event-channel allowlist
- * are applied downstream.
+ * Build payloads for a class-lifecycle event. Emits up to 5 payloads per
+ * affected user (one per channel; WhatsApp only when a template exists). The
+ * caller passes the SAME `affectedUserIds` to `dispatchWithPreferences` so
+ * per-user prefs + the event-channel allowlist are applied downstream.
  *
  * `studentName` is sourced from the metadata bag (the class lifecycle
  * services own the join that resolves the display name). If absent the
@@ -534,8 +273,8 @@ const STUDENT_LIFECYCLE_EVENTS: ReadonlySet<NotificationEventType> = new Set([
 ]);
 
 /**
- * Build payloads for a student-lifecycle event. Emits 4 payloads per
- * affected user (one per channel).
+ * Build payloads for a student-lifecycle event. Emits up to 5 payloads per
+ * affected user (one per channel; WhatsApp only when a template exists).
  *
  * Signature is `(studentId, eventType, affectedUserIds, locale?, metadata?)`:
  * builders do NOT read the `students` table. Context (student name, old/new

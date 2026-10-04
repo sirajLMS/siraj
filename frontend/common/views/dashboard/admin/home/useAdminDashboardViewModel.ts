@@ -12,8 +12,8 @@ import {
 } from "@/frontend/common/views/dashboard/admin/__shared__/useAdminDashboard";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import { buildAdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardLabels";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
-import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import { type AdminDashboardLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 const METRIC_LABEL_KEYS: ReadonlySet<string> = new Set<string>([
@@ -47,43 +47,6 @@ export interface UseAdminDashboardViewModelProps {
   readonly onRetry?: () => void;
 }
 
-function buildLabelsBySection(labels: AdminDashboardLabels): AdminDashboardLabelsBySection {
-  return {
-    shell: {
-      todayClasses: labels.todayClasses,
-      scheduleOverview: labels.scheduleOverview,
-      searchPlaceholder: labels.searchPlaceholder,
-      noClasses: labels.noClasses,
-      details: labels.details,
-      loading: labels.loading,
-    },
-    filters: {
-      listOfClassesOn: labels.listOfClassesOn,
-      today: labels.today,
-      previousDay: labels.previousDay,
-      nextDay: labels.nextDay,
-      selectTeacher: labels.selectTeacher,
-      submit: labels.submit,
-    },
-    columns: {
-      className: labels.className,
-      student: labels.student,
-      teacher: labels.teacher,
-      time: labels.time,
-      yourTime: labels.yourTime,
-      teacherTime: labels.teacherTime,
-      studentTime: labels.studentTime,
-      duration: labels.duration,
-      status: labels.status,
-      actions: labels.actions,
-      history: labels.history,
-      joinVideo: labels.joinVideo,
-    },
-    status: buildClassInstanceStatusLabels(labels.statusLabels),
-    metrics: labels.metrics,
-  };
-}
-
 export interface AdminDashboardViewModel {
   readonly labelsBySection: AdminDashboardLabelsBySection;
   readonly loading: boolean;
@@ -112,7 +75,7 @@ export interface AdminDashboardViewModel {
 
 export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardViewModelProps>): AdminDashboardViewModel {
   const labels = useAppTranslation(Translation.Dashboard.Admin);
-  const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
+  const labelsBySection = useMemo(() => buildAdminDashboardLabelsBySection(labels), [labels]);
 
   const { hasPermission } = useUserStore();
   const canDashboardSearch = hasPermission(AppPermission.DashboardSearch);

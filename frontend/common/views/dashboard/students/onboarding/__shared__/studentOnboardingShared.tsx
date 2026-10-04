@@ -3,6 +3,11 @@
 import { Box, type SxProps, type Theme } from "@mui/material";
 import type { ComponentType } from "react";
 import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections";
+import {
+  buildParentAssignmentSlotLabels,
+  buildStudentExtensionSectionLabels,
+  buildTeacherAssignmentSlotLabels,
+} from "@/frontend/common/views/dashboard/students/onboarding/__shared__/studentOnboardingShared.helpers";
 import { StudentExtensionSection } from "@/frontend/common/views/dashboard/students/onboarding/components/StudentExtensionSection";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -96,11 +101,7 @@ export function StudentOnboardingFormBodyShared({
         errors={errors}
         parentLocked={parentLocked}
         sectionTitle={labels.sections.parentAssignment}
-        labels={{
-          parent: labels.fields.parent,
-          parentPlaceholder: labels.placeholders.parent,
-          parentRequired: labels.validation.parentRequired,
-        }}
+        labels={buildParentAssignmentSlotLabels(labels)}
       />
 
       <options.SectionPanel title={labels.sections.studentInfo}>
@@ -108,29 +109,11 @@ export function StudentOnboardingFormBodyShared({
           register={register}
           errors={errors}
           control={control}
-          labels={{
-            dateOfBirth: labels.fields.dateOfBirth,
-            dateOfBirthPlaceholder: labels.placeholders.dateOfBirth,
-            gender: labels.fields.gender,
-            male: labels.fields.male,
-            female: labels.fields.female,
-            language: labels.fields.language,
-            languagePlaceholder: labels.placeholders.language,
-            status: labels.fields.status,
-            statusOnTrial: labels.options.status.onTrial,
-            statusRegular: labels.options.status.regular,
-          }}
+          labels={buildStudentExtensionSectionLabels(labels)}
         />
       </options.SectionPanel>
 
-      <options.TeacherAssignmentSection
-        control={control}
-        labels={{
-          sectionTitle: labels.sections.teacherAssignment,
-          primaryTeacher: labels.fields.primaryTeacher,
-          primaryTeacherPlaceholder: labels.placeholders.primaryTeacher,
-        }}
-      />
+      <options.TeacherAssignmentSection control={control} labels={buildTeacherAssignmentSlotLabels(labels)} />
 
       <Box
         sx={theme => ({

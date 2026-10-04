@@ -1,45 +1,18 @@
 "use client";
 
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
+import { Box, Typography } from "@mui/material";
 import type * as React from "react";
 import { useMemo } from "react";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import {
-  isPaymentDirectionLabelKey,
-  isPaymentMethodTypeLabelKey,
-} from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodLabelHelpers";
+  buildPaymentMethodColumns,
+  type DataGridSlot,
+  type PaymentMethodColumnsLabels,
+  type StatusBadgeSlot,
+} from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodListShared.parts";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
-import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
-import type {
-  PaymentMethodDirectionLabels,
-  PaymentMethodDisplayLabels,
-  PaymentMethodListLabels,
-  PaymentMethodTypeLabels,
-} from "@/shared/locale/types/ui";
 
 //#region Slots
-
-type StatusBadgeSlot = React.ComponentType<{
-  category: "paymentMethod";
-  status: string;
-  label: string;
-  size: "small";
-}>;
-
-type DataGridSlot = React.ComponentType<{
-  readonly rows: readonly PaymentMethodRow[];
-  readonly columns: GridColDef<PaymentMethodRow>[];
-  readonly getRowId: (row: PaymentMethodRow) => string;
-  readonly loading?: boolean;
-  readonly autoHeight?: boolean;
-  readonly paginationOptions: { mode: "client" };
-  readonly emptyMessage?: string;
-}>;
 
 export interface PaymentMethodListSlots {
   readonly StatusBadge: StatusBadgeSlot;
@@ -55,12 +28,7 @@ export interface PaymentMethodListSharedProps {
   readonly onDeleteAction?: (id: string) => void;
   readonly onSetDefaultAction?: (id: string) => void;
   readonly slots: PaymentMethodListSlots;
-  readonly t: {
-    readonly display: PaymentMethodDisplayLabels;
-    readonly list: PaymentMethodListLabels;
-    readonly type: PaymentMethodTypeLabels;
-    readonly direction: PaymentMethodDirectionLabels;
-  };
+  readonly t: PaymentMethodColumnsLabels;
 }
 
 //#endregion
@@ -76,96 +44,12 @@ export function PaymentMethodListShared({
   slots,
   t,
 }: Readonly<PaymentMethodListSharedProps>): React.ReactNode {
-  const tList = t.list;
   const { StatusBadge, DataGrid } = slots;
 
-  const columns = useMemo<GridColDef<PaymentMethodRow>[]>(() => {
-    return [
-      {
-        field: "label",
-        headerName: tList.columnLabel,
-        flex: 1.2,
-        minWidth: 180,
-        renderCell: params => (
-          <Typography sx={{ typography: "bodyMd" }}>
-            {params.row.label?.trim() ?? params.row.catalogSlug ?? "—"}
-          </Typography>
-        ),
-      },
-      {
-        field: "type",
-        headerName: tList.columnType,
-        width: 160,
-        renderCell: params => (
-          <Typography sx={{ typography: "bodyMd" }}>
-            {getPaymentMethodTypeLabel(params.row.type, key => (isPaymentMethodTypeLabelKey(key) ? t.type[key] : ""))}
-          </Typography>
-        ),
-      },
-      {
-        field: "direction",
-        headerName: tList.columnDirection,
-        width: 120,
-        renderCell: params => (
-          <Typography sx={{ typography: "bodyMd" }}>
-            {getPaymentMethodDirectionLabel(params.row.direction, key =>
-              isPaymentDirectionLabelKey(key) ? t.direction[key] : ""
-            )}
-          </Typography>
-        ),
-      },
-      {
-        field: "status",
-        headerName: tList.columnStatus,
-        width: 140,
-        renderCell: params => {
-          if (params.row.type === PaymentMethodType.BankTransfer) {
-            const status = params.row.verifiedAt ? "verified" : "unverified";
-            return <StatusBadge category="paymentMethod" status={status} label={t.display[status]} size="small" />;
-          }
-          if (params.row.isActive === false) {
-            return <StatusBadge category="paymentMethod" status="inactive" label={t.display.inactive} size="small" />;
-          }
-          return <StatusBadge category="paymentMethod" status="active" label={t.display.active} size="small" />;
-        },
-      },
-      {
-        field: "isDefault",
-        headerName: tList.columnDefault,
-        width: 120,
-        renderCell: params =>
-          params.row.isDefault ? (
-            <StatusBadge category="paymentMethod" status="active" label={t.display.defaultBadge} size="small" />
-          ) : null,
-      },
-      {
-        field: "actions",
-        headerName: "",
-        width: 140,
-        sortable: false,
-        filterable: false,
-        renderCell: params => (
-          <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
-            {!params.row.isDefault && onSetDefaultAction ? (
-              <IconButton aria-label={tList.setDefault} size="small" onClick={() => onSetDefaultAction(params.row.id)}>
-                <StarOutlinedIcon fontSize="small" />
-              </IconButton>
-            ) : null}
-            {onEditAction ? (
-              <IconButton aria-label={tList.edit} size="small" onClick={() => onEditAction(params.row.id)}>
-                <EditOutlinedIcon fontSize="small" />
-              </IconButton>
-            ) : null}
-            {onDeleteAction ? (
-              <IconButton aria-label={tList.delete} size="small" onClick={() => onDeleteAction(params.row.id)}>
-                <DeleteOutlinedIcon fontSize="small" />
-              </IconButton>
-            ) : null}
-          </Stack>
-        ),
-      },
-    ];
-  }, [StatusBadge, onDeleteAction, onEditAction, onSetDefaultAction, t, tList]);
+  const columns = useMemo(
+    () => buildPaymentMethodColumns({ t, StatusBadge, onEditAction, onDeleteAction, onSetDefaultAction }),
+    [StatusBadge, onDeleteAction, onEditAction, onSetDefaultAction, t]
+  );
 
   return (
     <BaseCard edgeToEdge>
@@ -182,7 +66,7 @@ export function PaymentMethodListShared({
           loading={loading}
           autoHeight
           paginationOptions={{ mode: "client" }}
-          emptyMessage={emptyMessage ?? tList.empty}
+          emptyMessage={emptyMessage ?? t.list.empty}
         />
       </Box>
     </BaseCard>

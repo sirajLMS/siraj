@@ -2,9 +2,7 @@
 
 import { DownloadOutlined } from "@mui/icons-material";
 import { Box, Stack } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import {
@@ -13,75 +11,13 @@ import {
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__/optin";
 import { OptInTabContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/OptInTabContent";
 import type { OptInTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
-import type {
-  WhatsappOptInAuditEntry,
-  WhatsappOptInUserState,
-} from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import { DesktopExportButton } from "@/frontend/desktop/components/ui/button";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { DesktopAppDateRangePicker } from "@/frontend/desktop/components/ui/form/date";
-import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
-
-function buildHistoryColumns(t: WhatsappLabels): GridColDef<WhatsappOptInAuditEntry>[] {
-  return [
-    {
-      field: "date",
-      headerName: t.optInHistoryDate,
-      flex: 0.5,
-      minWidth: 120,
-    },
-    {
-      field: "action",
-      headerName: t.optInHistoryAction,
-      flex: 0.4,
-      minWidth: 100,
-      renderCell: ({ value }) => (
-        <StatusBadge
-          category="syncStatus"
-          status={value === "optIn" ? "success" : "cancelled"}
-          label={value === "optIn" ? t.optInActionOptedIn : t.optInActionOptedOut}
-        />
-      ),
-    },
-    {
-      field: "changedBy",
-      headerName: t.optInHistoryChangedBy,
-      flex: 1,
-      minWidth: 150,
-    },
-  ];
-}
-
-function buildAdminColumns(t: WhatsappLabels): GridColDef<WhatsappOptInUserState>[] {
-  return [
-    {
-      field: "userName",
-      headerName: t.optInAdminUserName,
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: "optedIn",
-      headerName: t.optInAdminOptedIn,
-      flex: 0.4,
-      minWidth: 100,
-      renderCell: ({ value }) => (
-        <StatusBadge
-          category="syncStatus"
-          status={value ? "success" : "cancelled"}
-          label={value ? t.optInAdminYes : t.optInAdminNo}
-        />
-      ),
-    },
-    {
-      field: "optedInAt",
-      headerName: t.optInAdminOptedInAt,
-      flex: 0.5,
-      minWidth: 140,
-      renderCell: ({ value }) => value ?? "—",
-    },
-  ];
-}
+import {
+  buildAdminColumns,
+  buildHistoryColumns,
+} from "@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/OptInTab.columns";
 
 /**
  * Desktop wrapper for OptInTab. Renders the shared toggle section plus a

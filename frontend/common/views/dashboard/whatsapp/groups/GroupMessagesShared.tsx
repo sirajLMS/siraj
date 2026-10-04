@@ -1,13 +1,13 @@
 "use client";
 
-import { PushPinOutlined, SendOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, CircularProgress, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
-import { useAutoScrollToEnd } from "@/frontend/common/views/dashboard/whatsapp/conversations/useAutoScrollToEnd";
+import { SendOutlined } from "@mui/icons-material";
+import { Alert, Button, CircularProgress, Stack, TextField, Typography } from "@mui/material";
+import { ThreadMessagesFeedback, useThreadAutoScroll } from "@/frontend/common/views/dashboard/whatsapp/__shared__";
+import { MessageItem } from "@/frontend/common/views/dashboard/whatsapp/groups/GroupMessagesShared.parts";
 import type {
   WhatsappGroupMessageRow,
   WhatsappGroupsMessagesLabels,
 } from "@/frontend/common/views/dashboard/whatsapp/groups/types/whatsappGroupsView.types";
-import { resolveMessageText } from "@/frontend/common/views/dashboard/whatsapp/groups/useWhatsappGroupsViewModel";
 
 export interface GroupMessagesSharedProps {
   readonly labels: WhatsappGroupsMessagesLabels;
@@ -26,88 +26,6 @@ export interface GroupMessagesSharedProps {
   readonly onUnpin: (messageId: string) => void;
   readonly formatTimestamp: (iso: string | null) => string;
   readonly onRetry: () => void;
-}
-
-function isOutboundMessage(direction: WhatsappGroupMessageRow["direction"]): boolean {
-  const labels: Record<string, boolean> = {
-    ECHO: true,
-    API_OUTBOUND: true,
-  };
-  return labels[direction] ?? false;
-}
-
-interface MessageItemProps {
-  readonly message: WhatsappGroupMessageRow;
-  readonly labels: WhatsappGroupsMessagesLabels;
-  readonly canManage: boolean;
-  readonly pinning: boolean;
-  readonly onPin: (messageId: string) => void;
-  readonly onUnpin: (messageId: string) => void;
-  readonly formatTimestamp: (iso: string | null) => string;
-}
-
-function MessageItem({
-  message,
-  labels,
-  canManage,
-  pinning,
-  onPin,
-  onUnpin,
-  formatTimestamp,
-}: Readonly<MessageItemProps>) {
-  const outbound = isOutboundMessage(message.direction);
-  const pinned = message.pinnedAt !== null;
-  const text = resolveMessageText(message.content);
-  return (
-    <Box sx={{ display: "flex", justifyContent: outbound ? "flex-end" : "flex-start" }}>
-      <Stack
-        spacing={0.5}
-        sx={[
-          {
-            maxWidth: "85%",
-            px: 1.5,
-            py: 1.25,
-            borderRadius: 2,
-            borderStartStartRadius: outbound ? 8 : 2,
-            borderStartEndRadius: outbound ? 2 : 8,
-          },
-          {
-            bgcolor: theme => (outbound ? theme.palette.primaryContainer : theme.palette.surfaceVariant),
-            color: theme => (outbound ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant),
-          },
-        ]}
-      >
-        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-          {pinned && (
-            <Typography variant="labelUppercase" sx={{ opacity: 0.7 }}>
-              {labels.pinned}
-            </Typography>
-          )}
-          {canManage && (
-            <Tooltip title={pinned ? labels.unpin : labels.pin}>
-              <IconButton
-                size="small"
-                disabled={pinning}
-                onClick={() => (pinned ? onUnpin(message.id) : onPin(message.id))}
-                aria-label={pinned ? labels.unpin : labels.pin}
-                sx={{ opacity: 0.7 }}
-              >
-                {pinning ? <CircularProgress size={14} /> : <PushPinOutlined sx={{ fontSize: 16 }} />}
-              </IconButton>
-            </Tooltip>
-          )}
-        </Stack>
-        {text !== null && (
-          <Typography variant="bodyMd" sx={{ whiteSpace: "pre-wrap" }} dir="auto">
-            {text}
-          </Typography>
-        )}
-        <Typography variant="caption" sx={{ opacity: 0.7, marginInlineStart: "auto" }}>
-          {formatTimestamp(message.sentAt)}
-        </Typography>
-      </Stack>
-    </Box>
-  );
 }
 
 /**
@@ -135,8 +53,7 @@ export function GroupMessagesShared({
   formatTimestamp,
   onRetry,
 }: Readonly<GroupMessagesSharedProps>) {
-  const lastMessageId = messages.length > 0 ? (messages[messages.length - 1]?.id ?? null) : null;
-  const scrollContainerRef = useAutoScrollToEnd<HTMLElement>(lastMessageId, loading);
+  const scrollContainerRef = useThreadAutoScroll(messages, loading);
   return (
     <Stack spacing={2}>
       {error ? (
@@ -159,16 +76,7 @@ export function GroupMessagesShared({
         component="section"
         aria-label={labels.messagesTitle}
       >
-        {loading ? (
-          <Box component="output" sx={{ display: "flex", justifyContent: "center", py: 4 }} aria-busy>
-            <CircularProgress size={28} />
-          </Box>
-        ) : null}
-        {!loading && messages.length === 0 ? (
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            {labels.messagesEmpty}
-          </Typography>
-        ) : null}
+        <ThreadMessagesFeedback loading={loading} messages={messages} emptyText={labels.messagesEmpty} />
         {!loading ? (
           <Stack spacing={1.5}>
             {messages.map(message => (

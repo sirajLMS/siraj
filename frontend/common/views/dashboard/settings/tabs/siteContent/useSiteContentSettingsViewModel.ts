@@ -1,54 +1,22 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
-import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  deleteSiteContentMutationDocument,
-  updateSiteContentPublishStateMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments/settings/site-content-settings.documents";
 import { useSiteContentEntriesQuery } from "@/frontend/common/hooks/settings";
 import { useSiteContentSettingsStore } from "@/frontend/common/stores/siteContentSettingsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { logger } from "@/frontend/common/utils/logger";
+import { buildSiteContentRows } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/useSiteContentSettingsViewModel.helpers";
+import { useSiteContentRowActions } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/useSiteContentSettingsViewModel.hooks";
 import type {
-  SiteContentRow,
   SiteContentSettingsViewModel,
   UseSiteContentSettingsViewModelProps,
 } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-function toSiteContentRow(
-  entry: {
-    readonly id: string | null;
-    readonly slug: string | null;
-    readonly title: string | null;
-    readonly body: string | null;
-    readonly contentType: string | null;
-    readonly isPublished: boolean | null;
-  },
-  index: number
-): SiteContentRow | null {
-  if (!entry.slug || !entry.title) {
-    return null;
-  }
-
-  return {
-    id: entry.id ?? `${entry.slug}-${index}`,
-    slug: entry.slug,
-    title: entry.title,
-    body: entry.body ?? "",
-    contentType: entry.contentType ?? "page",
-    isPublished: entry.isPublished ?? false,
-  };
-}
-
 export function useSiteContentSettingsViewModel(
   _props: Readonly<UseSiteContentSettingsViewModelProps>
 ): SiteContentSettingsViewModel {
   const labels = useAppTranslation(Translation.Dashboard.SettingsSiteContent);
-  const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
   const canManage = hasPermission(AppPermission.SettingsSiteContentManage);
 
@@ -65,52 +33,16 @@ export function useSiteContentSettingsViewModel(
 
   const { data, loading, refetch } = useSiteContentEntriesQuery();
 
-  const [deleteSiteContent, { loading: deleting }] = useMutation(deleteSiteContentMutationDocument);
-  const [updatePublishState] = useMutation(updateSiteContentPublishStateMutationDocument);
+  const rows = useMemo(() => buildSiteContentRows(data?.siteContentEntries), [data?.siteContentEntries]);
 
-  const rows = useMemo<readonly SiteContentRow[]>(() => {
-    const entries = data?.siteContentEntries ?? [];
-    return entries
-      .map((entry, index) => toSiteContentRow(entry, index))
-      .filter((row): row is SiteContentRow => row != null)
-      .toSorted((left, right) => left.slug.localeCompare(right.slug));
-  }, [data?.siteContentEntries]);
-
-  const onSaved = async (): Promise<void> => {
-    closeForm();
-    notifications.show(labels.saveSuccess, { severity: "success" });
-    await refetch();
-  };
-
-  const onConfirmDelete = async (): Promise<void> => {
-    if (!deleteRow?.id) {
-      return;
-    }
-
-    try {
-      await deleteSiteContent({ variables: { id: deleteRow.id } });
-      notifications.show(labels.deleteSuccess, { severity: "success" });
-      closeDeleteDialog();
-      await refetch();
-    } catch (error) {
-      notifications.show(labels.deleteError, { severity: "error" });
-      logger.error("Failed to delete site content", { error, id: deleteRow.id });
-    }
-  };
-
-  const onTogglePublish = async (row: SiteContentRow, isPublished: boolean): Promise<void> => {
-    setTogglingPublishId(row.id);
-    try {
-      await updatePublishState({ variables: { id: row.id, isPublished } });
-      notifications.show(isPublished ? labels.publishSuccess : labels.unpublishSuccess, { severity: "success" });
-      await refetch();
-    } catch (error) {
-      notifications.show(labels.publishError, { severity: "error" });
-      logger.error("Failed to update site content publish state", { error, id: row.id, isPublished });
-    } finally {
-      setTogglingPublishId(null);
-    }
-  };
+  const { isDeleting, onSaved, onConfirmDelete, onTogglePublish } = useSiteContentRowActions({
+    labels,
+    deleteRow,
+    closeForm,
+    closeDeleteDialog,
+    setTogglingPublishId,
+    refetch,
+  });
 
   return {
     rows,
@@ -120,7 +52,7 @@ export function useSiteContentSettingsViewModel(
     formOpen,
     editRow,
     deleteRow,
-    isDeleting: deleting,
+    isDeleting,
     togglingPublishId,
     onAdd: openCreateForm,
     onEdit: openEditForm,

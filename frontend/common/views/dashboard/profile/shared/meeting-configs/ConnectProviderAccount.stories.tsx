@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ConnectProviderAccount } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";
+import {
+  connectProviderAccountStoryLabels as defaultLabels,
+  storyNoop as noop,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount.stories.fixtures";
 
 const meta = {
   title: "Views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount",
@@ -10,21 +14,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-const noop = () => {};
-
-const defaultLabels = {
-  connectButton: "Connect",
-  connectingLabel: "Connecting...",
-  connectedAs: (email: string) => `Connected as ${email}`,
-  disconnectButton: "Disconnect",
-  reconnectButton: "Reconnect",
-  reconnectCallout: "Reconnect your account",
-  statusConnected: "Connected",
-  statusExpiring: "Expiring",
-  statusExpired: "Expired",
-  statusDisconnected: "Not connected",
-};
 
 export const Disconnected: Story = {
   args: {

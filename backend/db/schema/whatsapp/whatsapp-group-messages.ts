@@ -1,15 +1,13 @@
 import {
   createTable,
   index,
-  jsonbColumn,
   timestampColumn,
   uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { whatsappMessageDirectionEnum } from "@/backend/db/schema/enums";
-import { whatsappAccounts } from "@/backend/db/schema/whatsapp/whatsapp-accounts";
+import { whatsappMessageColumns } from "@/backend/db/schema/whatsapp/__shared__";
 import { whatsappGroups } from "@/backend/db/schema/whatsapp/whatsapp-groups";
 
 /**
@@ -31,14 +29,7 @@ export const whatsappGroupMessages = createTable(
     groupId: uuidDefaultColumn("group_id")
       .notNull()
       .references(() => whatsappGroups.id, { onDelete: "cascade" }),
-    accountId: uuidDefaultColumn("account_id")
-      .notNull()
-      .references(() => whatsappAccounts.id, { onDelete: "cascade" }),
-    wamid: varcharColumn("wamid", { length: 128 }).notNull(),
-    direction: whatsappMessageDirectionEnum("direction").notNull(),
-    type: varcharColumn("type", { length: 32 }).notNull(),
-    content: jsonbColumn("content").notNull(),
-    status: varcharColumn("status", { length: 20 }),
+    ...whatsappMessageColumns(),
     fromWaId: varcharColumn("from_wa_id", { length: 32 }),
     mediaId: varcharColumn("media_id", { length: 256 }),
     mediaMime: varcharColumn("media_mime", { length: 128 }),

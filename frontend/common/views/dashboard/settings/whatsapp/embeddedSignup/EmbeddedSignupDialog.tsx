@@ -11,20 +11,13 @@
  */
 
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
-} from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useCallback } from "react";
+import {
+  EmbeddedSignupActions,
+  EmbeddedSignupConfiguredContent,
+  EmbeddedSignupNotConfigured,
+} from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup/EmbeddedSignupDialog.parts";
 import { EmbeddedSignupPhaseContent } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup/EmbeddedSignupPhaseContent";
 import { useEmbeddedSignupSession } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup/useEmbeddedSignupSession";
 import type { WhatsappEmbeddedSignupPayload } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
@@ -64,26 +57,7 @@ export function EmbeddedSignupDialog({
 
   const phase = session.phase;
   const busy = phase === "waiting" || phase === "submitting";
-  const failed = phase === "cancelled" || phase === "error";
   const configured = configId !== null && appId !== null;
-
-  // Step mapping: launch (0) completes once the FB flow reports a code or
-  // asset IDs; app pairing (1) completes when completion starts; sync (2)
-  // completes on mutation success.
-  let activeStep = 0;
-  if (phase === "submitting") {
-    activeStep = 2;
-  } else if (phase === "success") {
-    activeStep = 3;
-  } else if (session.codeReceived || session.assetsReceived) {
-    activeStep = 1;
-  }
-
-  const stepLabels = [
-    labels.embeddedSignupLaunch,
-    labels.embeddedSignupStepCompleteInApp,
-    labels.embeddedSignupStepSync,
-  ];
 
   return (
     <Dialog open={open} onClose={handleClose} fullScreen={fullScreen} fullWidth maxWidth="sm">
@@ -95,35 +69,7 @@ export function EmbeddedSignupDialog({
       </DialogTitle>
       <DialogContent dividers sx={{ pb: 1 }}>
         {configured ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2.5, sm: 3 }, pt: 1 }}>
-            <Stepper
-              activeStep={activeStep}
-              alternativeLabel
-              sx={theme => ({
-                width: "100%",
-                "& .MuiStepLabel-label": {
-                  color: theme.palette.text.secondary,
-                  textWrap: "balance",
-                  mt: 0.5,
-                },
-                "& .MuiStepLabel-label.Mui-active, & .MuiStepLabel-label.Mui-completed": {
-                  color: theme.palette.text.primary,
-                  fontWeight: 600,
-                },
-                // Upcoming steps ship as dark-navy numerals on near-black
-                // circles at the default tokens; lift both to readable levels.
-                "& .MuiStepIcon-root:not(.Mui-active):not(.Mui-completed)": {
-                  color: theme.palette.action.selected,
-                  "& .MuiStepIcon-text": { fill: theme.palette.text.primary },
-                },
-              })}
-            >
-              {stepLabels.map((label, index) => (
-                <Step key={label} completed={phase === "success" || index < activeStep}>
-                  <StepLabel error={failed && index === activeStep}>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+          <EmbeddedSignupConfiguredContent session={session} labels={labels}>
             <EmbeddedSignupPhaseContent
               phase={phase}
               labels={labels}
@@ -131,28 +77,12 @@ export function EmbeddedSignupDialog({
               onLaunch={session.launch}
               onRetry={session.reset}
             />
-          </Box>
+          </EmbeddedSignupConfiguredContent>
         ) : (
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 1 }}>
-            {labels.embeddedSignupNotConfigured}
-          </Typography>
+          <EmbeddedSignupNotConfigured labels={labels} />
         )}
       </DialogContent>
-      <DialogActions sx={{ px: 3, pt: 1, pb: 2 }}>
-        <Button
-          onClick={handleClose}
-          disabled={busy}
-          color="inherit"
-          sx={{ color: theme => theme.palette.text.secondary }}
-        >
-          {labels.cancel}
-        </Button>
-        {phase === "success" ? (
-          <Button variant="contained" onClick={handleClose}>
-            {labels.embeddedSignupDone}
-          </Button>
-        ) : null}
-      </DialogActions>
+      <EmbeddedSignupActions phase={phase} busy={busy} labels={labels} onClose={handleClose} />
     </Dialog>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronRightOutlined } from "@mui/icons-material";
-import { Box, Breadcrumbs, Link, type SxProps, type Theme, Typography } from "@mui/material";
+import { Box, type SxProps, type Theme, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
@@ -9,6 +8,10 @@ import {
   type UsePageBreadcrumbsOptions,
   usePageBreadcrumbs,
 } from "@/frontend/common/views/dashboard/lib/usePageBreadcrumbs";
+import {
+  MobilePageHeaderActionsRow,
+  MobilePageHeaderBreadcrumbs,
+} from "@/frontend/mobile/components/ui/container/page/MobilePageHeader.parts";
 
 export interface MobilePageHeaderBreadcrumb {
   readonly label: string;
@@ -92,50 +95,7 @@ export function MobilePageHeader({
             gap: 0.5,
           }}
         >
-          {resolvedBreadcrumbs.length > 0 ? (
-            <Breadcrumbs
-              separator={<ChevronRightOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />}
-              sx={{ mb: 1 }}
-            >
-              {resolvedBreadcrumbs.map(crumb => {
-                if (crumb.current) {
-                  return (
-                    <Typography
-                      key={crumb.label}
-                      variant="labelMd"
-                      sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}
-                    >
-                      {crumb.label}
-                    </Typography>
-                  );
-                }
-
-                if (crumb.href) {
-                  return (
-                    <Link
-                      key={crumb.label}
-                      href={crumb.href}
-                      underline="hover"
-                      variant="labelMd"
-                      sx={theme => ({ color: theme.palette.text.secondary })}
-                    >
-                      {crumb.label}
-                    </Link>
-                  );
-                }
-
-                return (
-                  <Typography
-                    key={crumb.label}
-                    variant="labelMd"
-                    sx={theme => ({ color: theme.palette.text.secondary })}
-                  >
-                    {crumb.label}
-                  </Typography>
-                );
-              })}
-            </Breadcrumbs>
-          ) : null}
+          <MobilePageHeaderBreadcrumbs breadcrumbs={resolvedBreadcrumbs} />
           <Typography variant={titleVariant} sx={theme => ({ color: theme.palette.primary.main })}>
             {title}
           </Typography>
@@ -145,21 +105,7 @@ export function MobilePageHeader({
             </Typography>
           ) : null}
         </Box>
-        {actions ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1.5,
-              width: "100%",
-              // Stretch Link/wrappers so MobilePrimaryPageAction's width:100%
-              // resolves against the full content column, not shrink-wrapped text.
-              "& > *": { width: "100%", minWidth: 0 },
-            }}
-          >
-            {actions}
-          </Box>
-        ) : null}
+        {actions ? <MobilePageHeaderActionsRow actions={actions} /> : null}
       </Box>
     </Box>
   );

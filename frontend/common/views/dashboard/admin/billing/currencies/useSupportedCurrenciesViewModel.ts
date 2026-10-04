@@ -9,12 +9,14 @@ import {
   deactivateSupportedCurrencyMutationDocument,
   supportedCurrenciesQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/currency-catalog.documents";
-import { countryCodeToEmoji } from "@/frontend/common/lib/locale";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type { SupportedCurrenciesLabelsBySection } from "@/frontend/common/views/dashboard/admin/billing/currencies/types/supportedCurrencies.types";
+import {
+  buildLabelsBySection,
+  mapSupportedCurrencyRows,
+} from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel.helpers";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 
 export type SupportedCurrencyRow = {
   readonly id: string;
@@ -47,46 +49,6 @@ export interface SupportedCurrenciesViewModel {
 
 export type UseSupportedCurrenciesViewModelProps = Record<string, never>;
 
-function buildLabelsBySection(labels: SupportedCurrenciesLabels): SupportedCurrenciesLabelsBySection {
-  return {
-    shell: {
-      pageTitle: labels.pageTitle,
-      pageSubtitle: labels.pageSubtitle,
-      empty: labels.empty,
-      footerNote: labels.footerNote,
-    },
-    columns: {
-      flag: labels.flag,
-      code: labels.code,
-      symbol: labels.symbol,
-      name: labels.name,
-      country: labels.country,
-      active: labels.active,
-      actions: labels.actions,
-    },
-    actions: {
-      activateLabel: labels.activateLabel,
-      editLabel: labels.editLabel,
-      deactivateLabel: labels.deactivateLabel,
-    },
-    dialogs: {
-      activateTitle: labels.activateTitle,
-      editTitle: labels.editTitle,
-      deactivateConfirmTitle: labels.deactivateConfirmTitle,
-      deactivateConfirmBody: labels.deactivateConfirmBody,
-      deactivateConfirmCancel: labels.deactivateConfirmCancel,
-      deactivateConfirmConfirm: labels.deactivateConfirmConfirm,
-    },
-    notifications: {
-      saveSuccess: labels.saveSuccess,
-      saveError: labels.saveError,
-      deactivateSuccess: labels.deactivateSuccess,
-      deactivateError: labels.deactivateError,
-      currencyInUse: labels.currencyInUse,
-    },
-  };
-}
-
 export function useSupportedCurrenciesViewModel(
   _props: Readonly<UseSupportedCurrenciesViewModelProps>
 ): SupportedCurrenciesViewModel {
@@ -108,22 +70,10 @@ export function useSupportedCurrenciesViewModel(
   const [_activateCurrency, { loading: activating }] = useMutation(activateSupportedCurrencyMutationDocument);
   const [deactivateCurrency, { loading: deactivating }] = useMutation(deactivateSupportedCurrencyMutationDocument);
 
-  const rows = useMemo<readonly SupportedCurrencyRow[]>(() => {
-    const catalog = data?.supportedCurrencies ?? [];
-    return catalog
-      .filter((row): row is typeof row & { code: NonNullable<typeof row.code> } => row.code != null)
-      .map((row, index) => {
-        const countryCode = row.countryCode ?? "US";
-        return {
-          id: `${row.code}-${index}`,
-          code: row.code,
-          symbol: row.symbol ?? row.code,
-          countryCode,
-          flagEmoji: countryCodeToEmoji(countryCode),
-          isActive: row.isActive ?? true,
-        };
-      });
-  }, [data?.supportedCurrencies]);
+  const rows = useMemo<readonly SupportedCurrencyRow[]>(
+    () => mapSupportedCurrencyRows(data?.supportedCurrencies ?? []),
+    [data?.supportedCurrencies]
+  );
 
   const handleSaved = async (): Promise<void> => {
     setActivateOpen(false);

@@ -1,10 +1,8 @@
 "use client";
 
-import { EditOutlined } from "@mui/icons-material";
-import { Box, Button, FormHelperText, TextField } from "@mui/material";
-import InputAdornment from "@mui/material/InputAdornment";
-import { type ReactNode, useRef } from "react";
-import { TooltipIconButton } from "@/frontend/common/components/ui";
+import { Box } from "@mui/material";
+import { useRef } from "react";
+import { LocalizedStringInputSharedView } from "@/frontend/common/components/ui/input/localizedString/localizedStringInputShared.parts";
 import type {
   LocaleAdornmentSwitchProps,
   LocalizedStringDrawerProps,
@@ -12,11 +10,7 @@ import type {
 } from "@/frontend/common/components/ui/input/localizedString/types";
 import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { type LocalizedStringLabels, Translation, useAppTranslation } from "@/shared/locale";
-
-// ---------------------------------------------------------------------------
-// Slot Types
-// ---------------------------------------------------------------------------
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type LocalizedStringInputSlotProps = {
   /** Locale-switch adornment component — supplied pre-bound with slot props. */
@@ -26,48 +20,6 @@ export type LocalizedStringInputSlotProps = {
   /** Optional `TextField` size override (mobile uses `"small"`). */
   readonly textFieldSize?: "small" | "medium";
 };
-
-// ---------------------------------------------------------------------------
-// Sub-Components (shared presentation — no tier-specific logic)
-// ---------------------------------------------------------------------------
-
-type EditDrawerControlProps = {
-  readonly t: LocalizedStringLabels;
-  readonly isCompact: boolean;
-  readonly disabled: boolean;
-  readonly onOpen: () => void;
-};
-
-function renderEditDrawerControl({ t, isCompact, disabled, onOpen }: EditDrawerControlProps): ReactNode {
-  if (isCompact) {
-    return (
-      <TooltipIconButton
-        label={t.editTranslations}
-        onClick={onOpen}
-        disabled={disabled}
-        size="small"
-        icon={<EditOutlined fontSize="small" />}
-        sx={{ flexShrink: 0 }}
-      />
-    );
-  }
-  return (
-    <Button
-      variant="text"
-      size="small"
-      onClick={onOpen}
-      disabled={disabled}
-      startIcon={<EditOutlined fontSize="small" />}
-      sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
-    >
-      {t.editTranslations}
-    </Button>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Scaffold Component
-// ---------------------------------------------------------------------------
 
 export function LocalizedStringInputShared({
   value,
@@ -95,26 +47,7 @@ export function LocalizedStringInputShared({
 }: LocalizedStringInputProps & LocalizedStringInputSlotProps) {
   const t = useAppTranslation(Translation.Ui.LocalizedString);
   const containerRef = useRef<HTMLDivElement>(null);
-  const {
-    isCompact,
-    activeLocale,
-    draft,
-    drawerOpen,
-    successSwitch,
-    resolvedRequiredLocales,
-    fieldValue,
-    isRtl,
-    showInlineError,
-    inlineHelperText,
-    drawerResolvedTitle,
-    textFieldSuccessSx,
-    adornmentTopSx,
-    handleFieldChange,
-    handleLocaleSwitch,
-    handleDrawerSave,
-    handleDrawerCancel,
-    setDrawerOpen,
-  } = useLocalizedStringInputState({
+  const state = useLocalizedStringInputState({
     value,
     onChangeAction,
     error,
@@ -131,59 +64,23 @@ export function LocalizedStringInputShared({
 
   return (
     <Box ref={containerRef} sx={mergeSx({ width: fullWidth ? "100%" : undefined }, sx)}>
-      <TextField
+      <LocalizedStringInputSharedView
+        t={t}
+        state={state}
         label={label}
-        value={fieldValue}
-        onChange={event => handleFieldChange(event.target.value)}
-        onBlur={onBlurAction}
         required={required}
+        onBlurAction={onBlurAction}
         disabled={disabled}
-        error={showInlineError}
         multiline={multiline}
         minRows={minRows}
         fullWidth={fullWidth}
-        size={textFieldSize}
-        dir={isRtl ? "rtl" : "ltr"}
-        key={activeLocale}
-        sx={textFieldSuccessSx}
-        slotProps={{
-          inputLabel: { shrink: true },
-          input: {
-            startAdornment: (
-              <InputAdornment position="start" sx={adornmentTopSx}>
-                <LocaleAdornmentSwitch
-                  activeLocale={activeLocale}
-                  onChangeAction={handleLocaleSwitch}
-                  disabled={disabled}
-                  compact={isCompact}
-                  successSwitch={successSwitch}
-                />
-              </InputAdornment>
-            ),
-            endAdornment: disableDrawer ? undefined : (
-              <InputAdornment position="end" sx={adornmentTopSx}>
-                {renderEditDrawerControl({ t, isCompact, disabled, onOpen: () => setDrawerOpen(true) })}
-              </InputAdornment>
-            ),
-          },
-          htmlInput: { dir: isRtl ? "rtl" : "ltr" },
-        }}
-      />
-      {inlineHelperText ? <FormHelperText error={showInlineError}>{inlineHelperText}</FormHelperText> : null}
-      <LocalizedStringDrawer
-        open={drawerOpen}
-        value={draft}
-        title={drawerResolvedTitle}
-        multiline={multiline}
-        minRows={minRows}
-        required={required}
-        requiredLocales={resolvedRequiredLocales}
-        onSaveAction={handleDrawerSave}
-        onCancelAction={handleDrawerCancel}
-        autosave={drawerAutosave}
-        showActions={drawerShowActions}
-        dismissAction={drawerDismissAction}
-        saving={false}
+        textFieldSize={textFieldSize}
+        disableDrawer={disableDrawer}
+        LocaleAdornmentSwitch={LocaleAdornmentSwitch}
+        LocalizedStringDrawer={LocalizedStringDrawer}
+        drawerAutosave={drawerAutosave}
+        drawerShowActions={drawerShowActions}
+        drawerDismissAction={drawerDismissAction}
       />
     </Box>
   );

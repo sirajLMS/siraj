@@ -1,13 +1,5 @@
 import type { SessionAuditReportRow } from "@/backend/types";
-
-/** Spreadsheet formula starters — cells beginning with one of these are neutralized (OWASP CSV-injection guidance: =, +, -, @, tab, CR). */
-const CSV_FORMULA_PREFIXES: readonly string[] = ["=", "+", "-", "@", "\t", "\r"];
-const CSV_LINE_SEPARATOR = "\r\n";
-
-interface CsvColumn {
-  readonly header: string;
-  readonly pick: (row: SessionAuditReportRow) => string;
-}
+import { type CsvColumn, serializeCsvRowset } from "@/shared/lib/csv";
 
 /**
  * One CSV column per session audit report row field. Grid-visible columns
@@ -17,7 +9,7 @@ interface CsvColumn {
  * siblings kept adjacent to the column they qualify; the join-back id columns
  * (`teacherId`, `studentId`, `instanceId`) come last.
  */
-const CSV_COLUMNS: readonly CsvColumn[] = [
+const CSV_COLUMNS: readonly CsvColumn<SessionAuditReportRow>[] = [
   { header: "scheduledStartAt", pick: row => row.scheduledStartAt },
   { header: "teacherName", pick: row => row.teacherName },
   { header: "currentStatus", pick: row => row.currentStatus },
@@ -42,17 +34,6 @@ const CSV_COLUMNS: readonly CsvColumn[] = [
   { header: "instanceId", pick: row => row.instanceId },
 ];
 
-/** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR (including after leading whitespace) get a `'` prefix. */
-function toCsvCell(value: string): string {
-  const trimmed = value.trimStart();
-  const startsFormula = trimmed.length > 0 && CSV_FORMULA_PREFIXES.some(prefix => trimmed.startsWith(prefix));
-  const hardened = startsFormula ? `'${value}` : value;
-  if (hardened.includes(",") || hardened.includes('"') || hardened.includes("\n") || hardened.includes("\r")) {
-    return `"${hardened.replaceAll('"', '""')}"`;
-  }
-  return hardened;
-}
-
 /**
  * Serializes session audit report rows into an RFC 4180 CSV string: a header
  * line, one CRLF-terminated line per row, and a trailing separator after the
@@ -60,7 +41,5 @@ function toCsvCell(value: string): string {
  * safe to call on a large pre-fetched row set from request handlers.
  */
 export function serializeSessionAuditCsv(rows: readonly SessionAuditReportRow[]): string {
-  const headerLine = CSV_COLUMNS.map(column => toCsvCell(column.header)).join(",");
-  const dataLines = rows.map(row => CSV_COLUMNS.map(column => toCsvCell(column.pick(row))).join(","));
-  return `${[headerLine, ...dataLines].join(CSV_LINE_SEPARATOR)}${CSV_LINE_SEPARATOR}`;
+  return serializeCsvRowset(CSV_COLUMNS, rows);
 }

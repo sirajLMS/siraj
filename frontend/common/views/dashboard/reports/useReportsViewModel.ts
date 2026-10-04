@@ -1,73 +1,37 @@
-// NEW FOR PLAN v5: prior to the migration wave, the reports tier files owned
-// `useUserStore`, `useAppLocale`, `useMemo`, `date-fns`, and `useState` for the
-// collapsible. Per specs.md §0 + §6, all of that now lives ONCE in this hook
-// (the ViewModel is the SOLE owner of side effects, derived values, and
-// store subscriptions) and is handed down to the tier views as plain props.
-
 "use client";
 
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import {
-  type BillingCurrencyBucket,
-  formatBillingCurrencyTotals,
-} from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useReportsStore } from "@/frontend/common/stores/reportsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type {
-  ReportFiltersFormLabels,
-  ReportsDataGridLabels,
-} from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type {
-  LedgerStatus,
   ReportLedgerRow,
   ReportPaidAmount,
   ReportsSummary,
   ReportType,
 } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import {
-  aggregatePaidAmountTotals,
-  formatReportPaidAmounts,
-} from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
+  DEFAULT_LABELS,
+  DEFAULT_SUMMARY,
+  type ReportsViewLabels,
+} from "@/frontend/common/views/dashboard/reports/useReportsViewModel.constants";
+import {
+  computeReportsTotalsDisplay,
+  type ReportsTotalsDisplay,
+} from "@/frontend/common/views/dashboard/reports/useReportsViewModel.helpers";
+import { formatReportPaidAmounts } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-interface ReportsViewLabels {
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly filtersTitle: string;
-  readonly exportCsv: string;
-  readonly printReport: string;
-  readonly filtersLabels: ReportFiltersFormLabels;
-  readonly tableLabels: ReportsDataGridLabels;
-  readonly summaryLabels: {
-    readonly engagementRate: string;
-    readonly engagementGrowth: string;
-    readonly increase: string;
-    readonly financialDistribution: string;
-    readonly financialSubtitle: string;
-  };
-  readonly totalsLabel: string;
-  readonly ledgerTitle: string;
-  readonly ledgerLabels: {
-    readonly studentLabel: (name: string) => string;
-    readonly paid: string;
-    readonly statusLabels: Record<LedgerStatus, string>;
-    readonly taken: string;
-    readonly absent: string;
-    readonly leave: string;
-    readonly pending: string;
-    readonly hours: string;
-  };
-}
+export type { ReportsTotalsDisplay } from "@/frontend/common/views/dashboard/reports/useReportsViewModel.helpers";
 
 export interface UseReportsViewModelProps {
-  // NEW FOR PLAN v5: all fields optional so the Container may invoke the
-  // ViewModel with no args (specs.md §6.1 — the Container is the
-  // view-orchestrator and the page.tsx renders `<ReportsContainer />` with no
-  // props). The VM supplies no-op/empty defaults when callers omit data; a
-  // future caller may still pass real labels/rows/handlers to override them.
+  /**
+   * All fields are optional so the page can render `<ReportsContainer />`
+   * with no props; the ViewModel supplies empty/no-op defaults for any
+   * omitted labels, rows, or handlers.
+   */
   readonly labels?: ReportsViewLabels;
   readonly rows?: readonly ReportLedgerRow[];
   readonly summary?: ReportsSummary;
@@ -77,13 +41,6 @@ export interface UseReportsViewModelProps {
   readonly onExportCsv?: () => void;
   readonly onPrintReport?: () => void;
   readonly onRowClick?: (row: ReportLedgerRow) => void;
-}
-
-/** Precomputed paid-amounts totals display (lifted out of tier). */
-export interface ReportsTotalsDisplay {
-  readonly primary: string;
-  readonly breakdown?: string;
-  readonly ariaLabel?: string;
 }
 
 export interface ReportsViewModel {
@@ -104,82 +61,19 @@ export interface ReportsViewModel {
   readonly onExportCsv: () => void;
   readonly onPrintReport: () => void;
   readonly onRowClick?: (row: ReportLedgerRow) => void;
-  // NEW FOR PLAN v5: filters-collapsible state lifted out of the mobile tier
-  // (the desktop variant renders the form permanently, no collapse chrome).
+  /** Collapsible filters state; only the mobile tier renders collapse chrome. */
   readonly filtersExpanded: boolean;
   readonly onToggleFiltersExpanded: () => void;
-  // NEW FOR PLAN v5: permission gate lifted out of tier (specs.md §3 N3) —
-  // tier files no longer call `useUserStore`.
+  /** Permission gate for financial columns, resolved from the user store. */
   readonly showFinancials: boolean;
-  // NEW FOR PLAN v5: precomputed financials totals display (specs.md §3 N11 —
-  // the `useMemo` derivation is owned by the ViewModel, not the tier).
+  /** Precomputed financials totals display owned by the ViewModel. */
   readonly totalsDisplay: ReportsTotalsDisplay;
-  // NEW FOR PLAN v5: prebuilt pure formatter that tier components call
-  // instead of importing `date-fns`/`buildFxDisplayMessages`/`useUserStore`
-  // themselves. The closure carries the locale/error labels, so the tier is
-  // left only with rendering.
+  /**
+   * Locale-bound formatter for ledger card paid amounts, so tier components
+   * never import locale/FX dependencies themselves.
+   */
   readonly formatPaidAmounts: (paidAmounts: readonly ReportPaidAmount[]) => string;
 }
-
-const DEFAULT_LABELS: ReportsViewLabels = {
-  pageTitle: "",
-  pageSubtitle: "",
-  filtersTitle: "",
-  exportCsv: "",
-  printReport: "",
-  filtersLabels: {
-    fromDate: "",
-    toDate: "",
-    teacher: "",
-    allTeachers: "",
-    reportType: "",
-    submit: "",
-    reportTypes: {
-      byTeacher: "",
-      byStudent: "",
-      byDate: "",
-    },
-  },
-  tableLabels: {
-    name: "",
-    taken: "",
-    absent: "",
-    leave: "",
-    pending: "",
-    hours: "",
-    paid: "",
-    noEntries: "",
-  },
-  summaryLabels: {
-    engagementRate: "",
-    engagementGrowth: "",
-    increase: "",
-    financialDistribution: "",
-    financialSubtitle: "",
-  },
-  totalsLabel: "",
-  ledgerTitle: "",
-  ledgerLabels: {
-    studentLabel: (name: string) => name,
-    paid: "",
-    statusLabels: {
-      active: "",
-      on_break: "",
-    },
-    taken: "",
-    absent: "",
-    leave: "",
-    pending: "",
-    hours: "",
-  },
-};
-
-const DEFAULT_SUMMARY: ReportsSummary = {
-  engagementRate: 0,
-  engagementGrowth: null,
-  currencyDistribution: [],
-  totalHours: "",
-};
 
 export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = {}): ReportsViewModel {
   const fromDate = useReportsStore(state => state.fromDate);
@@ -201,10 +95,6 @@ export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = 
   const tErrors = useAppTranslation(Translation.Errors);
 
   const { labels, rows, summary, canGenerate, loading, onSubmit, onExportCsv, onPrintReport, onRowClick } = props;
-  // NEW FOR PLAN v5: empty/no-op defaults so the Container can invoke this
-  // ViewModel with no arguments (specs.md §6.1) — the page passes `<ReportsContainer />`
-  // and the VM supplies safe defaults for callers that omit input data/handlers.
-  // Wrapped in `useMemo` so the `useMemo` further down has stable deps.
   const safeLabels = useMemo(() => labels ?? DEFAULT_LABELS, [labels]);
   const safeRows = useMemo(() => rows ?? [], [rows]);
   const safeSummary = useMemo(() => summary ?? DEFAULT_SUMMARY, [summary]);
@@ -213,41 +103,18 @@ export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = 
   const safeOnExportCsv = onExportCsv ?? (() => undefined);
   const safeOnPrintReport = onPrintReport ?? (() => undefined);
 
-  // NEW FOR PLAN v5: totals display derived ONCE in the ViewModel (lifted from
-  // the tier's `useTotalsDisplay` hook which used to live in both
-  // `reportsTotalsSection.{mobile,desktop}.tsx`).
-  const totalsDisplay = useMemo<ReportsTotalsDisplay>(() => {
-    const paidTotals = aggregatePaidAmountTotals(safeRows);
-    if (paidTotals.length === 0) {
-      return { primary: "—", ariaLabel: tProfile.notSet };
-    }
+  const fxMessages = useMemo(
+    () =>
+      buildFxDisplayMessages({ convertedAmount: tProfile.convertedAmount }, tErrors, {
+        convertedTotalApprox: tProfile.convertedTotalApprox,
+      }),
+    [tProfile, tErrors]
+  );
 
-    const buckets: BillingCurrencyBucket[] = paidTotals.map(paid => ({
-      amount: paid.amount,
-      currency: paid.currency,
-      displayAmount: paid.displayAmount
-        ? {
-            amount: paid.displayAmount.amount,
-            currency: paid.displayAmount.currency,
-            stale: paid.displayAmount.stale,
-          }
-        : null,
-    }));
-
-    return formatBillingCurrencyTotals(
-      buckets,
-      locale,
-      buildFxDisplayMessages(
-        {
-          convertedAmount: tProfile.convertedAmount,
-        },
-        tErrors,
-        {
-          convertedTotalApprox: tProfile.convertedTotalApprox,
-        }
-      )
-    );
-  }, [safeRows, locale, tProfile, tErrors]);
+  const totalsDisplay = useMemo(
+    () => computeReportsTotalsDisplay(safeRows, locale, tProfile.notSet, fxMessages),
+    [safeRows, locale, tProfile, fxMessages]
+  );
 
   return {
     labels: safeLabels,
@@ -271,21 +138,6 @@ export function useReportsViewModel(props: Readonly<UseReportsViewModelProps> = 
     onToggleFiltersExpanded: toggleFiltersExpanded,
     showFinancials,
     totalsDisplay,
-    // NEW FOR PLAN v5: bound formatter handed down so the performance ledger
-    // cards do not import `useUserStore`/`buildFxDisplayMessages` themselves.
-    formatPaidAmounts: paidAmounts =>
-      formatReportPaidAmounts(
-        paidAmounts,
-        locale,
-        buildFxDisplayMessages(
-          {
-            convertedAmount: tProfile.convertedAmount,
-          },
-          tErrors,
-          {
-            convertedTotalApprox: tProfile.convertedTotalApprox,
-          }
-        )
-      ),
+    formatPaidAmounts: paidAmounts => formatReportPaidAmounts(paidAmounts, locale, fxMessages),
   };
 }

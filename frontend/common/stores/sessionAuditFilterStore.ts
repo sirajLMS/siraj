@@ -6,6 +6,7 @@ import {
   SessionAuditReportSortField,
   SessionAuditStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import { createPaginatedFilterActions } from "@/frontend/common/stores/__shared__";
 
 /** Rows per server page on first load; mirrors the audit query resolver default. */
 export const SESSION_AUDIT_DEFAULT_PAGE_SIZE = 50;
@@ -111,16 +112,6 @@ function defaultState(): SessionAuditFilterState {
     pageSize: SESSION_AUDIT_DEFAULT_PAGE_SIZE,
     selectedIds: [],
   };
-}
-
-function toNonNegativePage(page: number): number {
-  if (!Number.isFinite(page)) return 0;
-  return Math.max(0, Math.trunc(page));
-}
-
-function toPositivePageSize(pageSize: number): number {
-  if (!Number.isFinite(pageSize)) return SESSION_AUDIT_DEFAULT_PAGE_SIZE;
-  return Math.max(1, Math.trunc(pageSize));
 }
 
 function currentWindowSearch(): string {
@@ -252,17 +243,11 @@ export const useSessionAuditFilterStore = create<SessionAuditFilterStore>(set =>
   setCurrentStatuses: currentStatuses => set({ currentStatuses, page: 0 }),
   setSearch: search => set({ search, page: 0 }),
   setSort: (sortField, sortDirection) => set({ sortField, sortDirection, page: 0 }),
-  setPage: page => set({ page: toNonNegativePage(page) }),
-  setPageSize: pageSize => set({ pageSize: toPositivePageSize(pageSize), page: 0 }),
-  toggleSelected: id =>
-    set(state => ({
-      selectedIds: state.selectedIds.includes(id)
-        ? state.selectedIds.filter(selectedId => selectedId !== id)
-        : [...state.selectedIds, id],
-    })),
-  clearSelection: () => set({ selectedIds: [] }),
-  clearFilters: () => set({ ...DEFAULT_FILTERS, page: 0, selectedIds: [] }),
-  reset: () => set(defaultState()),
+  ...createPaginatedFilterActions<SessionAuditFilterState>(set, {
+    defaultPageSize: SESSION_AUDIT_DEFAULT_PAGE_SIZE,
+    defaultFilters: DEFAULT_FILTERS,
+    createDefaultState: defaultState,
+  }),
   hydrateFromUrl: search => set({ ...defaultState(), ...parseSessionAuditUrlParams(search ?? currentWindowSearch()) }),
 }));
 

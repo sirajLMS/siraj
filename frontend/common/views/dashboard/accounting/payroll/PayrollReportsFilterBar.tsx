@@ -1,31 +1,22 @@
 "use client";
 
 import { ClearOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Chip,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Tooltip,
-} from "@mui/material";
-import { useMemo, useState } from "react";
+import { Box, IconButton, type SelectChangeEvent, Tooltip } from "@mui/material";
 import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField/SearchBarField";
-import {
-  type PersonOption,
-  StudentAutocomplete,
-  TeacherAutocomplete,
-} from "@/frontend/common/components/ui/input/userSelect";
-import { CalculationStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { StudentAutocomplete, TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect";
 import { FilterBarShellShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/filterBarShellShared";
-import type {
-  PayrollReportRow,
-  PayrollReportsViewModel,
-} from "@/frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel";
+import {
+  isCalculationStatus,
+  rowStudentId,
+  rowStudentName,
+  rowTeacherId,
+  rowTeacherName,
+  SEARCH_INPUT_MAX_LENGTH,
+} from "@/frontend/common/views/dashboard/accounting/payroll/PayrollReportsFilterBar.helpers";
+import { usePersonFilterSelection } from "@/frontend/common/views/dashboard/accounting/payroll/PayrollReportsFilterBar.hooks";
+import { PayrollStatusFilterSelect } from "@/frontend/common/views/dashboard/accounting/payroll/PayrollReportsFilterBar.parts";
+import type { PayrollReportsViewModel } from "@/frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel";
 
 /**
  * View-model slice consumed by the payroll reports filter bar. The raw search
@@ -52,91 +43,6 @@ export type PayrollReportsFilterBarProps = Pick<
   | "clearFilters"
   | "hasActiveFilters"
 >;
-
-/** Search length accepted by both the report query and the CSV export route. */
-const SEARCH_INPUT_MAX_LENGTH = 200;
-
-/** Status chips previewed inside the collapsed multi-select before the overflow chip. */
-const STATUS_CHIP_PREVIEW_LIMIT = 2;
-
-const CALCULATION_STATUS_VALUES: readonly string[] = Object.values(CalculationStatus);
-
-function isCalculationStatus(value: string): value is CalculationStatus {
-  return CALCULATION_STATUS_VALUES.includes(value);
-}
-
-const rowTeacherId = (row: PayrollReportRow): string | null => row.teacherId;
-const rowTeacherName = (row: PayrollReportRow): string | null => row.teacherName;
-const rowStudentId = (row: PayrollReportRow): string | null => row.studentId;
-const rowStudentName = (row: PayrollReportRow): string | null => row.studentName;
-
-/**
- * Display option for a person filter whose id is already applied. The loaded
- * report rows supply the name after a remount or an external filter reset;
- * null when the id matches no row on the current page.
- */
-function findRowPersonOption(
-  rows: readonly PayrollReportRow[],
-  personId: string,
-  idOf: (row: PayrollReportRow) => string | null,
-  nameOf: (row: PayrollReportRow) => string | null
-): PersonOption | null {
-  const match = rows.find(row => idOf(row) === personId);
-  return match ? { id: personId, name: nameOf(match) ?? "" } : null;
-}
-
-interface PersonFilterSelection {
-  readonly option: PersonOption | null;
-  readonly handleChange: (next: PersonOption | null) => void;
-}
-
-/**
- * Bridges the id-only store filter with the autocomplete's option shape: the
- * freshly picked option is kept in local state, and the report rows provide a
- * display fallback when the stored id no longer matches the local option
- * (initial mount, page navigation, or cleared filters).
- */
-function usePersonFilterSelection(
-  personId: string | null,
-  rows: readonly PayrollReportRow[],
-  idOf: (row: PayrollReportRow) => string | null,
-  nameOf: (row: PayrollReportRow) => string | null,
-  setPersonId: (personId: string | null) => void
-): PersonFilterSelection {
-  const [picked, setPicked] = useState<PersonOption | null>(null);
-  const option = useMemo<PersonOption | null>(() => {
-    if (personId === null || personId === "") return null;
-    if (picked?.id === personId) return picked;
-    return findRowPersonOption(rows, personId, idOf, nameOf);
-  }, [rows, personId, picked, idOf, nameOf]);
-  const handleChange = (next: PersonOption | null) => {
-    setPicked(next);
-    setPersonId(next?.id ?? null);
-  };
-  return { option, handleChange };
-}
-
-/** Collapsed multi-select preview: a few status chips, then a "+N" overflow chip. */
-function renderStatusValue(
-  selected: readonly string[],
-  statusLabels: Record<CalculationStatus, string>,
-  allLabel: string
-): React.ReactNode {
-  const statuses = selected.filter(isCalculationStatus);
-  if (statuses.length === 0) {
-    return <Box sx={theme => ({ color: theme.palette.onSurfaceVariant })}>{allLabel}</Box>;
-  }
-  return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-      {statuses.slice(0, STATUS_CHIP_PREVIEW_LIMIT).map(status => (
-        <Chip key={status} size="small" label={statusLabels[status]} />
-      ))}
-      {statuses.length > STATUS_CHIP_PREVIEW_LIMIT ? (
-        <Chip size="small" label={`+${statuses.length - STATUS_CHIP_PREVIEW_LIMIT}`} />
-      ) : null}
-    </Box>
-  );
-}
 
 export function PayrollReportsFilterBar({
   labels,
@@ -208,25 +114,12 @@ export function PayrollReportsFilterBar({
               size="small"
             />
           </Box>
-          <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 230 } }}>
-            <InputLabel id="payroll-reports-status-filter-label" shrink>
-              {labels.filters.status}
-            </InputLabel>
-            <Select
-              labelId="payroll-reports-status-filter-label"
-              label={labels.filters.status}
-              multiple
-              value={[...calculationStatuses]}
-              onChange={handleStatusesChange}
-              renderValue={selected => renderStatusValue(selected, statusLabels, labels.filters.all)}
-            >
-              {Object.values(CalculationStatus).map(status => (
-                <MenuItem key={status} value={status}>
-                  {statusLabels[status]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <PayrollStatusFilterSelect
+            filters={labels.filters}
+            statusLabels={statusLabels}
+            value={calculationStatuses}
+            onChange={handleStatusesChange}
+          />
         </>
       }
       actions={

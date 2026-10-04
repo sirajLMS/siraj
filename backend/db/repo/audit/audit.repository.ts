@@ -1,19 +1,30 @@
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/backend/db";
-import { maskAuditPayload } from "@/backend/db/repo/audit/audit-masking.helpers";
+import {
+  buildSingleFieldChangeInput,
+  buildStateTransitionInput,
+  buildTypedAuditLogInput,
+  computeAuditChanges,
+  type ExchangeRateUpdateInput,
+  type InvoiceChangeInput,
+  type PaymentRefundInput,
+  type PermissionChangeInput,
+  type SingleFieldChangeInput,
+  type StateTransitionInput,
+  type StudentStatusChangeInput,
+  type SystemSettingChangeInput,
+  type TypedAuditLogInput,
+} from "@/backend/db/repo/audit/audit-typed-logging.helpers";
+import {
+  mapAdminAuditLogRows,
+  mapAuditLogRows,
+  mapSingleAuditLogRow,
+  runInTransaction,
+} from "@/backend/db/repo/audit/audit-write.helpers";
 import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
 import { adminAuditLogs, auditLogs } from "@/backend/db/schema";
-import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
-
-/**
- * Helper to execute a function within a transaction if provided, or a new one otherwise
- */
-async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
-  return tx ? await fn(tx) : await db.transaction((t: DBTransaction) => fn(t));
-}
 
 export namespace AuditRepository {
   /**
@@ -29,36 +40,6 @@ export namespace AuditRepository {
       return created;
     });
   };
-
-  /**
-   * Maps a single CreateAuditLogInput to an insert row object.
-   * Shared by `createAuditLog` (single insert) and `mapAuditLogRows` (bulk insert).
-   */
-  function mapSingleAuditLogRow(input: Types.CreateAuditLogInput, defaultDate?: Date) {
-    return {
-      actorUserId: input.actorUserId ?? null,
-      actorType: input.actorType,
-      entityType: input.entityType,
-      entityId: input.entityId,
-      action: input.action,
-      description: input.description ?? null,
-      previousState: maskAuditPayload(input.previousState),
-      newState: maskAuditPayload(input.newState),
-      changes: maskAuditPayload(input.changes),
-      ipAddress: sanitizeIpAddress(input.ipAddress),
-      userAgent: input.userAgent ?? null,
-      metadata: input.metadata ?? null,
-      createdAt: input.createdAt ?? defaultDate ?? new Date(),
-    };
-  }
-
-  /**
-   * Maps CreateAuditLogInput[] to insert row objects.
-   */
-  function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
-    const now = new Date();
-    return inputs.map(input => mapSingleAuditLogRow(input, now));
-  }
 
   /**
    * Bulk-insert audit log entries. Chunks large batches and returns inserted rows.
@@ -102,23 +83,6 @@ export namespace AuditRepository {
 
     return runInTransaction(tx, run);
   };
-
-  /**
-   * Maps CreateAdminAuditLogInput[] to insert row objects.
-   */
-  function mapAdminAuditLogRows(inputs: readonly Types.CreateAdminAuditLogInput[]) {
-    const now = new Date();
-    return inputs.map(input => ({
-      actorUserId: input.actorUserId,
-      targetUserId: input.targetUserId ?? null,
-      action: input.action,
-      description: input.description ?? null,
-      previousState: maskAuditPayload(input.previousState),
-      newState: maskAuditPayload(input.newState),
-      ipAddress: sanitizeIpAddress(input.ipAddress),
-      createdAt: input.createdAt ?? now,
-    }));
-  }
 
   /**
    * Bulk-insert admin audit log entries.
@@ -184,31 +148,14 @@ export namespace AuditRepository {
   };
 
   /**
-   * Internal helper for convenience logging methods
+   * Internal helper for convenience logging methods: resolves the actor type
+   * and inserts the normalized audit log entry.
    */
-  type TypedAuditLogInput = {
-    actorUserId: string | null;
-    entityType: Types.AuditEntityType;
-    entityId: string;
-    action: Types.AuditAction;
-    description?: string | null;
-    previousState?: Record<string, unknown> | null;
-    newState?: Record<string, unknown> | null;
-    changes?: Record<string, unknown> | null;
-    metadata?: Record<string, unknown> | null;
-  };
-
   async function createTypedAuditLog(
     tx: DBTransaction | undefined,
     input: TypedAuditLogInput
   ): Promise<Types.AuditLogSelectType> {
-    return await createAuditLog(
-      {
-        ...input,
-        actorType: input.actorUserId ? "USER" : "SYSTEM",
-      },
-      tx
-    );
+    return await createAuditLog(buildTypedAuditLogInput(input), tx);
   }
 
   /**
@@ -216,15 +163,9 @@ export namespace AuditRepository {
    */
   async function logStateTransition(
     tx: DBTransaction | undefined,
-    input: Omit<TypedAuditLogInput, "changes"> & {
-      previousState: Record<string, unknown> | null;
-      newState: Record<string, unknown> | null;
-    }
+    input: StateTransitionInput
   ): Promise<Types.AuditLogSelectType> {
-    return await createTypedAuditLog(tx, {
-      ...input,
-      changes: computeChanges(input.previousState, input.newState),
-    });
+    return await createAuditLog(buildStateTransitionInput(input), tx);
   }
 
   /**
@@ -232,28 +173,9 @@ export namespace AuditRepository {
    */
   async function logSingleFieldChange(
     tx: DBTransaction | undefined,
-    input: {
-      actorUserId: string | null;
-      entityType: Types.AuditEntityType;
-      entityId: string;
-      action: Types.AuditAction;
-      description: string;
-      field: string;
-      oldValue: unknown;
-      newValue: unknown;
-      metadata?: Record<string, unknown> | null;
-    }
+    input: SingleFieldChangeInput
   ): Promise<Types.AuditLogSelectType> {
-    return await logStateTransition(tx, {
-      actorUserId: input.actorUserId,
-      entityType: input.entityType,
-      entityId: input.entityId,
-      action: input.action,
-      description: input.description,
-      previousState: { [input.field]: input.oldValue },
-      newState: { [input.field]: input.newValue },
-      metadata: input.metadata,
-    });
+    return await createAuditLog(buildSingleFieldChangeInput(input), tx);
   }
 
   /**
@@ -364,33 +286,7 @@ export namespace AuditRepository {
   /**
    * Helper function to compute changes between old and new state.
    */
-  export const computeChanges = (
-    previousState: Record<string, unknown> | null,
-    newState: Record<string, unknown> | null
-  ): Record<string, unknown> | null => {
-    if (!previousState || !newState) return null;
-
-    const changes: Record<string, unknown> = {};
-
-    for (const key in newState) {
-      if (previousState[key] !== newState[key]) {
-        changes[key] = { from: previousState[key], to: newState[key] };
-      }
-    }
-
-    return Object.keys(changes).length > 0 ? changes : null;
-  };
-
-  /**
-   * Student status change log input
-   */
-  interface StudentStatusChangeInput {
-    studentId: string;
-    oldStatus: string;
-    newStatus: string;
-    actorUserId: string | null;
-    description?: string;
-  }
+  export const computeChanges = computeAuditChanges;
 
   export const logStudentStatusChange = (input: StudentStatusChangeInput, tx?: DBTransaction) =>
     logSingleFieldChange(tx, {
@@ -403,18 +299,6 @@ export namespace AuditRepository {
       oldValue: input.oldStatus,
       newValue: input.newStatus,
     });
-
-  /**
-   * Invoice change log input
-   */
-  interface InvoiceChangeInput {
-    invoiceId: string;
-    action: Types.AuditAction;
-    previousState: Record<string, unknown> | null;
-    newState: Record<string, unknown> | null;
-    actorUserId: string | null;
-    description?: string;
-  }
 
   export const logInvoiceChange = async (
     input: InvoiceChangeInput,
@@ -432,17 +316,6 @@ export namespace AuditRepository {
     });
   };
 
-  /**
-   * Payment refund log input
-   */
-  interface PaymentRefundInput {
-    paymentId: string;
-    refundAmount: number;
-    currency: CurrencyCode;
-    actorUserId: string | null;
-    reason?: string;
-  }
-
   export const logPaymentRefund = async (
     input: PaymentRefundInput,
     tx?: DBTransaction
@@ -457,18 +330,6 @@ export namespace AuditRepository {
       metadata: { refundAmount, currency, reason },
     });
   };
-
-  /**
-   * Permission change log input
-   */
-  interface PermissionChangeInput {
-    userId: string;
-    action: "GRANT" | "REVOKE";
-    permissionOrGroupId: string;
-    permissionType: "PERMISSION" | "PERMISSION_GROUP";
-    actorUserId: string | null;
-    description?: string;
-  }
 
   export const logPermissionChange = async (
     input: PermissionChangeInput,
@@ -485,19 +346,6 @@ export namespace AuditRepository {
       metadata: { targetUserId: userId, permissionType },
     });
   };
-
-  /**
-   * Exchange rate update log input
-   */
-  interface ExchangeRateUpdateInput {
-    rateId: string;
-    fromCurrency: CurrencyCode;
-    toCurrency: CurrencyCode;
-    oldRate: number | null;
-    newRate: number;
-    actorUserId: string | null;
-    source?: string;
-  }
 
   export const logExchangeRateUpdate = async (
     input: ExchangeRateUpdateInput,
@@ -518,17 +366,6 @@ export namespace AuditRepository {
       metadata: { fromCurrency, toCurrency, source },
     });
   };
-
-  /**
-   * System setting change log input
-   */
-  interface SystemSettingChangeInput {
-    settingKey: string;
-    oldValue: unknown;
-    newValue: unknown;
-    actorUserId: string | null;
-    description?: string;
-  }
 
   export const logSystemSettingChange = (input: SystemSettingChangeInput, tx?: DBTransaction) =>
     logSingleFieldChange(tx, {

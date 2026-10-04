@@ -1,6 +1,16 @@
-import { Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
+import {
+  CardItem,
+  FormItem,
+  MixedContentItem,
+} from "@/frontend/mobile/components/ui/container/MobileContentStack.stories.fixtures";
+import {
+  createCardItemsStory,
+  createLocaleStory,
+  createSingleChildStory,
+} from "@/frontend/mobile/components/ui/container/MobileContentStack.stories.helpers";
 
 const meta: Meta<typeof MobileContentStack> = {
   title: "UI/ContentStack/Mobile",
@@ -35,147 +45,26 @@ const meta: Meta<typeof MobileContentStack> = {
 export default meta;
 type Story = StoryObj<typeof MobileContentStack>;
 
-function CardItem({
-  index,
-  variant = "outlined",
-  children,
-}: Readonly<{ index: number; variant?: "outlined" | "elevation"; children?: React.ReactNode }>) {
-  return (
-    <Card variant={variant} sx={{ p: 2 }}>
-      <CardContent>
-        <Typography variant="bodyMd">{children ?? `Card Item ${index}`}</Typography>
-      </CardContent>
-    </Card>
-  );
-}
+export const Default = createCardItemsStory({ count: 4, variant: "outlined" });
 
-function FormItem({ index }: Readonly<{ index: number }>) {
-  return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-      <TextField label={`Field ${index}`} placeholder={`Enter value ${index}`} fullWidth size="small" />
-    </Box>
-  );
-}
+export const CustomGap = createCardItemsStory({ count: 5, variant: "elevation", args: { gap: 2 } });
 
-function MixedContentItem({ index, type }: Readonly<{ index: number; type: "card" | "form" | "text" }>) {
-  switch (type) {
-    case "card":
-      return (
-        <CardItem index={index} variant="elevation">
-          Elevated Card Content
-        </CardItem>
-      );
-    case "form":
-      return <FormItem index={index} />;
-    case "text":
-      return (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            Plain text content item {index}
-          </Typography>
-        </Box>
-      );
-    default:
-      return <CardItem index={index} />;
-  }
-}
+export const LargeGap = createCardItemsStory({ count: 3, variant: "outlined", args: { gap: 4 } });
 
-function createLocaleStory({
-  locale,
-  direction,
-  title1,
-  body1,
-  title2,
-  fieldLabel,
-  fieldPlaceholder,
-}: {
-  locale: "ar" | "en";
-  direction: "rtl" | "ltr";
-  title1: string;
-  body1: string;
-  title2: string;
-  fieldLabel: string;
-  fieldPlaceholder: string;
-}): Story {
-  return {
-    globals: { locale, viewport: "mobile" },
-    render: args => (
-      <MobileContentStack {...args} sx={{ direction }}>
-        <CardItem index={1} variant="outlined">
-          <Typography variant="titleLg" gutterBottom>
-            {title1}
-          </Typography>
-          <Typography variant="bodyMd">{body1}</Typography>
-        </CardItem>
-        <CardItem index={2} variant="outlined">
-          <Typography variant="titleLg" gutterBottom>
-            {title2}
-          </Typography>
-          <TextField label={fieldLabel} placeholder={fieldPlaceholder} fullWidth size="small" />
-        </CardItem>
-      </MobileContentStack>
-    ),
-  };
-}
-
-export const Default: Story = {
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3, 4].map(index => (
-        <CardItem key={index} index={index} />
-      ))}
-    </MobileContentStack>
-  ),
-};
-
-export const CustomGap: Story = {
-  args: {
-    gap: 2,
-  },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3, 4, 5].map(index => (
-        <CardItem key={index} index={index} variant="elevation" />
-      ))}
-    </MobileContentStack>
-  ),
-};
-
-export const LargeGap: Story = {
-  args: {
-    gap: 4,
-  },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3].map(index => (
-        <CardItem key={index} index={index} variant="outlined" />
-      ))}
-    </MobileContentStack>
-  ),
-};
-
-export const CustomPaddingBottomForFAB: Story = {
-  args: {
-    paddingBottom: 10,
-  },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3, 4].map(index => (
-        <CardItem key={index} index={index} variant="elevation">
-          Content with extra bottom padding for FAB clearance
-        </CardItem>
-      ))}
-    </MobileContentStack>
-  ),
+export const CustomPaddingBottomForFAB = createCardItemsStory({
+  count: 4,
+  variant: "elevation",
+  args: { paddingBottom: 10 },
+  children: "Content with extra bottom padding for FAB clearance",
   parameters: {
     viewport: { defaultViewport: "mobile" },
   },
-};
+});
 
 export const WithFormContent: Story = {
   render: args => (
     <MobileContentStack {...args}>
-      <CardItem index={1} variant="outlined">
+      <CardItem index={1}>
         <Typography variant="titleLg" gutterBottom>
           Form Section
         </Typography>
@@ -183,7 +72,7 @@ export const WithFormContent: Story = {
       {[1, 2, 3].map(index => (
         <FormItem key={index} index={index} />
       ))}
-      <CardItem index={4} variant="outlined">
+      <CardItem index={4}>
         <Typography variant="bodyMd">Additional card after form fields</Typography>
       </CardItem>
     </MobileContentStack>
@@ -205,7 +94,7 @@ export const MixedContentTypes: Story = {
 export const WithStackAndButtons: Story = {
   render: args => (
     <MobileContentStack {...args}>
-      <CardItem index={1} variant="outlined">
+      <CardItem index={1}>
         <Typography variant="titleLg" gutterBottom>
           Action Section
         </Typography>
@@ -218,7 +107,7 @@ export const WithStackAndButtons: Story = {
           </Button>
         </Stack>
       </CardItem>
-      <CardItem index={2} variant="outlined">
+      <CardItem index={2}>
         <Typography variant="bodyMd">Another card with different content</Typography>
       </CardItem>
       <CardItem index={3} variant="elevation">
@@ -228,69 +117,23 @@ export const WithStackAndButtons: Story = {
   ),
 };
 
-export const NoPaddingBottom: Story = {
-  args: {
-    paddingBottom: 0,
-  },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3].map(index => (
-        <CardItem key={index} index={index} variant="elevation" />
-      ))}
-    </MobileContentStack>
-  ),
-};
+export const NoPaddingBottom = createCardItemsStory({ count: 3, variant: "elevation", args: { paddingBottom: 0 } });
 
-export const SmallGapWithManyItems: Story = {
-  args: {
-    gap: 1,
-    paddingBottom: 2,
-  },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3, 4, 5, 6, 7, 8].map(index => (
-        <CardItem key={index} index={index} variant="outlined" />
-      ))}
-    </MobileContentStack>
-  ),
-};
+export const SmallGapWithManyItems = createCardItemsStory({
+  count: 8,
+  variant: "outlined",
+  args: { gap: 1, paddingBottom: 2 },
+});
 
-export const SingleChild: Story = {
-  render: args => (
-    <MobileContentStack {...args}>
-      <CardItem index={1} variant="elevation">
-        <Typography variant="headlineMd" gutterBottom>
-          Single Child
-        </Typography>
-        <Typography variant="bodyMd">
-          This MobileContentStack has only one child with default gap and padding.
-        </Typography>
-      </CardItem>
-    </MobileContentStack>
-  ),
-};
+export const SingleChild = createSingleChildStory();
 
-export const TabletViewport: Story = {
-  globals: { viewport: "tablet" },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3].map(index => (
-        <CardItem key={index} index={index} variant="outlined" />
-      ))}
-    </MobileContentStack>
-  ),
-};
+export const TabletViewport = createCardItemsStory({ count: 3, variant: "outlined", globals: { viewport: "tablet" } });
 
-export const DesktopViewport: Story = {
+export const DesktopViewport = createCardItemsStory({
+  count: 3,
+  variant: "outlined",
   globals: { viewport: "desktop" },
-  render: args => (
-    <MobileContentStack {...args}>
-      {[1, 2, 3].map(index => (
-        <CardItem key={index} index={index} variant="outlined" />
-      ))}
-    </MobileContentStack>
-  ),
-};
+});
 
 export const ArabicLocale = createLocaleStory({
   locale: "ar",

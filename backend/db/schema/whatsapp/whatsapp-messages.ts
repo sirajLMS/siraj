@@ -3,15 +3,13 @@ import {
   createTable,
   index,
   integerColumn,
-  jsonbColumn,
   timestampColumn,
   uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { whatsappMessageDirectionEnum } from "@/backend/db/schema/enums";
-import { whatsappAccounts } from "@/backend/db/schema/whatsapp/whatsapp-accounts";
+import { whatsappMessageColumns } from "@/backend/db/schema/whatsapp/__shared__";
 import { whatsappConversations } from "@/backend/db/schema/whatsapp/whatsapp-conversations";
 
 /**
@@ -36,14 +34,7 @@ export const whatsappMessages = createTable(
     conversationId: uuidDefaultColumn("conversation_id")
       .notNull()
       .references(() => whatsappConversations.id, { onDelete: "cascade" }),
-    accountId: uuidDefaultColumn("account_id")
-      .notNull()
-      .references(() => whatsappAccounts.id, { onDelete: "cascade" }),
-    wamid: varcharColumn("wamid", { length: 128 }).notNull(),
-    direction: whatsappMessageDirectionEnum("direction").notNull(),
-    type: varcharColumn("type", { length: 32 }).notNull(),
-    content: jsonbColumn("content").notNull(),
-    status: varcharColumn("status", { length: 20 }),
+    ...whatsappMessageColumns(),
     mediaPlaceholder: booleanColumn("media_placeholder").notNull().default(false),
     mediaId: varcharColumn("media_id", { length: 128 }),
     mediaMime: varcharColumn("media_mime", { length: 64 }),

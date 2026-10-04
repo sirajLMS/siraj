@@ -1,6 +1,19 @@
 import { AppPermission } from "@/backend/enum";
-import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  approveWhatsappGroupJoinRequests,
+  createWhatsappGroup,
+  deleteWhatsappGroup,
+  getWhatsappGroupInviteLink,
+  pinWhatsappGroupMessage,
+  rejectWhatsappGroupJoinRequests,
+  removeWhatsappGroupParticipants,
+  resetWhatsappGroupInviteLink,
+  sendWhatsappGroupMessage,
+  syncWhatsappGroups,
+  unpinWhatsappGroupMessage,
+  updateWhatsappGroupSettings,
+} from "@/backend/graphql/mutation/whatsapp/whatsapp-groups.mutation.helpers";
 import {
   WhatsappGroupCreateInputPothosObject,
   WhatsappGroupIdsInputPothosObject,
@@ -13,10 +26,6 @@ import {
   WhatsappJoinRequestsOutcomePothosObject,
   WhatsappRemoveParticipantsOutcomePothosObject,
 } from "@/backend/graphql/pothos/whatsapp/whatsapp-groups.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { WhatsappGroupsService } from "@/backend/services";
-import type { UserPermissionContext, WhatsappGroupSendInput } from "@/backend/types";
-import type { Translations } from "@/shared/locale";
 
 /**
  * WhatsApp groups workspace mutations: local group registry lifecycle
@@ -27,27 +36,6 @@ import type { Translations } from "@/shared/locale";
  * client never supplies it.
  */
 
-function permissionContext(ctx: BaseContext): UserPermissionContext {
-  return {
-    permissions: ctx.permissions,
-    permissionGroups: ctx.permissionGroups,
-    isSuperAdmin: ctx.isSuperAdmin,
-    role: ctx.role,
-  };
-}
-
-async function groupMutationContext(ctx: BaseContext): Promise<{
-  context: UserPermissionContext;
-  tErrors: Translations["errorsTranslations"];
-  actorUserId: string;
-}> {
-  return {
-    context: permissionContext(ctx),
-    tErrors: ctx.t().errorsTranslations,
-    actorUserId: await requireAuth(ctx),
-  };
-}
-
 gqlSchemaBuilder.mutationFields(t => ({
   createWhatsappGroup: t.field({
     type: WhatsappGroupPothosObject,
@@ -57,15 +45,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupCreateInputPothosObject, required: true }),
     },
-    resolve: async (_root, { input }, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.createGroup(context, tErrors, {
-        ...input,
-        description: input.description ?? undefined,
-        joinApprovalMode: input.joinApprovalMode ?? undefined,
-        actorUserId,
-      });
-    },
+    resolve: (_root, { input }, ctx) => createWhatsappGroup(ctx, input),
   }),
 
   deleteWhatsappGroup: t.field({
@@ -76,13 +56,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 256 } } }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.deleteGroup(context, tErrors, {
-        groupId: args.groupId,
-        actorUserId,
-      });
-    },
+    resolve: (_root, args, ctx) => deleteWhatsappGroup(ctx, args.groupId),
   }),
 
   updateWhatsappGroupSettings: t.field({
@@ -93,16 +67,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupSettingsUpdateInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.updateGroupSettings(context, tErrors, {
-        ...args.input,
-        subject: args.input.subject ?? undefined,
-        description: args.input.description ?? undefined,
-        profilePicturePath: args.input.profilePicturePath ?? undefined,
-        actorUserId,
-      });
-    },
+    resolve: (_root, args, ctx) => updateWhatsappGroupSettings(ctx, args.input),
   }),
 
   syncWhatsappGroups: t.field({
@@ -113,15 +78,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       accountId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.syncGroups(context, tErrors, {
-        accountId: args.accountId ?? null,
-        actorUserId,
-      });
-    },
+    resolve: (_root, args, ctx) => syncWhatsappGroups(ctx, args.accountId ?? null),
   }),
+}));
 
+gqlSchemaBuilder.mutationFields(t => ({
   getWhatsappGroupInviteLink: t.field({
     type: "String",
     description: "Read the current group invite link from Meta and cache it on the local row; returns the link.",
@@ -129,14 +90,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 256 } } }),
     },
-    resolve: async (_root, args, ctx) => {
-      await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      const { inviteLink } = await WhatsappGroupsService.getInviteLink(permissionContext(ctx), tErrors, {
-        groupId: args.groupId,
-      });
-      return inviteLink;
-    },
+    resolve: (_root, args, ctx) => getWhatsappGroupInviteLink(ctx, args.groupId),
   }),
 
   resetWhatsappGroupInviteLink: t.field({
@@ -147,14 +101,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 256 } } }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      const { inviteLink } = await WhatsappGroupsService.resetInviteLink(context, tErrors, {
-        groupId: args.groupId,
-        actorUserId,
-      });
-      return inviteLink;
-    },
+    resolve: (_root, args, ctx) => resetWhatsappGroupInviteLink(ctx, args.groupId),
   }),
 
   approveWhatsappGroupJoinRequests: t.field({
@@ -165,14 +112,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupIdsInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.approveJoinRequests(context, tErrors, {
-        groupId: args.input.groupId,
-        joinRequestIds: args.input.joinRequestIds,
-        actorUserId,
-      });
-    },
+    resolve: (_root, args, ctx) => approveWhatsappGroupJoinRequests(ctx, args.input),
   }),
 
   rejectWhatsappGroupJoinRequests: t.field({
@@ -183,14 +123,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupIdsInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.rejectJoinRequests(context, tErrors, {
-        groupId: args.input.groupId,
-        joinRequestIds: args.input.joinRequestIds,
-        actorUserId,
-      });
-    },
+    resolve: (_root, args, ctx) => rejectWhatsappGroupJoinRequests(ctx, args.input),
   }),
 
   removeWhatsappGroupParticipants: t.field({
@@ -201,16 +134,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupParticipantsInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      return WhatsappGroupsService.removeParticipants(context, tErrors, {
-        groupId: args.input.groupId,
-        participants: args.input.participants,
-        actorUserId,
-      });
-    },
+    resolve: (_root, args, ctx) => removeWhatsappGroupParticipants(ctx, args.input),
   }),
+}));
 
+gqlSchemaBuilder.mutationFields(t => ({
   sendWhatsappGroupMessage: t.field({
     type: WhatsappGroupSendResultPothosObject,
     description:
@@ -219,25 +147,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupSendInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      const input: WhatsappGroupSendInput = {
-        groupId: args.input.groupId,
-        ...(args.input.body != null
-          ? {
-              text: {
-                body: args.input.body,
-                ...(args.input.previewUrl != null ? { previewUrl: args.input.previewUrl } : {}),
-              },
-            }
-          : {}),
-        templateName: args.input.templateName ?? undefined,
-        templateLanguageCode: args.input.templateLanguageCode ?? undefined,
-        templateGroupIdParameter: args.input.templateGroupIdParameter ?? undefined,
-        actorUserId,
-      };
-      return WhatsappGroupsService.sendGroupMessage(context, tErrors, input);
-    },
+    resolve: (_root, args, ctx) => sendWhatsappGroupMessage(ctx, args.input),
   }),
 
   pinWhatsappGroupMessage: t.field({
@@ -248,17 +158,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupPinInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      const { messageId } = await WhatsappGroupsService.pinGroupMessage(context, tErrors, {
-        groupId: args.input.groupId,
-        messageId: args.input.messageId,
-        operation: args.input.operation === "pin" ? "pin" : "unpin",
-        expirationDays: args.input.expirationDays ?? undefined,
-        actorUserId,
-      });
-      return messageId;
-    },
+    resolve: (_root, args, ctx) => pinWhatsappGroupMessage(ctx, args.input),
   }),
 
   unpinWhatsappGroupMessage: t.field({
@@ -269,14 +169,6 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappGroupPinInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const { context, tErrors, actorUserId } = await groupMutationContext(ctx);
-      const { messageId } = await WhatsappGroupsService.unpinGroupMessage(context, tErrors, {
-        groupId: args.input.groupId,
-        messageId: args.input.messageId,
-        actorUserId,
-      });
-      return messageId;
-    },
+    resolve: (_root, args, ctx) => unpinWhatsappGroupMessage(ctx, args.input),
   }),
 }));

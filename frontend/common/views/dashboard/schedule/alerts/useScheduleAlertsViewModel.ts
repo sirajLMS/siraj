@@ -1,199 +1,26 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { PeopleOutlined, SchoolOutlined } from "@mui/icons-material";
 import { useCallback, useMemo } from "react";
-import {
-  ClassExecutionState,
-  ClassOutcome,
-  type AdminDashboardScheduleQuery_adminDashboardSchedule_rows as ScheduleRow,
-} from "@/frontend/common/graphql/generated/gql/graphql";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useScheduleAlertsStore } from "@/frontend/common/stores/scheduleAlertsStore";
 import type {
   AcademicClassRow,
   AlertsMetric,
-  ClassSessionAction,
-  ClassSessionStatus,
   ScheduleAlert,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import {
+  buildMetricLabels,
+  buildScheduleLabels,
+} from "@/frontend/common/views/dashboard/schedule/alerts/useScheduleAlertsViewModel.labels.helpers";
+import {
+  buildScheduleAlertMetrics,
+  buildScheduleQueryInput,
+  mapScheduleRowsToClasses,
+  resolveScheduleTotalCount,
+} from "@/frontend/common/views/dashboard/schedule/alerts/useScheduleAlertsViewModel.mappers.helpers";
 import { useRouter } from "@/shared/i18n/navigation";
-import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
-
-function getTodayString() {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-const ACTIVE_DASHBOARD_STATUSES: ReadonlySet<string> = new Set<string>([
-  ClassExecutionState.Running,
-  ClassExecutionState.Activated,
-]);
-const MISSED_DASHBOARD_STATUSES: ReadonlySet<string> = new Set<string>([ClassOutcome.Absent, ClassOutcome.Leave]);
-
-function mapRowToSessionStatus(
-  outcome: string | null | undefined,
-  executionState: string | null | undefined,
-  isFrozen: boolean | null | undefined,
-  scheduledEndAt?: string | null
-): ClassSessionStatus {
-  if (isFrozen) return "hold";
-
-  const displayStatus = resolveClassInstanceDashboardStatus(outcome, executionState, undefined, undefined, {
-    scheduledEndAt: scheduledEndAt ?? undefined,
-  });
-
-  if (ACTIVE_DASHBOARD_STATUSES.has(displayStatus)) {
-    return "active";
-  }
-  if (MISSED_DASHBOARD_STATUSES.has(displayStatus)) {
-    return "missed";
-  }
-  return "upcoming";
-}
-
-function mapOutcomeToAction(outcome: string | null | undefined, status: ClassSessionStatus): ClassSessionAction {
-  if (status === "hold") return "contact_admin";
-  if (status === "missed") return "view_class_audit";
-  if (outcome?.toLowerCase() === "taken") return "leave_disabled";
-  return "leave_enabled";
-}
-
-function buildScheduleQueryInput(page: number, pageSize: number) {
-  return {
-    date: getTodayString(),
-    teacherId: null,
-    search: null,
-    metricFilter: null,
-    paginationArgs: {
-      first: pageSize,
-      page: page + 1,
-      skip: null,
-      after: null,
-      before: null,
-      last: null,
-      maxCount: null,
-    },
-  };
-}
-
-function mapScheduleRowsToClasses(rows: ScheduleRow[] | null | undefined): AcademicClassRow[] {
-  return (rows ?? []).map(row => {
-    const status = mapRowToSessionStatus(row?.outcome, row?.executionState, row?.isFrozen, row?.scheduledEndAt);
-    return {
-      id: row?.id ?? "",
-      className: row?.courseName?.trim() ?? row?.student?.name ?? "—",
-      classId: row?.id ?? "",
-      classAvatarUrl: row?.avatarUrl ?? null,
-      instructor: row?.teacher?.name ?? "",
-      instructorId: row?.teacher?.id ?? undefined,
-      time: row?.yourTime ?? "",
-      room: "",
-      action: mapOutcomeToAction(row?.outcome, status),
-      sessionStatus: status,
-      executionState: row?.executionState,
-      outcome: row?.outcome,
-      isFrozen: row?.isFrozen ?? false,
-      meetingJoinUrl: row?.meetingJoinUrl,
-      effectiveMeeting: row?.effectiveMeeting,
-    };
-  });
-}
-
-function buildScheduleLabels(t: ScheduleAlertsLabels) {
-  return {
-    pageTitle: t.pageTitle,
-    pageSubtitle: t.pageSubtitle,
-    alertMessages: {
-      leave_quota_exceeded: t.alerts.leaveQuotaExceeded,
-      missed_class_time: t.alerts.missedClassTime,
-    },
-    reportTitle: t.report.title,
-    reportDescription: t.report.description,
-    reportDescriptionMobile: t.report.descriptionMobile,
-    downloadPdf: t.report.downloadPdf,
-    sectionTitle: t.section.title,
-    sectionSubtitle: t.section.subtitle,
-    filter: t.actions.filter,
-    export: t.actions.export,
-    className: t.table.className,
-    instructor: t.table.instructor,
-    time: t.table.time,
-    room: t.table.room,
-    status: t.table.status,
-    joinSession: t.actions.joinSession,
-    leaveClass: t.actions.leaveClass,
-    leaveDisabledReason: t.actions.leaveDisabledReason,
-    viewClassAudit: t.actions.viewClassAudit,
-    contactAdmin: t.actions.contactAdmin,
-    showingOf: t.showingOf,
-    active: t.sessionStatus.active,
-    upcoming: t.sessionStatus.upcoming,
-    missed: t.sessionStatus.missed,
-    hold: t.sessionStatus.hold,
-    endOfSchedule: t.endOfSchedule,
-    noEntries: t.noEntries,
-    loading: t.loading,
-  };
-}
-
-type MetricLabelKey = keyof ScheduleAlertsLabels["metrics"];
-
-function isMetricLabelKey(key: string): key is MetricLabelKey {
-  return (
-    key === "totalStudents" || key === "totalStudentsTrend" || key === "activeCourses" || key === "activeCoursesSub"
-  );
-}
-
-function buildMetricLabels(metrics: readonly AlertsMetric[], t: ScheduleAlertsLabels) {
-  return Object.fromEntries(
-    metrics.map(metric => [
-      metric.key,
-      {
-        label: isMetricLabelKey(metric.labelKey) ? t.metrics[metric.labelKey] : "",
-        subLabel: isMetricLabelKey(metric.subLabelKey) ? t.metrics[metric.subLabelKey] : "",
-      },
-    ])
-  );
-}
-
-type ScheduleResultMetrics = {
-  total?: number | null;
-  regular?: number | null;
-};
-
-function buildScheduleAlertMetrics(m: ScheduleResultMetrics | null | undefined): AlertsMetric[] {
-  if (!m) return [];
-  return [
-    {
-      key: "totalStudents",
-      value: m.total ?? 0,
-      labelKey: "totalStudents",
-      subLabelKey: "totalStudentsTrend",
-      icon: PeopleOutlined,
-      trend: undefined,
-    },
-    {
-      key: "activeCourses",
-      value: m.regular ?? 0,
-      labelKey: "activeCourses",
-      subLabelKey: "activeCoursesSub",
-      icon: SchoolOutlined,
-      trend: undefined,
-    },
-  ];
-}
-
-function resolveScheduleTotalCount(
-  scheduleResult: { pageInfo?: { total?: number | null } | null; totalCount?: number | null } | null | undefined
-): number | undefined {
-  return scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
-}
 
 function useScheduleAlertsHandlers(setPage: (page: number) => void, router: ReturnType<typeof useRouter>) {
   const handlePageChange = useCallback(

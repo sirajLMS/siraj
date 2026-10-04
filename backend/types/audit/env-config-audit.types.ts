@@ -10,14 +10,3 @@
 
 /** Discriminator for the kind of env-config change being audited. */
 export type EnvConfigAuditEvent = "env_config.upsert" | "env_config.delete";
-
-/** Input accepted by env-config audit write helpers. */
-export interface EnvConfigAuditCreateInput {
-  actorUserId: string;
-  event: EnvConfigAuditEvent;
-  key: string;
-  priorValue?: string;
-  newValue?: string;
-  actorIpAddress?: string;
-  userAgent?: string;
-}

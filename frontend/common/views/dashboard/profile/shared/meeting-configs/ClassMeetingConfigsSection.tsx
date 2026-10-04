@@ -1,51 +1,29 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import { Stack, Typography } from "@mui/material";
-import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { ErrorState, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import {
-  CopyMeetingUrlButton,
-  MeetingGenerationStatusIndicator,
-} from "@/frontend/common/components/ui/display/meetingConfig";
-import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
-import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
-import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import {
   AppPermission,
   type ClassMeetingConfigFieldsFragment,
-  type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs,
   type EffectiveMeetingFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  classMeetingConfigsQueryDocument,
-  classMeetingConfigsWithStatusQueryDocument,
-  createClassMeetingConfigMutationDocument,
-  deleteClassMeetingConfigMutationDocument,
-  recurringMeetingConfigsQueryDocument,
-  setDefaultClassMeetingConfigMutationDocument,
-  updateClassMeetingConfigMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
-import { ClassMeetingContextBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
-import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
+import {
+  ClassMeetingConfigDialogs,
+  ErrorSection,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection.dialogs";
+import {
+  configLabel,
+  isClassMeetingConfig,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection.helpers";
+import {
+  useMeetingConfigMutations,
+  useMeetingConfigRetry,
+  useScopeQueries,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection.hooks";
+import { ConfigsContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection.parts";
 import { useMeetingConfigProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigProfileLabels";
-import { resolveLocalizedString } from "@/shared/lib/localized-string";
-import type {
-  MeetingConfigClassScopeLabels,
-  MeetingConfigDisplayLabels,
-  MeetingConfigEnhancementLabels,
-  MeetingConfigManagerLabels,
-} from "@/shared/locale/types/ui";
-
-type StatusConfigEntry = ClassMeetingConfigsWithStatusQuery_classMeetingConfigs;
-
-type StatusMap = ReadonlyMap<string, StatusConfigEntry>;
 
 export type ClassMeetingConfigsSectionProps = {
   readonly classInstanceId?: string;
@@ -53,327 +31,6 @@ export type ClassMeetingConfigsSectionProps = {
   readonly canManage?: boolean;
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 };
-
-function isClassMeetingConfig(config: unknown): config is ClassMeetingConfigFieldsFragment {
-  if (typeof config !== "object" || config === null) return false;
-  return "classInstanceId" in config;
-}
-
-function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): string {
-  if (config.label?.trim()) return config.label.trim();
-  if (config.provider?.name) return resolveLocalizedString(config.provider.name, locale);
-  return config.provider?.slug ?? config.id ?? "";
-}
-
-type IndicatorStatus = "pending" | "success" | "failed";
-
-function resolveGenerationStatus(statusValue: string | null | undefined): IndicatorStatus {
-  if (statusValue === "generated") return "success";
-  if (statusValue === "failed") return "failed";
-  return "pending";
-}
-
-function StatusExtra({
-  config,
-  statusMap,
-  enhancements,
-  onRetry,
-}: {
-  readonly config: MeetingConfigListItem;
-  readonly statusMap: StatusMap;
-  readonly enhancements: MeetingConfigEnhancementLabels;
-  readonly onRetry: (id: string) => void;
-}): React.ReactNode {
-  const configId = config.id;
-  const statusEntry = configId ? statusMap.get(configId) : undefined;
-
-  if (!configId || !statusEntry) return null;
-
-  const status = resolveGenerationStatus(statusEntry.meetingUrlStatus);
-  const meetingUrl = statusEntry.details?.meetingUrl ?? null;
-  const hasUrl = meetingUrl != null && meetingUrl.trim() !== "";
-  const isFailed = status === "failed";
-
-  return (
-    <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap", mt: 1 }}>
-      <MeetingGenerationStatusIndicator
-        status={status}
-        error={statusEntry.meetingUrlError}
-        expiresAt={statusEntry.meetingUrlExpiresAt}
-        onRetry={isFailed ? () => onRetry(configId) : undefined}
-      />
-
-      {hasUrl && meetingUrl ? (
-        <CopyMeetingUrlButton
-          meetingUrl={meetingUrl}
-          ariaLabel={enhancements.copyMeetingUrl}
-          tooltipLabel={enhancements.copyMeetingUrl}
-        />
-      ) : null}
-    </Stack>
-  );
-}
-
-function ConfigsContent({
-  t,
-  tManager,
-  tDisplay,
-  resolvedCanManage,
-  configs,
-  busy,
-  effectiveMeeting,
-  enhancements,
-  statusMap,
-  handleAdd,
-  handleEdit,
-  handleSetDefault,
-  onDelete,
-  onRetry,
-}: {
-  readonly t: MeetingConfigClassScopeLabels;
-  readonly tManager: MeetingConfigManagerLabels;
-  readonly tDisplay: MeetingConfigDisplayLabels;
-  readonly resolvedCanManage: boolean;
-  readonly configs: readonly ClassMeetingConfigFieldsFragment[];
-  readonly busy: boolean;
-  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
-  readonly enhancements: MeetingConfigEnhancementLabels;
-  readonly statusMap: StatusMap;
-  readonly handleAdd: () => void;
-  readonly handleEdit: (config: unknown) => void;
-  readonly handleSetDefault: (id: string) => Promise<void>;
-  readonly onDelete: (id: string) => void;
-  readonly onRetry: (id: string) => void;
-}) {
-  const renderRowExtra = useCallback(
-    (config: MeetingConfigListItem): React.ReactNode => (
-      <StatusExtra config={config} statusMap={statusMap} enhancements={enhancements} onRetry={onRetry} />
-    ),
-    [statusMap, enhancements, onRetry]
-  );
-
-  return (
-    <Stack spacing={2}>
-      <ClassMeetingContextBanner
-        effectiveMeeting={effectiveMeeting}
-        hasScopeConfigs={configs.length > 0}
-        labels={{ classScope: t, display: tDisplay }}
-      />
-
-      {resolvedCanManage ? (
-        <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          <PrimaryPageAction startIcon={<AddOutlinedIcon />} onClick={handleAdd}>
-            {tManager.add}
-          </PrimaryPageAction>
-        </Stack>
-      ) : null}
-
-      <MeetingConfigList
-        configs={configs}
-        loading={busy}
-        title={tManager.listTitle}
-        emptyMessage={t.noConfigs}
-        onEditAction={resolvedCanManage ? handleEdit : undefined}
-        onDeleteAction={resolvedCanManage ? onDelete : undefined}
-        onSetDefaultAction={resolvedCanManage ? handleSetDefault : undefined}
-        renderRowExtra={renderRowExtra}
-      />
-
-      {!resolvedCanManage && configs.length === 0 ? (
-        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-          {t.noConfigs}
-        </Typography>
-      ) : null}
-    </Stack>
-  );
-}
-
-function ErrorSection({
-  title,
-  subtitle,
-  errorMessage,
-  retryLabel,
-  onRetry,
-}: {
-  readonly title: string;
-  readonly subtitle: string;
-  readonly errorMessage: string;
-  readonly retryLabel: string;
-  readonly onRetry: () => void;
-}) {
-  return (
-    <SectionPanel title={title} subTitle={subtitle}>
-      <ErrorState embedded message={errorMessage} retryLabel={retryLabel} onRetry={onRetry} />
-    </SectionPanel>
-  );
-}
-
-function useScopeQueries(scopeId: string, isClassScope: boolean) {
-  const {
-    data: classData,
-    loading: classLoading,
-    error: classError,
-    refetch: refetchClass,
-  } = useQuery(classMeetingConfigsQueryDocument, {
-    variables: { classInstanceId: scopeId },
-    skip: !isClassScope || !scopeId,
-  });
-
-  const {
-    data: recurringData,
-    loading: recurringLoading,
-    error: recurringError,
-    refetch: refetchRecurring,
-  } = useQuery(recurringMeetingConfigsQueryDocument, {
-    variables: { recurringScheduleId: scopeId },
-    skip: isClassScope || !scopeId,
-  });
-
-  const { data: statusData, loading: statusLoading } = useQuery(classMeetingConfigsWithStatusQueryDocument, {
-    variables: { classInstanceId: scopeId },
-    skip: !isClassScope || !scopeId,
-  });
-
-  const loading = classLoading || recurringLoading || statusLoading;
-  const error = classError ?? recurringError;
-  const refetch = isClassScope ? refetchClass : refetchRecurring;
-  const configs = useMemo(
-    () => (isClassScope ? classData?.classMeetingConfigs : recurringData?.recurringMeetingConfigs) ?? [],
-    [isClassScope, classData?.classMeetingConfigs, recurringData?.recurringMeetingConfigs]
-  );
-
-  const statusMap = useMemo<StatusMap>(() => {
-    if (!isClassScope || !statusData?.classMeetingConfigs) return new Map();
-    const map = new Map<string, StatusConfigEntry>();
-    for (const entry of statusData.classMeetingConfigs) {
-      if (entry?.id) {
-        map.set(entry.id, entry);
-      }
-    }
-    return map;
-  }, [isClassScope, statusData]);
-
-  return { loading, error, refetch, configs, statusMap };
-}
-
-function useMeetingConfigMutations(
-  deleteId: string | null,
-  refetch: () => Promise<unknown>,
-  setDeleteId: (id: string | null) => void,
-  setErrorMessage: (msg: string | null) => void,
-  tManager: MeetingConfigManagerLabels
-) {
-  const [deleteConfig, { loading: deleting }] = useMutation(deleteClassMeetingConfigMutationDocument);
-  const [setDefault, { loading: settingDefault }] = useMutation(setDefaultClassMeetingConfigMutationDocument);
-
-  const handleSetDefault = useCallback(
-    async (id: string) => {
-      try {
-        await setDefault({ variables: { id } });
-        await refetch();
-      } catch {
-        setErrorMessage(tManager.saveError);
-      }
-    },
-    [setDefault, refetch, tManager, setErrorMessage]
-  );
-
-  const handleDelete = useCallback(async () => {
-    if (!deleteId) return;
-    try {
-      await deleteConfig({ variables: { id: deleteId } });
-      setDeleteId(null);
-      await refetch();
-    } catch {
-      setErrorMessage(tManager.deleteError);
-    }
-  }, [deleteId, deleteConfig, refetch, tManager, setDeleteId, setErrorMessage]);
-
-  return { deleting, settingDefault, handleSetDefault, handleDelete };
-}
-
-function ClassMeetingConfigDialogs({
-  resolvedCanManage,
-  formOpen,
-  editConfig,
-  deleteId,
-  deleteLabel,
-  deleting,
-  showSuccess,
-  errorMessage,
-  classInstanceId,
-  recurringScheduleId,
-  configsCount,
-  tManager,
-  setFormOpen,
-  setEditConfig,
-  setDeleteId,
-  setShowSuccess,
-  setErrorMessage,
-  refetch,
-  handleDelete,
-}: {
-  readonly resolvedCanManage: boolean;
-  readonly formOpen: boolean;
-  readonly editConfig: ClassMeetingConfigFieldsFragment | null;
-  readonly deleteId: string | null;
-  readonly deleteLabel: string;
-  readonly deleting: boolean;
-  readonly showSuccess: boolean;
-  readonly errorMessage: string | null;
-  readonly classInstanceId?: string;
-  readonly recurringScheduleId?: string;
-  readonly configsCount: number;
-  readonly tManager: MeetingConfigManagerLabels;
-  readonly setFormOpen: (open: boolean) => void;
-  readonly setEditConfig: (config: ClassMeetingConfigFieldsFragment | null) => void;
-  readonly setDeleteId: (id: string | null) => void;
-  readonly setShowSuccess: (show: boolean) => void;
-  readonly setErrorMessage: (msg: string | null) => void;
-  readonly refetch: () => Promise<unknown>;
-  readonly handleDelete: () => Promise<void>;
-}) {
-  return (
-    <>
-      {resolvedCanManage ? (
-        <ClassMeetingConfigFormDialog
-          open={formOpen}
-          classInstanceId={classInstanceId}
-          recurringScheduleId={recurringScheduleId}
-          editConfig={editConfig}
-          existingCount={configsCount}
-          labels={tManager}
-          createMutation={createClassMeetingConfigMutationDocument}
-          updateMutation={updateClassMeetingConfigMutationDocument}
-          onClose={() => {
-            setFormOpen(false);
-            setEditConfig(null);
-          }}
-          onSaved={async () => {
-            setShowSuccess(true);
-            await refetch();
-          }}
-        />
-      ) : null}
-
-      <MeetingConfigDeleteDialog
-        open={deleteId != null}
-        configLabel={deleteLabel}
-        isLoading={deleting}
-        labels={tManager}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-      />
-
-      <FormSuccessSnackbar open={showSuccess} message={tManager.saved} onClose={() => setShowSuccess(false)} />
-      <FormErrorSnackbar
-        open={errorMessage != null}
-        message={errorMessage ?? ""}
-        onClose={() => setErrorMessage(null)}
-      />
-    </>
-  );
-}
 
 export function ClassMeetingConfigsSection({
   classInstanceId,
@@ -407,6 +64,8 @@ export function ClassMeetingConfigsSection({
     tManager
   );
 
+  const { retryingId, handleRetry } = useMeetingConfigRetry(refetch, setErrorMessage, tManager);
+
   const deleteLabel = useMemo(() => {
     if (!deleteId) return "";
     const config = configs.find(c => c.id === deleteId);
@@ -424,25 +83,6 @@ export function ClassMeetingConfigsSection({
     setEditConfig(null);
     setFormOpen(true);
   }, []);
-
-  const [retryingId, setRetryingId] = useState<string | null>(null);
-  const [retryMutation] = useMutation(updateClassMeetingConfigMutationDocument);
-  const handleRetry = useCallback(
-    async (id: string) => {
-      setRetryingId(id);
-      try {
-        await retryMutation({
-          variables: { id, input: { details: null, isDefault: null, label: null, password: null, providerId: null } },
-        });
-        await refetch();
-      } catch {
-        setErrorMessage(tManager.saveError);
-      } finally {
-        setRetryingId(null);
-      }
-    },
-    [retryMutation, refetch, tManager]
-  );
 
   if (!scopeId) return null;
 

@@ -1,9 +1,9 @@
 import { ComplaintRepository, ComplaintResponseRepository } from "@/backend/db/repo/complaints";
 import { ParentRepository } from "@/backend/db/repo/parents";
-import { SoftDeleteRepository, SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
-import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { NotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -12,6 +12,7 @@ import {
   resolveEntityById,
   softDeleteEntityLog,
 } from "@/backend/services/communication/__shared__/complaintSuggestionBase";
+import { validateComplaintFiles } from "@/backend/services/communication/complaint.service.helpers";
 import { deriveComplaintMetrics } from "@/backend/services/communication/complaint-validation.helpers";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildNewComplaintPayloads } from "@/backend/services/notification/notification-payloads.builders";
@@ -27,9 +28,6 @@ import type {
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-const MAX_COMPLAINT_FILES = 5;
-const MAX_COMPLAINT_FILE_SIZE_MB = 25;
 
 async function dispatchNewComplaint(complaint: ComplaintSelectType, locale?: string): Promise<void> {
   const reviewerUserIds = await PermissionsService.getUserIdsWithPermission(AppPermission.COMPLAINTS_LIST);
@@ -311,42 +309,5 @@ export namespace ComplaintService {
       return existing;
     }
     return ComplaintResponseRepository.insertResponse(input);
-  }
-}
-
-async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale?: string): Promise<void> {
-  const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-  const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", MAX_COMPLAINT_FILES);
-  if (files.length > maxFiles) {
-    throw new ValidationError("TOO_MANY_FILES", tErrors.complaintTooManyFiles(maxFiles));
-  }
-
-  const maxSizeMb = await SystemSettingsRepository.getIntValue(
-    "complaint_max_file_size_mb",
-    MAX_COMPLAINT_FILE_SIZE_MB
-  );
-  const maxSizeBytes = maxSizeMb * 1024 * 1024;
-
-  const allowedMimeTypes = new Set<string>([
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "text/plain",
-    "text/markdown",
-  ]);
-
-  for (const file of files) {
-    if (file.sizeBytes > maxSizeBytes) {
-      throw new ValidationError("FILE_TOO_LARGE", tErrors.complaintFileTooLarge(maxSizeMb));
-    }
-
-    if (!allowedMimeTypes.has(file.mimeType)) {
-      throw new ValidationError("INVALID_FILE_TYPE", tErrors.file.invalidFileType);
-    }
   }
 }

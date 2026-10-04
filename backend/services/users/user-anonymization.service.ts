@@ -1,33 +1,17 @@
 import { db } from "@/backend/db";
-import { AuditRepository } from "@/backend/db/repo/audit";
-import { ComplaintRepository } from "@/backend/db/repo/complaints";
-import { NotificationRepository } from "@/backend/db/repo/notifications";
-import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parents";
-import { RateLimitRepository, SessionRepository, SoftDeleteRepository } from "@/backend/db/repo/shared";
-import { StorageDbRepository } from "@/backend/db/repo/storage";
-import { StudentRepository } from "@/backend/db/repo/students";
-import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import {
-  WhatsappContactRepository,
-  WhatsappConversationRepository,
-  WhatsappMessageRepository,
-} from "@/backend/db/repo/whatsapp";
-import { AccountStatus } from "@/backend/enum";
-import { DomainError } from "@/backend/lib/errors";
+  scrubCommunicationsPii,
+  scrubParentProfile,
+  scrubSessionRemnants,
+  scrubStudentsAndFileJunctions,
+  scrubTeacherProfile,
+  scrubUserAccount,
+  scrubWhatsappIdentity,
+  softDeleteAndAuditUser,
+} from "@/backend/services/users/user-anonymization.helpers";
 import type { DBTransaction } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-/**
- * Tombstone display name applied to anonymized persons.
- */
-const DELETED_USER_NAME = "Deleted user";
-
-/**
- * Unique, non-deliverable tombstone email — satisfies the `users.email`
- * unique constraint because it embeds the (immutable) user id.
- */
-const tombstoneEmail = (userId: string) => `deleted_${userId}@removed.invalid`;
 
 export namespace UserAnonymizationService {
   interface AnonymizeUserResult {
@@ -95,127 +79,14 @@ export namespace UserAnonymizationService {
       const subjectEmail = user.email;
       const subjectPhones = [user.phone].filter((p): p is string => !!p);
 
-      // 1. Scrub the users row (profile fields first, then security remnants).
-      await UserRepository.updateProfileFields(
-        userId,
-        {
-          name: DELETED_USER_NAME,
-          email: tombstoneEmail(userId),
-          phone: null,
-          avatarUrl: null,
-          avatarFilePath: null,
-        },
-        locale,
-        t
-      );
-      await UserRepository.scrubSecurityRemnants(userId, t);
-      await UserRepository.updateStatus(userId, AccountStatus.DEACTIVATED, t, locale);
-
-      // 2. Scrub the directly-owned parent row.
-      const parent = await ParentRepository.findByUserId(userId, t);
-      if (parent?.whatsapp) {
-        subjectPhones.push(parent.whatsapp);
-      }
-      if (parent) {
-        await ParentRepository.updateParentProfile(
-          parent.id,
-          { nationality: null, address: null, facebook: null, whatsapp: null, twitter: null },
-          locale,
-          t
-        );
-      }
-
-      // 2b. Erase WhatsApp identity data linked to the subject's phone
-      //     numbers (users.phone and the pre-scrub parents.whatsapp).
-      const uniquePhones = [...new Set(subjectPhones)];
-      if (uniquePhones.length > 0) {
-        await WhatsappContactRepository.anonymizeByPhoneNumbers(uniquePhones, t);
-        await WhatsappConversationRepository.anonymizeByWaIds(uniquePhones, t);
-        await WhatsappMessageRepository.deleteSubjectContentByWaIds(uniquePhones, t);
-      }
-
-      // 3. Scrub the directly-owned teacher row.
-      const teacher = await TeacherRepository.findByUserId(userId, t);
-      if (teacher) {
-        await TeacherRepository.updateTeacherProfile(
-          teacher.id,
-          {
-            nationalId: null,
-            phone: null,
-            dateOfBirth: null,
-            address: null,
-            qualifications: null,
-            nationality: null,
-            gender: null,
-            countryCode: null,
-          },
-          t
-        );
-      }
-
-      // 4. Scrub directly-owned student rows: the user's own student record and,
-      //    for parents, their children (matching the schema's parent cascade).
-      //    The scrub runs through the students repository inside withCurrentUser
-      //    (FORCE RLS sets the app.current_user_id GUC), and the affected-row
-      //    assertion guarantees the scrub matched every row the pre-read found —
-      //    a mismatch (RLS policy, concurrent write) aborts the whole erasure
-      //    instead of leaving a partial scrub.
-      const { priorCount, scrubbedCount, scrubbedIds } = await StudentRepository.scrubForAnonymization(t, {
-        userId,
-        parentId: parent?.id ?? null,
-        scrubbedName: DELETED_USER_NAME,
-      });
-      if (scrubbedCount !== priorCount) {
-        throw new DomainError("ANONYMIZATION_SCRUB_INCOMPLETE", errorsTranslations.anonymizationScrubIncomplete);
-      }
-
-      // 4b. Remove the subject's file-junction rows (user, parent, teacher,
-      //     student files) so the anonymized person stops linking to stored
-      //     photos and proofs. Physical blob removal is owned by the storage
-      //     cleanup workflow; `avatarFilePath` was cleared in step 1.
-      await StorageDbRepository.deleteOwnerFileJunctions(
-        {
-          userId,
-          parentId: parent?.id ?? null,
-          teacherId: teacher?.id ?? null,
-          studentIds: scrubbedIds,
-        },
-        t
-      );
-
-      // 5. Scrub communications PII: complaints and suggestions are deleted
-      //    (their submitter/body columns are NOT NULL, so the rows cannot be
-      //    nulled without a schema change); device tokens are deleted; the
-      //    content columns of the subject's notification deliveries are nulled.
-      if (parent) {
-        await ComplaintRepository.deleteByParentId(parent.id, t);
-        await SuggestionRepository.deleteByParentId(parent.id, t);
-      }
-      await NotificationRepository.deleteDeviceTokensByUserId(userId, t);
-      await NotificationRepository.scrubDeliveryContentByUserId(userId, t);
-
-      // 6. Erase session remnants: active sessions (+ metadata, and Redis
-      //    mirrors when enabled) and email-keyed security rows recorded
-      //    under the pre-anonymization email.
-      await SessionRepository.deleteByUserId(userId, t);
-      await RateLimitRepository.deleteEmailRemnants(subjectEmail, t);
-
-      // 7. Soft-delete the user row last (RLS hides soft-deleted rows afterwards).
-      const { deletedAt } = await SoftDeleteRepository.softDeleteUser(userId, actorUserId, t);
-
-      await AuditRepository.createManyAdminAuditLogs(
-        [
-          {
-            actorUserId,
-            targetUserId: userId,
-            action: "USER_ANONYMIZED",
-            description: "User PII anonymized and account soft-deleted",
-            newState: { anonymized: true, status: AccountStatus.DEACTIVATED },
-            ipAddress: actorIpAddress ?? null,
-          },
-        ],
-        t
-      );
+      await scrubUserAccount(t, userId, locale);
+      const parentId = await scrubParentProfile(t, userId, locale, subjectPhones);
+      await scrubWhatsappIdentity(t, subjectPhones);
+      const teacherId = await scrubTeacherProfile(t, userId);
+      await scrubStudentsAndFileJunctions(t, { userId, parentId, teacherId, locale });
+      await scrubCommunicationsPii(t, userId, parentId);
+      await scrubSessionRemnants(t, userId, subjectEmail);
+      const { deletedAt } = await softDeleteAndAuditUser(t, { userId, actorUserId, actorIpAddress });
 
       return { userId, anonymized: true, deletedAt };
     };

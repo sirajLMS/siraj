@@ -24,11 +24,12 @@ import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
-import {
-  fetchWithTimeout,
-  REQUEST_TIMEOUT_MS,
-} from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
+import {
+  buildAuthorizeUrl,
+  buildRedirectUri,
+} from "@/backend/services/meeting/integrations/meeting-oauth-authorize-urls";
+import { exchangeCodeForTokens } from "@/backend/services/meeting/integrations/meeting-oauth-token-exchange";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
   ConnectMeetingProviderOAuthReturnType,
@@ -42,7 +43,6 @@ import type {
   MeetingProviderTokenUpsertInput,
   MyConnectedMeetingProviderReturnType,
   OAuthCallbackConfig,
-  OAuthTokenResponse,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -204,193 +204,8 @@ export async function verifyAndConsumeOAuthState(
 }
 
 // ============================================================================
-// Authorize URL builders
+// OAuth callback redirect
 // ============================================================================
-
-function buildRedirectUri(providerSlug: MeetingProvider): string {
-  const config = getEnvironmentConfig();
-  const baseUrl = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
-  // Use split/join instead of replace/replaceAll for better compatibility and to
-  // satisfy static analysis rules that prefer explicit all-occurrence handling.
-  const pathSlug = providerSlug.split("_").join("-");
-  return `${baseUrl.replace(/\/$/, "")}/api/oauth/${pathSlug}/callback`;
-}
-
-const ZOOM_SCOPES = ["meeting:write:meeting", "user:read:user"] as const;
-const GOOGLE_SCOPES = ["https://www.googleapis.com/auth/meetings.space.created"] as const;
-const MS_TEAMS_SCOPES = ["https://graph.microsoft.com/OnlineMeetings.ReadWrite", "User.Read"] as const;
-
-/**
- * Builds the common `URLSearchParams` shared by all meeting-provider OAuth
- * authorize endpoints, then layers provider-specific extras on top.
- */
-function buildOAuthParams(
-  redirectUri: string,
-  state: string,
-  clientId: string,
-  scope: string,
-  codeChallenge: string,
-  extraParams?: Record<string, string>
-): URLSearchParams {
-  return new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    state,
-    scope,
-    // PKCE (RFC 7636): S256 challenge — the verifier only travels back inside
-    // the signed state JWT and is sent at the token exchange step.
-    code_challenge: codeChallenge,
-    code_challenge_method: "S256",
-    ...extraParams,
-  });
-}
-
-function buildZoomAuthorizeUrl(redirectUri: string, state: string, codeChallenge: string): string {
-  const config = getEnvironmentConfig();
-  const params = buildOAuthParams(redirectUri, state, config.zoomClientId ?? "", ZOOM_SCOPES.join(" "), codeChallenge);
-  return `https://zoom.us/oauth/authorize?${params.toString()}`;
-}
-
-function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string, codeChallenge: string): string {
-  const config = getEnvironmentConfig();
-  const params = buildOAuthParams(
-    redirectUri,
-    state,
-    config.googleMeetClientId ?? "",
-    GOOGLE_SCOPES.join(" "),
-    codeChallenge,
-    {
-      access_type: "offline",
-      prompt: "consent",
-    }
-  );
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-}
-
-function buildMicrosoftTeamsAuthorizeUrl(redirectUri: string, state: string, codeChallenge: string): string {
-  const config = getEnvironmentConfig();
-  const tenantId = config.msTeamsTenantId ?? "common";
-  const params = buildOAuthParams(
-    redirectUri,
-    state,
-    config.msTeamsClientId ?? "",
-    MS_TEAMS_SCOPES.join(" "),
-    codeChallenge,
-    {
-      response_mode: "query",
-    }
-  );
-  return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;
-}
-
-function buildAuthorizeUrl(
-  providerSlug: MeetingProvider,
-  redirectUri: string,
-  state: string,
-  codeChallenge: string
-): string {
-  switch (providerSlug) {
-    case "zoom":
-      return buildZoomAuthorizeUrl(redirectUri, state, codeChallenge);
-    case "google_meet":
-      return buildGoogleMeetAuthorizeUrl(redirectUri, state, codeChallenge);
-    case "microsoft_teams":
-      return buildMicrosoftTeamsAuthorizeUrl(redirectUri, state, codeChallenge);
-  }
-  throw new Error(`Unhandled case in buildAuthorizeUrl`);
-}
-
-// ============================================================================
-// OAuth callback (code-for-tokens exchange + persistence)
-// ============================================================================
-
-/**
- * Type guard that validates a token-endpoint response conforms to the minimal
- * {@link OAuthTokenResponse} shape. Used instead of `as` to satisfy oxlint's
- * `no-unsafe-type-assertion` rule.
- */
-function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return false;
-  }
-  return (
-    "access_token" in value &&
-    typeof value.access_token === "string" &&
-    "token_type" in value &&
-    typeof value.token_type === "string" &&
-    "expires_in" in value &&
-    typeof value.expires_in === "number" &&
-    (!("refresh_token" in value) || value.refresh_token === undefined || typeof value.refresh_token === "string") &&
-    (!("scope" in value) || value.scope === undefined || typeof value.scope === "string")
-  );
-}
-
-/**
- * Exchanges an authorization code for provider tokens at the provider's token
- * endpoint. Sends the PKCE `code_verifier` (bound to the S256 challenge sent
- * at authorize time). Throws on non-2xx with a truncated excerpt of the
- * provider's error body — the full upstream body may contain provider-internal
- * detail and must never be embedded verbatim in thrown errors.
- */
-async function exchangeCodeForTokens(
-  cfg: OAuthCallbackConfig,
-  code: string,
-  redirectUri: string,
-  codeVerifier: string
-): Promise<OAuthTokenResponse> {
-  const config = getEnvironmentConfig();
-
-  const params = new URLSearchParams({
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: redirectUri,
-    client_id: cfg.resolveClientId(config),
-    client_secret: cfg.resolveClientSecret(config),
-    // PKCE (RFC 7636 §4.5): the provider verifies this against the
-    // code_challenge sent with the authorize request.
-    code_verifier: codeVerifier,
-  });
-
-  // Conditionally append provider-specific extra params to avoid creating an
-  // effectively empty object via spread when `extraTokenParams` is undefined.
-  if (cfg.extraTokenParams) {
-    for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
-      // Ensure only string values are appended; the config type enforces this,
-      // but guard defensively in case of unexpected runtime values.
-      if (value != null) params.set(key, value);
-    }
-  }
-
-  const res = await fetchWithTimeout(
-    cfg.buildTokenUrl(config),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
-    },
-    cfg.providerSlug,
-    REQUEST_TIMEOUT_MS
-  );
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${truncateForError(body)}`);
-  }
-
-  const data: unknown = await res.json();
-  if (!isOAuthTokenResponse(data)) {
-    throw new Error(
-      `${cfg.displayName} token exchange returned unexpected shape: ${truncateForError(JSON.stringify(data))}`
-    );
-  }
-  return data;
-}
-
-/** Caps provider-response excerpts embedded in error messages (~200 chars). */
-function truncateForError(text: string): string {
-  return text.length > 200 ? `${text.slice(0, 200)}…[truncated]` : text;
-}
 
 /**
  * Builds the redirect URI for a provider's OAuth callback. Mirrors the

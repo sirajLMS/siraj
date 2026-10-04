@@ -1,13 +1,13 @@
 "use client";
 
-import { GroupsOutlined } from "@mui/icons-material";
-import { Box, ButtonBase, Skeleton, Stack, Typography } from "@mui/material";
+import { Skeleton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui";
-import { ClassAvatar } from "@/frontend/common/components/ui/avatar";
-import { FilterChip } from "@/frontend/common/components/ui/filter";
 import type { ServerListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
+import {
+  GroupsListEmptyState,
+  GroupsListRow,
+} from "@/frontend/common/views/dashboard/whatsapp/groups/GroupsListShared.parts";
 import type {
   WhatsappGroupRow,
   WhatsappGroupsListLabels,
@@ -39,92 +39,6 @@ export interface GroupsListSharedProps {
 }
 
 const LIST_SKELETON_KEYS = ["groups-row-a", "groups-row-b", "groups-row-c"];
-
-function GroupsListEmptyState({ labels }: Readonly<{ labels: WhatsappGroupsListLabels }>) {
-  return (
-    <Stack spacing={1.5} sx={{ alignItems: "center", textAlign: "center", px: 2, py: 6 }}>
-      <GroupsOutlined sx={{ fontSize: 40, color: theme => theme.palette.text.secondary }} />
-      <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-        {labels.emptyState}
-      </Typography>
-    </Stack>
-  );
-}
-
-interface GroupsListRowProps {
-  readonly group: WhatsappGroupRow;
-  readonly labels: WhatsappGroupsListLabels;
-  readonly selected: boolean;
-  readonly onSelectGroup: (groupId: string) => void;
-  readonly formatTimestamp: (iso: string | null) => string;
-}
-
-function GroupsListRow({ group, labels, selected, onSelectGroup, formatTimestamp }: Readonly<GroupsListRowProps>) {
-  const pendingBadgeText =
-    group.pendingJoinRequestCount > 0 ? withCount(labels.pendingBadge, group.pendingJoinRequestCount) : null;
-  return (
-    <ButtonBase
-      type="button"
-      onClick={() => onSelectGroup(group.id)}
-      aria-pressed={selected}
-      sx={theme => ({
-        display: "flex",
-        gap: 1.5,
-        width: "100%",
-        boxSizing: "border-box",
-        px: 2,
-        py: 1.5,
-        alignItems: "center",
-        textAlign: "start",
-        backgroundColor: selected ? theme.palette.action.selected : "transparent",
-        borderRadius: 1,
-        "&:hover": { backgroundColor: theme.palette.action.hover },
-        "&:focus-visible": { backgroundColor: theme.palette.action.hover },
-      })}
-    >
-      <ClassAvatar label={group.subject} sx={{ width: 40, height: 40, flexShrink: 0 }} />
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          variant="titleLg"
-          sx={{
-            fontWeight: 600,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            textAlign: "start",
-          }}
-        >
-          {group.subject}
-        </Typography>
-        {pendingBadgeText !== null && (
-          <Stack direction="row" spacing={0.75} sx={{ mt: 0.5, flexWrap: "wrap" }}>
-            <FilterChip label={pendingBadgeText} />
-          </Stack>
-        )}
-      </Box>
-      <Stack spacing={0.5} sx={{ alignItems: "flex-end", flexShrink: 0 }}>
-        {group.suspended ? (
-          <StatusBadge category="syncStatus" status="failed" label={labels.suspendedBadge} />
-        ) : (
-          <StatusBadge category="syncStatus" status="success" label={labels.activeBadge} />
-        )}
-        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, whiteSpace: "nowrap" }}>
-          {withDate(labels.createdAtLabel, formatTimestamp(group.creationTimestamp))}
-        </Typography>
-      </Stack>
-    </ButtonBase>
-  );
-}
-
-/** Replaces a single `{variable}` placeholder in a translated template. */
-function withCount(template: string, count: number): string {
-  return template.replaceAll("{count}", String(count));
-}
-
-/** Replaces a single `{variable}` placeholder in a translated template. */
-function withDate(template: string, date: string): string {
-  return template.replaceAll("{date}", date);
-}
 
 /**
  * Shared groups list scaffold for the `/whatsapp` groups workspace: search

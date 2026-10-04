@@ -1,98 +1,10 @@
-import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
-import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
-  type MeetingConfigDetailsFormValue,
-  MeetingConfigTypeFieldsMobile,
-  type MeetingConfigTypeFieldsProps,
-} from "@/frontend/mobile/components/ui/input/meetingConfigTypeFields/meetingConfigTypeFields.mobile";
-
-const zoomProvider: MeetingProviderFieldsFragment = {
-  id: "provider-zoom",
-  slug: "zoom",
-  name: { en: "Zoom", ar: "زوم" },
-  description: null,
-  instructions: null,
-  urlAllowlist: ["*.zoom.us"],
-  urlExample: "https://zoom.us/j/123456789",
-  logoUrl: null,
-  isActive: true,
-  createdAt: null,
-  updatedAt: null,
-  fieldSchema: {
-    requiresMeetingUrl: true,
-    supportsAutoGeneration: false,
-    supportsUsername: false,
-    supportsPassword: false,
-    supportsTenantId: false,
-  },
-  providerKind: "manual",
-};
-
-const fullFieldsProvider: MeetingProviderFieldsFragment = {
-  id: "provider-teams",
-  slug: "microsoft_teams",
-  name: { en: "Microsoft Teams", ar: "مايكروسوفت Teams" },
-  description: null,
-  instructions: null,
-  urlAllowlist: ["*.teams.microsoft.com"],
-  urlExample: "https://teams.microsoft.com/l/meetup-join/example",
-  logoUrl: null,
-  isActive: true,
-  createdAt: null,
-  updatedAt: null,
-  fieldSchema: {
-    requiresMeetingUrl: true,
-    supportsAutoGeneration: false,
-    supportsUsername: true,
-    supportsPassword: true,
-    supportsTenantId: true,
-  },
-  providerKind: "manual",
-};
-
-const autoGenProvider: MeetingProviderFieldsFragment = {
-  id: "provider-zoom-auto",
-  slug: "zoom",
-  name: { en: "Zoom (Auto)", ar: "زوم (تلقائي)" },
-  description: null,
-  instructions: null,
-  urlAllowlist: ["*.zoom.us"],
-  urlExample: "https://zoom.us/j/123456789",
-  logoUrl: null,
-  isActive: true,
-  createdAt: null,
-  updatedAt: null,
-  fieldSchema: {
-    requiresMeetingUrl: false,
-    supportsAutoGeneration: true,
-    supportsUsername: false,
-    supportsPassword: false,
-    supportsTenantId: false,
-  },
-  providerKind: "zoom",
-};
-
-function MeetingConfigTypeFieldsStory({
-  initialValue,
-  provider = zoomProvider,
-  ...props
-}: Readonly<
-  Partial<MeetingConfigTypeFieldsProps> & {
-    initialValue?: MeetingConfigDetailsFormValue;
-    provider?: MeetingProviderFieldsFragment;
-  }
->) {
-  const [value, setValue] = useState<MeetingConfigDetailsFormValue>(initialValue ?? { meetingUrl: "" });
-
-  return (
-    <Box sx={{ width: 375, p: 2 }}>
-      <MeetingConfigTypeFieldsMobile provider={provider} value={value} onChangeAction={setValue} {...props} />
-    </Box>
-  );
-}
+  autoGenProvider,
+  fullFieldsProvider,
+} from "@/frontend/common/components/ui/input/meetingConfigTypeFields/meetingConfigTypeFields.fixtures";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
+import { MeetingConfigTypeFieldsStory } from "@/frontend/mobile/components/ui/input/meetingConfigTypeFields/meetingConfigTypeFields.mobile.stories.helpers";
 
 const meta: Meta<typeof MeetingConfigTypeFieldsStory> = {
   title: "UI/MeetingConfigTypeFields/Mobile",

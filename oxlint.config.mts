@@ -106,6 +106,7 @@ export default defineConfig({
       files: [
         "shared/locale/**",
         "shared/constants/iana-timezones.ts",
+        "shared/constants/iana-timezone.enum.ts",
         "shared/constants/iana-timezone-labels.ts",
         "shared/constants/iana-timezone-territories.ts",
         "shared/constants/countries.ts",

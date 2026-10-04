@@ -2,9 +2,14 @@
 
 import { useQuery } from "@apollo/client/react";
 import { ChevronRightOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
+import { Alert, Button, Card, CardContent, Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { myLeaveRequestsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  type LeaveRequestRow,
+  OpenRequestsRequestRowItem,
+  type OpenRequestsRequestTypeLabels,
+  type OpenRequestsStatusLabels,
+} from "@/frontend/common/views/dashboard/widgets/OpenRequestsWidget.parts";
 
 interface OpenRequestsWidgetProps {
   readonly labels: {
@@ -13,36 +18,8 @@ interface OpenRequestsWidgetProps {
     readonly emptyStateDescription: string;
     readonly viewAll: string;
   };
-  readonly statusLabels: {
-    readonly pending: string;
-    readonly approved: string;
-    readonly rejected: string;
-    readonly rescheduled: string;
-    readonly cancelled: string;
-  };
-  readonly requestTypeLabels: {
-    readonly delay: string;
-    readonly cancel: string;
-  };
-}
-
-interface LeaveRequestRow {
-  readonly id: string;
-  readonly requestType: string | null;
-  readonly reason: string | null;
-  readonly status: string;
-  readonly createdAt: string;
-}
-
-function StatusChip({ status, labels }: Readonly<{ status: string; labels: OpenRequestsWidgetProps["statusLabels"] }>) {
-  const labelMap: Record<string, string> = {
-    PENDING: labels.pending,
-    APPROVED: labels.approved,
-    REJECTED: labels.rejected,
-    RESCHEDULED: labels.rescheduled,
-    CANCELLED: labels.cancelled,
-  };
-  return <StatusBadge category="requestStatus" status={status} label={labelMap[status] ?? status} />;
+  readonly statusLabels: OpenRequestsStatusLabels;
+  readonly requestTypeLabels: OpenRequestsRequestTypeLabels;
 }
 
 export function OpenRequestsWidget({ labels, statusLabels, requestTypeLabels }: Readonly<OpenRequestsWidgetProps>) {
@@ -114,41 +91,14 @@ export function OpenRequestsWidget({ labels, statusLabels, requestTypeLabels }: 
           ) : null}
         </Stack>
         <Stack spacing={1}>
-          {recentRequests.map(req => {
-            const typeLabel = req.requestType === "DELAY" ? requestTypeLabels.delay : requestTypeLabels.cancel;
-            const createdDate = new Date(req.createdAt).toLocaleDateString("en", { month: "short", day: "numeric" });
-            return (
-              <Box
-                key={req.id}
-                sx={theme => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                  p: 1.5,
-                  borderRadius: 2,
-                  bgcolor: theme.palette.action.hover,
-                  transition: "background-color 0.2s",
-                  "&:hover": { bgcolor: theme.palette.action.selected },
-                })}
-              >
-                <Chip
-                  size="small"
-                  variant="filled"
-                  label={typeLabel}
-                  sx={{ borderRadius: 1.5, fontWeight: 600, minWidth: 60 }}
-                />
-                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                  <Typography variant="body2" noWrap>
-                    {req.reason ?? typeLabel}
-                  </Typography>
-                  <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
-                    {createdDate}
-                  </Typography>
-                </Box>
-                <StatusChip status={req.status} labels={statusLabels} />
-              </Box>
-            );
-          })}
+          {recentRequests.map(req => (
+            <OpenRequestsRequestRowItem
+              key={req.id}
+              request={req}
+              statusLabels={statusLabels}
+              requestTypeLabels={requestTypeLabels}
+            />
+          ))}
         </Stack>
         <Button
           fullWidth

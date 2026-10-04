@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ConnectedAccountsTable } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable";
 import { ConnectProviderAction } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
 import { EndpointList } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/EndpointList";
@@ -23,11 +23,11 @@ import { RevokeTokenDialog } from "@/frontend/common/views/dashboard/settings/co
 import { TestConnectionResultPanel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel";
 import { TokenMetadataDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TokenMetadataDialog";
 import { SettingsTabShell } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/SettingsTabShell";
+import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/tabs/meetingIntegrations/__shared__/meetingIntegrationsTabShared.helpers";
 import type {
   MeetingIntegrationConnectedAccount,
   MeetingIntegrationsViewModel,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
-import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 export type RevokeTarget = {
   readonly account: MeetingIntegrationConnectedAccount;
@@ -48,19 +48,6 @@ export type MeetingIntegrationsTabSharedProps = Readonly<
     readonly viewModel: MeetingIntegrationsViewModel;
   }
 >;
-
-function getProviderLabel(slug: MeetingIntegrationProviderSlug, labels: SettingsMeetingIntegrationsLabels): string {
-  switch (slug) {
-    case MeetingIntegrationProviderSlug.Zoom:
-      return labels.provider.zoom;
-    case MeetingIntegrationProviderSlug.GoogleMeet:
-      return labels.provider.googleMeet;
-    case MeetingIntegrationProviderSlug.MicrosoftTeams:
-      return labels.provider.microsoftTeams;
-    default:
-      return String(slug);
-  }
-}
 
 export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabSharedProps) {
   const { viewModel, summaryContentSx, summaryRowSx, detailsSx } = props;

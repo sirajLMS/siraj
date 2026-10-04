@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import type { ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
+import { createPaginatedFilterActions } from "@/frontend/common/stores/__shared__";
 
 /** Rows per server page on first load; mirrors the `expenses` resolver convention. */
 const EXPENSE_DEFAULT_PAGE_SIZE = 50;
@@ -79,16 +80,6 @@ function defaultState(): ExpenseFilterState {
   };
 }
 
-function toNonNegativePage(page: number): number {
-  if (!Number.isFinite(page)) return 0;
-  return Math.max(0, Math.trunc(page));
-}
-
-function toPositivePageSize(pageSize: number): number {
-  if (!Number.isFinite(pageSize)) return EXPENSE_DEFAULT_PAGE_SIZE;
-  return Math.max(1, Math.trunc(pageSize));
-}
-
 export const useExpenseFilterStore = create<ExpenseFilterStore>(set => ({
   ...defaultState(),
   setTitle: title => set({ title, page: 0 }),
@@ -97,15 +88,9 @@ export const useExpenseFilterStore = create<ExpenseFilterStore>(set => ({
   setPaymentDateFrom: paymentDateFrom => set({ paymentDateFrom, page: 0 }),
   setPaymentDateTo: paymentDateTo => set({ paymentDateTo, page: 0 }),
   setIncludeDeleted: includeDeleted => set({ includeDeleted, page: 0 }),
-  setPage: page => set({ page: toNonNegativePage(page) }),
-  setPageSize: pageSize => set({ pageSize: toPositivePageSize(pageSize), page: 0 }),
-  toggleSelected: id =>
-    set(state => ({
-      selectedIds: state.selectedIds.includes(id)
-        ? state.selectedIds.filter(selectedId => selectedId !== id)
-        : [...state.selectedIds, id],
-    })),
-  clearSelection: () => set({ selectedIds: [] }),
-  clearFilters: () => set({ ...DEFAULT_FILTERS, page: 0, selectedIds: [] }),
-  reset: () => set(defaultState()),
+  ...createPaginatedFilterActions<ExpenseFilterState>(set, {
+    defaultPageSize: EXPENSE_DEFAULT_PAGE_SIZE,
+    defaultFilters: DEFAULT_FILTERS,
+    createDefaultState: defaultState,
+  }),
 }));

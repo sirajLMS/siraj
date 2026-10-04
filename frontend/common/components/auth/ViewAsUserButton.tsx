@@ -1,21 +1,12 @@
 "use client";
 
-import { LoginOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { useState } from "react";
 
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Link,
-  MenuItem,
-  TextField,
-  Tooltip,
-} from "@mui/material";
-
-import { useState } from "react";
+  ViewAsUserConfirmDialog,
+  ViewAsUserTrigger,
+  type ViewAsUserVariant,
+} from "@/frontend/common/components/auth/ViewAsUserButton.parts";
 
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 
@@ -24,8 +15,6 @@ import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermiss
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-type ViewAsUserVariant = "icon" | "link" | "menuItem" | "button";
 
 interface ViewAsUserButtonProps {
   readonly targetUserId: string;
@@ -74,8 +63,6 @@ export function ViewAsUserButton({
 
   const [internalOpen, setInternalOpen] = useState(false);
 
-  const [reason, setReason] = useState("");
-
   const isControlled = typeof externalOpen === "boolean";
 
   const isDialogOpen = isControlled ? externalOpen : internalOpen;
@@ -104,102 +91,19 @@ export function ViewAsUserButton({
     }
   };
 
-  const handleConfirm = async () => {
-    const success = await startImpersonation(targetUserId, reason.trim() || undefined);
-
-    if (success) {
-      handleClose();
-
-      setReason("");
-    }
-  };
-
-  const loginLabel = t.loginAs;
-
-  function renderTrigger() {
-    if (isControlled && !variant) {
-      return null;
-    }
-
-    if (variant === "menuItem") {
-      return (
-        <MenuItem onClick={openDialog}>
-          <LoginOutlined fontSize="small" sx={{ mr: 1 }} />
-
-          {loginLabel}
-        </MenuItem>
-      );
-    }
-
-    if (variant === "link") {
-      return (
-        <Link
-          component="button"
-          type="button"
-          variant="bodyMd"
-          underline="hover"
-          onClick={openDialog}
-          sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
-        >
-          {loginLabel}
-        </Link>
-      );
-    }
-
-    if (variant === "button") {
-      return (
-        <Button variant="outlined" size={size} startIcon={<LoginOutlined />} onClick={openDialog}>
-          {loginLabel}
-        </Button>
-      );
-    }
-
-    if (variant === "icon") {
-      return (
-        <Tooltip title={loginLabel}>
-          <IconButton size={size} onClick={openDialog} aria-label={loginLabel}>
-            <VisibilityOutlined fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      );
-    }
-
-    return null;
-  }
-
-  const trigger = renderTrigger();
+  const handleConfirm = (reason?: string) => startImpersonation(targetUserId, reason);
 
   return (
     <>
-      {trigger}
+      <ViewAsUserTrigger variant={variant} size={size} loginLabel={t.loginAs} onOpen={openDialog} />
 
-      <Dialog open={isDialogOpen} onClose={handleClose} fullWidth maxWidth="xs">
-        <DialogTitle>{t.confirmTitle(targetUserName)}</DialogTitle>
-
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-          {t.confirmMessage}
-
-          <TextField
-            label={t.reasonLabel}
-            placeholder={t.reasonPlaceholder}
-            value={reason}
-            onChange={e => setReason(e.target.value)}
-            multiline
-            minRows={2}
-            fullWidth
-          />
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={handleClose} disabled={loading}>
-            {t.cancel}
-          </Button>
-
-          <Button variant="contained" onClick={() => void handleConfirm()} disabled={loading}>
-            {t.confirm}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ViewAsUserConfirmDialog
+        open={isDialogOpen}
+        targetUserName={targetUserName}
+        loading={loading}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+      />
     </>
   );
 }

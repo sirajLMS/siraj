@@ -8,11 +8,15 @@ import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/b
 import { logger } from "@/frontend/common/utils/logger";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import {
-  buildDeliveryRate,
-  buildExpiredSlippage,
-  buildPurchasesOverTime,
+  applyInsightsFilters,
+  buildChartData,
+  type InsightsDateRange,
+  type QuotaInsightsChartData,
+  type QuotaInsightsFilters,
+  type QuotaInsightsMetricsData,
+} from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel.helpers";
+import {
   buildQuotaInsightsCsv,
-  buildRedemptionByType,
   computeInsightsMetrics,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsights.helpers";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
@@ -23,34 +27,6 @@ import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota"
 
 /** Cache options object for Intl.DateTimeFormat to utilize getDateTimeFormatter WeakMap cache. */
 const MONTH_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { month: "short" };
-
-type InsightsDateRange = "all" | "month" | "quarter" | "year";
-
-interface QuotaInsightsFilters {
-  readonly dateRange: InsightsDateRange;
-  readonly kind: QuotaKind | null;
-  readonly status: QuotaStatus | null;
-  readonly studentId: string | null;
-}
-
-interface QuotaInsightsChartData {
-  readonly purchasesOverTime: { readonly month: string; readonly purchases: number; readonly classes: number }[];
-  readonly redemptionByType: { readonly name: string; readonly value: number; readonly pct: number }[];
-  readonly deliveryRate: { readonly name: string; readonly count: number }[];
-  readonly expiredSlippage: {
-    readonly month: string;
-    readonly cumulativeExpired: number;
-    readonly cumulativeRedeemed: number;
-  }[];
-}
-
-interface QuotaInsightsMetricsData {
-  readonly activeQuotasCount: number;
-  readonly totalClassesRemaining: number;
-  readonly totalReserved: number;
-  readonly expiringThisWeekCount: number;
-  readonly pendingBacklogCount: number;
-}
 
 export interface QuotaInsightsViewModel {
   readonly labels: QuotaLabels;
@@ -66,58 +42,6 @@ export interface QuotaInsightsViewModel {
   readonly setStudentId: (studentId: string | null) => void;
   readonly exportCsv: () => void;
   readonly refetch: () => void;
-}
-
-function filterByDateRange(quotas: QuotaItem[], dateRange: InsightsDateRange): QuotaItem[] {
-  if (dateRange === "all") return quotas;
-  const now = new Date();
-  const cutoff = new Date(now);
-  switch (dateRange) {
-    case "month":
-      cutoff.setMonth(now.getMonth() - 1);
-      break;
-    case "quarter":
-      cutoff.setMonth(now.getMonth() - 3);
-      break;
-    case "year":
-      cutoff.setFullYear(now.getFullYear() - 1);
-      break;
-  }
-  return quotas.filter(q => {
-    const d = q.createdAt ? new Date(q.createdAt) : null;
-    return d !== null && d >= cutoff;
-  });
-}
-
-function filterByKind(quotas: QuotaItem[], kind: QuotaKind | null): QuotaItem[] {
-  if (!kind) return quotas;
-  return quotas.filter(q => q.kind === kind);
-}
-
-function filterByStatus(quotas: QuotaItem[], status: QuotaStatus | null): QuotaItem[] {
-  if (!status) return quotas;
-  return quotas.filter(q => q.status === status);
-}
-
-function filterByStudentId(quotas: QuotaItem[], studentId: string | null): QuotaItem[] {
-  if (!studentId) return quotas;
-  return quotas.filter(q => q.studentId === studentId);
-}
-
-function applyInsightsFilters(quotas: QuotaItem[], filters: QuotaInsightsFilters): QuotaItem[] {
-  return filterByStudentId(
-    filterByStatus(filterByKind(filterByDateRange(quotas, filters.dateRange), filters.kind), filters.status),
-    filters.studentId
-  );
-}
-
-function buildChartData(quotas: QuotaItem[], monthFormatter: Intl.DateTimeFormat, labels: QuotaLabels) {
-  return {
-    purchasesOverTime: buildPurchasesOverTime(quotas, monthFormatter),
-    redemptionByType: buildRedemptionByType(quotas, labels),
-    deliveryRate: buildDeliveryRate(quotas, labels),
-    expiredSlippage: buildExpiredSlippage(quotas, monthFormatter),
-  };
 }
 
 export function useQuotaInsightsViewModel(): QuotaInsightsViewModel {

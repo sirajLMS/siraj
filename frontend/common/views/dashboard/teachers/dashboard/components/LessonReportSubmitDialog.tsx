@@ -1,37 +1,20 @@
 "use client";
 
-import {
-  Alert,
-  Box,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  Slider,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Alert, Stack } from "@mui/material";
 import { useMemo, useState } from "react";
 import { FormDialogShell } from "@/frontend/common/components/ui/dialog";
-import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
+import { LessonReportFormFields } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog.fields";
+import {
+  buildInitialLessonReportForm,
+  collectLessonReportFieldErrors,
+  type LessonReportFormState,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog.helpers";
 import { lessonReportFormSchema } from "@/frontend/common/views/dashboard/teachers/dashboard/schemas/lessonReportFormSchema";
 import type {
-  AttendanceEvaluationValue,
   LessonReportFormLabels,
   LessonReportFormSubmitInput,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
-
-const ATTENDANCE_OPTIONS: ReadonlyArray<{
-  readonly value: AttendanceEvaluationValue;
-  readonly labelKey: "present" | "absent" | "late";
-}> = [
-  { value: AttendanceEvaluation.Present, labelKey: "present" },
-  { value: AttendanceEvaluation.Absent, labelKey: "absent" },
-  { value: AttendanceEvaluation.Late, labelKey: "late" },
-];
 
 interface LessonReportSubmitDialogProps {
   readonly open: boolean;
@@ -46,15 +29,6 @@ interface LessonReportSubmitDialogProps {
 
 export type { LessonReportSubmitDialogProps };
 
-function buildInitialForm(defaultDurationMinutes?: number) {
-  return {
-    attendanceEvaluation: AttendanceEvaluation.Present as AttendanceEvaluationValue,
-    durationMinutes: defaultDurationMinutes ?? 60,
-    completionPercentage: 100,
-    teacherNotes: "",
-  };
-}
-
 export function LessonReportSubmitDialog({
   open,
   onClose,
@@ -64,7 +38,7 @@ export function LessonReportSubmitDialog({
   onSubmit,
   fullScreen = false,
 }: Readonly<LessonReportSubmitDialogProps>) {
-  const [form, setForm] = useState(() => buildInitialForm(defaultDurationMinutes));
+  const [form, setForm] = useState<LessonReportFormState>(() => buildInitialLessonReportForm(defaultDurationMinutes));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +46,7 @@ export function LessonReportSubmitDialog({
   if (open !== prevOpen) {
     setPrevOpen(open);
     if (open) {
-      setForm(buildInitialForm(defaultDurationMinutes));
+      setForm(buildInitialLessonReportForm(defaultDurationMinutes));
       setErrors({});
       setError(null);
     }
@@ -80,18 +54,16 @@ export function LessonReportSubmitDialog({
 
   const schema = useMemo(() => lessonReportFormSchema(labels), [labels]);
 
+  const handleFieldChange = <K extends keyof LessonReportFormState>(field: K, value: LessonReportFormState[K]) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: "" }));
+  };
+
   const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0];
-        if (typeof key === "string" && !fieldErrors[key]) {
-          fieldErrors[key] = issue.message;
-        }
-      }
-      setErrors(fieldErrors);
+      setErrors(collectLessonReportFieldErrors(parsed.error));
       return;
     }
 
@@ -128,76 +100,12 @@ export function LessonReportSubmitDialog({
     >
       <Stack spacing={3} sx={{ mt: 1 }}>
         {error && <Alert severity="error">{error}</Alert>}
-
-        <FormControl fullWidth required error={Boolean(errors.attendanceEvaluation)}>
-          <InputLabel id="attendance-evaluation-label">{labels.attendanceEvaluation}</InputLabel>
-          <Select
-            labelId="attendance-evaluation-label"
-            value={form.attendanceEvaluation}
-            label={labels.attendanceEvaluation}
-            disabled={submitting}
-            onChange={e => {
-              setForm(prev => ({ ...prev, attendanceEvaluation: e.target.value }));
-              setErrors(prev => ({ ...prev, attendanceEvaluation: "" }));
-            }}
-          >
-            {ATTENDANCE_OPTIONS.map(option => (
-              <MenuItem key={option.value} value={option.value}>
-                {labels[option.labelKey]}
-              </MenuItem>
-            ))}
-          </Select>
-          {errors.attendanceEvaluation && <FormHelperText>{errors.attendanceEvaluation}</FormHelperText>}
-        </FormControl>
-
-        <TextField
-          label={labels.durationMinutes}
-          type="number"
-          required
-          fullWidth
-          value={form.durationMinutes}
-          disabled={submitting}
-          error={Boolean(errors.durationMinutes)}
-          helperText={errors.durationMinutes}
-          onChange={e => {
-            setForm(prev => ({ ...prev, durationMinutes: Number(e.target.value) }));
-            setErrors(prev => ({ ...prev, durationMinutes: "" }));
-          }}
-          slotProps={{ htmlInput: { min: 1, max: 600, step: 1 } }}
-        />
-
-        <Box>
-          <Typography variant="bodyMd" sx={{ mb: 1 }}>
-            {labels.completionPercentage}: {form.completionPercentage}%
-          </Typography>
-          <Slider
-            value={form.completionPercentage}
-            min={0}
-            max={100}
-            step={1}
-            disabled={submitting}
-            onChange={(_, value) => {
-              setForm(prev => ({ ...prev, completionPercentage: Array.isArray(value) ? value[0] : value }));
-              setErrors(prev => ({ ...prev, completionPercentage: "" }));
-            }}
-            valueLabelDisplay="auto"
-          />
-          {errors.completionPercentage && <FormHelperText error>{errors.completionPercentage}</FormHelperText>}
-        </Box>
-
-        <TextField
-          label={labels.teacherNotes}
-          multiline
-          rows={4}
-          fullWidth
-          value={form.teacherNotes}
-          disabled={submitting}
-          error={Boolean(errors.teacherNotes)}
-          helperText={errors.teacherNotes}
-          onChange={e => {
-            setForm(prev => ({ ...prev, teacherNotes: e.target.value }));
-            setErrors(prev => ({ ...prev, teacherNotes: "" }));
-          }}
+        <LessonReportFormFields
+          form={form}
+          errors={errors}
+          submitting={submitting}
+          labels={labels}
+          onFieldChange={handleFieldChange}
         />
       </Stack>
     </FormDialogShell>

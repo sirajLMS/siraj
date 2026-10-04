@@ -9,7 +9,6 @@
  * Heartbeat: written periodically via `computeHeartbeatMs(timeoutSeconds)` (shared
  * utility — same formula as the pg-boss adapter's `computeHeartbeatSeconds`).
  */
-import { DomainError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import {
@@ -20,21 +19,14 @@ import {
 import { computeHeartbeatMs } from "@/backend/services/cron/cron-heartbeat.utils";
 import { computeBackoffSeconds } from "@/backend/services/cron/cron-scheduler.engine";
 import { formatError } from "@/backend/services/cron/cron-utils";
+import { JobTimeoutError, runJobWithHeartbeat } from "@/backend/services/cron/cron-worker-heartbeat.helpers";
 import { getHandler } from "@/backend/services/cron/job-handler-registry";
 import { getQueueAdapter } from "@/backend/services/cron/queue-adapter.factory";
-import type { CronJobHandler, CronJobPayload, CronQueueAdapter, WorkerDrainResult } from "@/backend/types";
+import type { CronJobPayload, CronQueueAdapter, WorkerDrainResult } from "@/backend/types";
 
 const DEFAULT_CONCURRENCY = 4;
 const HEARTBEAT_MIN_MS = 1_000;
 const MIN_TIMEOUT_SECONDS = 1;
-
-/** Error thrown when a job exceeds its `timeoutSeconds` deadline. */
-class JobTimeoutError extends DomainError {
-  constructor(message: string) {
-    super("JOB_TIMEOUT", message);
-    this.name = "JobTimeoutError";
-  }
-}
 
 function getWorkerId(): string {
   return process.env.WORKER_ID ?? `worker-${process.pid}`;
@@ -303,121 +295,5 @@ async function handleJobError(
       logger.error("cron.worker", `adapter.fail failed for job ${job.queueJobId}: ${formatError(caughtErr)}`);
     }
     result.failed++;
-  }
-}
-
-function classifyAndThrowError(err: unknown, abortController: AbortController): never {
-  if (err instanceof JobTimeoutError) {
-    throw err;
-  }
-  if (abortController.signal.aborted) {
-    // If our own timeout timer aborted the signal, the error should already be
-    // a JobTimeoutError (caught above). If it's a different error (e.g. an
-    // AbortError from the handler reacting to the abort signal), preserve the
-    // original error so handleJobError can classify it as a retryable AbortError
-    // rather than a non-retryable timeout.
-    if (err instanceof Error && (err.name === "AbortError" || (err as NodeJS.ErrnoException).code === "ABORT_ERR")) {
-      throw err;
-    }
-    // Signal aborted but error isn't an AbortError — treat as timeout.
-    throw new JobTimeoutError(formatError(err));
-  }
-  if (err instanceof Error && err.message.includes("timed out")) {
-    throw new JobTimeoutError(err.message);
-  }
-  throw err;
-}
-
-async function runJobWithHeartbeat(
-  job: CronJobPayload,
-  handler: CronJobHandler,
-  opts: {
-    heartbeatMs: number;
-    jobDeadline: number;
-    onHeartbeat: (progress?: Record<string, unknown>) => Promise<void>;
-  }
-): Promise<void> {
-  const { heartbeatMs, jobDeadline, onHeartbeat } = opts;
-
-  let resolved = false;
-  let handlerCompleted = false;
-  let heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
-  let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
-  const abortController = new AbortController();
-  const jobTimeoutMs = Math.max(0, jobDeadline - Date.now());
-
-  function stopHeartbeat(): void {
-    if (heartbeatTimer) {
-      clearTimeout(heartbeatTimer);
-      heartbeatTimer = null;
-    }
-  }
-
-  function clearTimeoutTimer(): void {
-    if (timeoutTimer) {
-      clearTimeout(timeoutTimer);
-      timeoutTimer = null;
-    }
-  }
-
-  try {
-    const handlerPromise = handler(job, { signal: abortController.signal });
-
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      timeoutTimer = setTimeout(() => {
-        abortController.abort();
-        reject(new JobTimeoutError(`Job timed out after ${jobTimeoutMs}ms`));
-      }, jobTimeoutMs);
-    });
-
-    // Start heartbeat ticker — setTimeout recursion guarantees non-overlapping ticks
-    const scheduleHeartbeat = (): void => {
-      if (resolved) return;
-      if (Date.now() >= jobDeadline) {
-        logger.warn("cron.worker.jobTimeout", { runId: job.runId, jobDeadline });
-        return;
-      }
-      heartbeatTimer = setTimeout(async () => {
-        if (resolved) return;
-        try {
-          await onHeartbeat({ tick: Date.now() });
-        } catch (err) {
-          logger.warn("cron.worker.heartbeatFailed", {
-            runId: job.runId,
-            error: formatError(err),
-          });
-        }
-        if (!resolved) scheduleHeartbeat();
-      }, heartbeatMs);
-    };
-
-    scheduleHeartbeat();
-
-    try {
-      const handlerResult = await Promise.race([handlerPromise, timeoutPromise]);
-
-      resolved = true;
-      stopHeartbeat();
-      clearTimeoutTimer();
-      handlerCompleted = true;
-
-      if (!handlerResult?.success) {
-        throw new DomainError("JOB_HANDLER_FAILED", handlerResult?.error ?? "Handler returned failure");
-      }
-    } catch (err) {
-      resolved = true;
-      stopHeartbeat();
-      clearTimeoutTimer();
-      classifyAndThrowError(err, abortController);
-    }
-  } finally {
-    resolved = true;
-    stopHeartbeat();
-    clearTimeoutTimer();
-    // Only abort on timeout — aborting after success or non-timeout errors
-    // forces abort signals on handlers that completed normally.
-    if (!handlerCompleted && !abortController.signal.aborted && Date.now() >= jobDeadline) {
-      abortController.abort();
-    }
   }
 }

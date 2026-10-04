@@ -10,6 +10,29 @@ import type {
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
+/**
+ * Loads a live (non-deleted) teacher note by id or throws the localized
+ * not-found error shared by the mutating repository methods.
+ */
+async function requireActiveNoteOrThrow(
+  t: DBTransaction,
+  id: string,
+  locale?: string
+): Promise<TeacherImportantNoteSelectType> {
+  const [existing] = await t
+    .select()
+    .from(teacherImportantNotes)
+    .where(and(eq(teacherImportantNotes.id, id), isNull(teacherImportantNotes.deletedAt)))
+    .limit(1);
+
+  if (!existing) {
+    const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(i18n.teacher.noteNotFound(id));
+  }
+
+  return existing;
+}
+
 export namespace TeacherNotesRepository {
   export async function getActiveNotes(
     teacherId?: string,
@@ -85,16 +108,7 @@ export namespace TeacherNotesRepository {
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType> {
     const run = async (t: DBTransaction): Promise<TeacherImportantNoteSelectType> => {
-      const [existing] = await t
-        .select()
-        .from(teacherImportantNotes)
-        .where(and(eq(teacherImportantNotes.id, id), isNull(teacherImportantNotes.deletedAt)))
-        .limit(1);
-
-      if (!existing) {
-        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(i18n.teacher.noteNotFound(id));
-      }
+      const existing = await requireActiveNoteOrThrow(t, id, locale);
 
       const now = new Date();
       const [updated] = await t
@@ -127,16 +141,7 @@ export namespace TeacherNotesRepository {
 
   export async function deleteNote(id: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
-      const [existing] = await t
-        .select()
-        .from(teacherImportantNotes)
-        .where(and(eq(teacherImportantNotes.id, id), isNull(teacherImportantNotes.deletedAt)))
-        .limit(1);
-
-      if (!existing) {
-        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(i18n.teacher.noteNotFound(id));
-      }
+      await requireActiveNoteOrThrow(t, id, locale);
 
       const now = new Date();
       await t

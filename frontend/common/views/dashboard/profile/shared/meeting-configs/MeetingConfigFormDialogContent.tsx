@@ -1,92 +1,13 @@
 "use client";
 
-import {
-  Alert,
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControlLabel,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Stack } from "@mui/material";
 import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
-import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
-import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
-import { MeetingProviderSelectContainer } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelectContainer";
+import { TestConfigSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent.parts";
+import { MeetingConfigFormDialogFields } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogFields.parts";
+import type { MeetingConfigFormContentEnhancementLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/meetingConfigFormDialogContent.types";
 import type { UseMeetingConfigFormStateReturn } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
-import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
 
-/** Enhancement label keys consumed by the form content (Test Config + copy URL). */
-export type MeetingConfigFormContentEnhancementLabels = Pick<
-  MeetingConfigEnhancementLabels,
-  "testConfig" | "previewUrlGenerated" | "copyMeetingUrl"
->;
-
-function TestConfigPreviewUrl({ previewUrl, copyLabel }: { readonly previewUrl: string; readonly copyLabel: string }) {
-  return (
-    <Stack spacing={0.5}>
-      <TextField
-        value={previewUrl}
-        fullWidth
-        size="small"
-        slotProps={{
-          input: {
-            readOnly: true,
-            endAdornment: (
-              <InputAdornment position="end">
-                <CopyMeetingUrlButton meetingUrl={previewUrl} ariaLabel={copyLabel} tooltipLabel={copyLabel} />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
-    </Stack>
-  );
-}
-
-function TestConfigSection({
-  enhancementLabels,
-  onTestConfig,
-  testing,
-  saving,
-  providerId,
-  previewUrl,
-  testError,
-}: {
-  readonly enhancementLabels: MeetingConfigFormContentEnhancementLabels;
-  readonly onTestConfig: () => void;
-  readonly testing: boolean;
-  readonly saving: boolean;
-  readonly providerId: string | null | undefined;
-  readonly previewUrl: string | null;
-  readonly testError: string | null;
-}) {
-  return (
-    <Stack spacing={1}>
-      <Button
-        variant="outlined"
-        onClick={onTestConfig}
-        disabled={!providerId || saving || testing}
-        startIcon={testing ? <CircularProgress size={16} /> : undefined}
-        sx={theme => ({ borderRadius: 1.5, fontWeight: 700, color: theme.palette.primary.main, minHeight: 48 })}
-      >
-        {enhancementLabels.testConfig}
-      </Button>
-      {testError ? <Alert severity="error">{testError}</Alert> : null}
-      {previewUrl ? (
-        <Stack spacing={0.5}>
-          <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>
-            {enhancementLabels.previewUrlGenerated}
-          </Typography>
-          <TestConfigPreviewUrl previewUrl={previewUrl} copyLabel={enhancementLabels.copyMeetingUrl} />
-        </Stack>
-      ) : null}
-    </Stack>
-  );
-}
+export type { MeetingConfigFormContentEnhancementLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/meetingConfigFormDialogContent.types";
 
 export type MeetingConfigFormDialogContentProps = {
   readonly formId: string;
@@ -132,23 +53,7 @@ export function MeetingConfigFormDialogContent({
   generating,
   generationError,
 }: Readonly<MeetingConfigFormDialogContentProps>) {
-  const {
-    t,
-    isEdit,
-    label,
-    setLabel,
-    provider,
-    setProvider,
-    details,
-    setDetails,
-    isDefault,
-    setIsDefault,
-    urlError,
-    setUrlError,
-    saveError,
-    providerChanged,
-    instructions,
-  } = state;
+  const { t, isEdit, provider } = state;
 
   const showTestButton = onTestConfig != null && enhancementLabels != null;
 
@@ -168,51 +73,16 @@ export function MeetingConfigFormDialogContent({
           onSave();
         }}
       >
-        <Stack spacing={2.5} sx={{ pt: 1 }}>
-          <TextField label={t.label} value={label} onChange={e => setLabel(e.target.value)} fullWidth size="small" />
-          <MeetingProviderSelectContainer
-            value={provider}
-            onChangeAction={setProvider}
-            label={t.provider}
-            disabled={providerSelectDisabled}
-          />
-          {providerChanged ? <Alert severity="warning">{t.providerChangeWarning}</Alert> : null}
-          {instructions ? (
-            <Alert severity="info">
-              {provider?.name ? (
-                <LocalizedStringDisplay value={provider.name} typographyVariant="labelMd" sx={{ fontWeight: 700 }} />
-              ) : null}
-              <Typography sx={{ typography: "bodyMd", mt: provider?.name ? 0.5 : 0 }}>{instructions}</Typography>
-            </Alert>
-          ) : null}
-          <MeetingConfigTypeFields
-            provider={provider}
-            value={details}
-            onChangeAction={value => {
-              setDetails({
-                meetingUrl: value.meetingUrl,
-                username: value.username ?? "",
-                password: value.password ?? "",
-                tenantId: value.tenantId ?? "",
-              });
-              setUrlError(null);
-            }}
-            passwordHelperText={hasSecretOnEdit ? t.passwordLeaveBlank : undefined}
-            onGenerateUrl={onGenerateUrl}
-            generating={generating}
-            generationError={generationError}
-          />
-          {urlError ? (
-            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
-              {urlError}
-            </Typography>
-          ) : null}
-          {saveError ? <Alert severity="error">{saveError}</Alert> : null}
-          <FormControlLabel
-            control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
-            label={t.setAsDefault}
-          />
-          {showTestButton && enhancementLabels && onTestConfig ? (
+        <MeetingConfigFormDialogFields
+          state={state}
+          hasSecretOnEdit={hasSecretOnEdit}
+          providerSelectDisabled={providerSelectDisabled}
+          onGenerateUrl={onGenerateUrl}
+          generating={generating}
+          generationError={generationError}
+        />
+        {showTestButton && enhancementLabels && onTestConfig ? (
+          <Stack sx={{ pt: 2.5 }}>
             <TestConfigSection
               enhancementLabels={enhancementLabels}
               onTestConfig={onTestConfig}
@@ -222,8 +92,8 @@ export function MeetingConfigFormDialogContent({
               previewUrl={previewUrl ?? null}
               testError={testError ?? null}
             />
-          ) : null}
-        </Stack>
+          </Stack>
+        ) : null}
       </form>
     </BaseFormDialogSection>
   );

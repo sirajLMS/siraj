@@ -2,7 +2,6 @@
 
 import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
 import { Alert, AlertTitle, Box, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { addDays } from "date-fns";
 import { useState } from "react";
 import { formatDateInput, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
@@ -10,6 +9,12 @@ import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import { TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect/TeacherAutocomplete";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { useCreditAdjustFormStore } from "@/frontend/common/stores/creditAdjustFormStore";
+import {
+  bannerAlertSx,
+  bannerCaptionSx,
+  FIELDS_GRID_SX,
+  TEACHER_FIELD_SX,
+} from "@/frontend/common/views/dashboard/accounting/credits/CarryoverBanner.styles";
 import { PAYMENT_DATE_MAX_FUTURE_DAYS } from "@/frontend/common/views/dashboard/accounting/credits/creditAdjust.constants";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingCreditAdjustment } from "@/shared/locale/namespaces";
@@ -25,20 +30,6 @@ export interface CarryoverBannerProps {
   /** Inline validation messages per field; absent keys render without error state. */
   readonly errors?: CarryoverBannerErrors;
 }
-
-const FIELDS_GRID_SX = {
-  display: "grid",
-  gap: 2,
-  mt: 1,
-  // One column on phones, two from `sm` up so tablets keep the date pickers
-  // side-by-side, and three from `lg` up where all three date pickers share
-  // one row below the full-width teacher picker. The wide layout engages at
-  // `lg` (1200px) rather than `xl` so common 1440px desktops use it.
-  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" },
-} as const;
-
-/** Teacher picker spans the full grid width on every breakpoint. */
-const TEACHER_FIELD_SX = { gridColumn: "1 / -1" } as const;
 
 /**
  * Carryover allocation section of the credit adjustment form. Surfaces only
@@ -75,41 +66,9 @@ export function CarryoverBanner({ errors }: Readonly<CarryoverBannerProps>) {
   };
 
   return (
-    <Alert
-      severity="success"
-      icon={<SwapHorizOutlinedIcon />}
-      sx={theme => ({
-        alignItems: "flex-start",
-        // The stock success-alert tone renders muddy-dark against the page;
-        // the success container pair is the theme's contrast-safe surface.
-        backgroundColor: theme.palette.successContainer,
-        color: theme.palette.onSuccessContainer,
-        "& .MuiAlert-icon": { color: theme.palette.success.main },
-        // Outlined inputs inherit the page-level divider alpha, which reads as
-        // a ghost over the green banner surface; derive the ring from the
-        // banner's own on-container tone so it stays visible. Scoped to the
-        // banner's fields only — the shared picker/field themes are untouched.
-        "& .MuiOutlinedInput-root:not(.Mui-focused) .MuiOutlinedInput-notchedOutline, & .MuiPickersOutlinedInput-root:not(.Mui-focused) .MuiPickersOutlinedInput-notchedOutline":
-          {
-            borderColor: alpha(theme.palette.onSuccessContainer, 0.35),
-          },
-        // Floating labels ride in the outlined-input notch above the banner
-        // surface; paint them with the banner tone so the notch does not let
-        // the surrounding page show through behind the label text.
-        "& .MuiInputLabel-root, & .MuiPickersInputLabel-root": {
-          backgroundColor: theme.palette.successContainer,
-        },
-      })}
-    >
+    <Alert severity="success" icon={<SwapHorizOutlinedIcon />} sx={bannerAlertSx}>
       <AlertTitle>{t.carryover.bannerTitle}</AlertTitle>
-      <Typography
-        variant="caption"
-        sx={theme => ({
-          // Keep the caption visually subordinate to the banner title while
-          // staying on the contrast-safe on-container tone.
-          color: alpha(theme.palette.onSuccessContainer, 0.85),
-        })}
-      >
+      <Typography variant="caption" sx={bannerCaptionSx}>
         {t.carryover.bannerCaption}
       </Typography>
       <Box sx={FIELDS_GRID_SX}>

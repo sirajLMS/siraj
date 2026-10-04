@@ -2,18 +2,12 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { SubjectCategoryTabsShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/subjectCategoryTabsShared";
-import { SubjectDialogsShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/subjectDialogsShared";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { CategoriesSectionMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/categoriesSection.mobile";
-import { CreateCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/createCategoryDialog.mobile";
-import { CreateSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/createSubjectDialog.mobile";
-import { DeleteCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/deleteCategoryDialog.mobile";
-import { DeleteSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/deleteSubjectDialog.mobile";
-import { EditCategoryDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/editCategoryDialog.mobile";
-import { EditSubjectDialogMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/editSubjectDialog.mobile";
 import { SubjectCardMobile } from "@/frontend/mobile/views/dashboard/subjects/home/components/subjectCard.mobile";
+import { SubjectDialogsSection } from "@/frontend/mobile/views/dashboard/subjects/home/subjectsView.mobile.parts";
 
 export function SubjectsViewMobile({
   labels,
@@ -106,19 +100,13 @@ export function SubjectsViewMobile({
         )}
       />
 
-      <SubjectDialogsShared
+      <SubjectDialogsSection
         createSubjectDialog={createSubjectDialog}
         editSubjectDialog={editSubjectDialog}
         deleteSubjectDialog={deleteSubjectDialog}
         createCategoryDialog={createCategoryDialog}
         editCategoryDialog={editCategoryDialog}
         deleteCategoryDialog={deleteCategoryDialog}
-        CreateSubjectDialog={CreateSubjectDialogMobile}
-        EditSubjectDialog={EditSubjectDialogMobile}
-        DeleteSubjectDialog={DeleteSubjectDialogMobile}
-        CreateCategoryDialog={CreateCategoryDialogMobile}
-        EditCategoryDialog={EditCategoryDialogMobile}
-        DeleteCategoryDialog={DeleteCategoryDialogMobile}
       />
     </MobilePageContainer>
   );

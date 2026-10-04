@@ -1,31 +1,16 @@
 import { useCallback, useMemo } from "react";
 import {
   MeetingIntegrationConnectedAccountStatus,
-  MeetingIntegrationProviderSlug,
+  type MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useMeetingIntegrationsSettingsStore } from "@/frontend/common/stores/meetingIntegrationsSettingsStore";
+import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/tabs/meetingIntegrations/__shared__/meetingIntegrationsTabShared.helpers";
 import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
   MeetingIntegrationProviderSlug as ProviderSlugType,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
-
-export function getProviderLabel(
-  slug: MeetingIntegrationProviderSlug,
-  labels: SettingsMeetingIntegrationsLabels
-): string {
-  switch (slug) {
-    case MeetingIntegrationProviderSlug.Zoom:
-      return labels.provider.zoom;
-    case MeetingIntegrationProviderSlug.GoogleMeet:
-      return labels.provider.googleMeet;
-    case MeetingIntegrationProviderSlug.MicrosoftTeams:
-      return labels.provider.microsoftTeams;
-    default:
-      return String(slug);
-  }
-}
 
 export function getStatusLabel(
   status: MeetingIntegrationConnectedAccountStatus,

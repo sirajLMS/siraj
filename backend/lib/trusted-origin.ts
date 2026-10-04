@@ -37,7 +37,7 @@ export function resolveTrustedOrigin(request: NextRequest): string {
   // A chain of proxies may append its own scheme; the first entry is the
   // client-facing one. Anything that is not http(s) is never trusted.
   const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const protocol = forwardedProto ? forwardedProto : request.nextUrl.protocol.replace(":", "");
+  const protocol = forwardedProto ?? request.nextUrl.protocol.replace(":", "");
   if (!isHttpProtocol(protocol)) {
     return request.nextUrl.origin;
   }

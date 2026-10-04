@@ -10,7 +10,7 @@ import {
   SessionAuditReportPagePothosObject,
   SessionAuditReportSortPothosInput,
 } from "@/backend/graphql/pothos/accounting";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { reportPageWindow, reportPaginationArgs, reportResolverContext } from "@/backend/graphql/query/__shared__";
 import { SessionAuditService } from "@/backend/services";
 import type { SessionAuditReportFilters, SessionAuditReportSort, SessionAuditStatus } from "@/backend/types";
 
@@ -53,17 +53,10 @@ gqlSchemaBuilder.queryField("sessionAuditReport", t =>
     args: {
       filter: t.arg({ type: SessionAuditReportFilterPothosInput, required: false }),
       sort: t.arg({ type: SessionAuditReportSortPothosInput, required: false }),
-      limit: t.arg.int({
-        required: false,
-        defaultValue: 50,
-        description: "Max rows per page (max 200)",
-        directives: { constraint: { min: 1, max: 200 } },
-      }),
-      offset: t.arg.int({ required: false, defaultValue: 0 }),
+      ...reportPaginationArgs(t),
     },
     resolve: async (_root, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await reportResolverContext(ctx);
       // includeDeleted holds for manage-capable callers only; a view-only
       // caller requesting it gets the flag silently removed, mirroring the
       // CSV export route — soft-deleted rows must not surface through the
@@ -87,13 +80,7 @@ gqlSchemaBuilder.queryField("sessionAuditReport", t =>
             direction: SORT_DIRECTION_FROM_POTHOS_ENUM[args.sort.direction],
           }
         : null;
-      return SessionAuditService.getReport(
-        actorUserId,
-        filters,
-        sort,
-        { limit: args.limit ?? 50, offset: args.offset ?? 0 },
-        tErrors
-      );
+      return SessionAuditService.getReport(actorUserId, filters, sort, reportPageWindow(args), tErrors);
     },
   })
 );

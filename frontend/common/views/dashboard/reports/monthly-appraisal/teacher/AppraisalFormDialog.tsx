@@ -1,113 +1,35 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CloseOutlined, SaveOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
-import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Rating,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Dialog, DialogContent } from "@mui/material";
 import { useState } from "react";
 import {
   studentAppraisalDetailForFormQueryDocument,
   submitMonthlyAppraisalMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  AppraisalDialogActions,
+  AppraisalDialogHeader,
+} from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/AppraisalDialogChrome.parts";
+import type {
+  AppraisalFormData,
+  AppraisalInitialGrades,
+} from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/AppraisalFormDialog.constants";
+import {
+  buildInitialFormData,
+  buildSubmitAppraisalInput,
+} from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/AppraisalFormDialog.helpers";
+import { AppraisalFormFields } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/AppraisalFormFields.parts";
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
-
-interface AppraisalFormData {
-  studentId: string;
-  studentName: string;
-  month: string;
-  behaviorGrade: number | null;
-  behaviorComment: string;
-  attendanceGrade: number | null;
-  attendanceComment: string;
-  punctualityGrade: number | null;
-  punctualityComment: string;
-  overallGrade: number | null;
-  overallComment: string;
-  learningTargets: string;
-}
 
 interface AppraisalFormDialogProps {
   open: boolean;
   studentId: string;
   studentName: string;
   month: string;
-  initialGrades?: {
-    behaviorGrade: number | null;
-    behaviorComment: string;
-    attendanceGrade: number | null;
-    attendanceComment: string;
-    punctualityGrade: number | null;
-    punctualityComment: string;
-    overallGrade: number | null;
-    overallComment: string;
-    learningTargets: string;
-  } | null;
+  initialGrades?: AppraisalInitialGrades | null;
   onClose: () => void;
   onSubmitted: () => void;
-}
-
-const RUBRIC_FIELDS = [
-  { key: "behavior", labelKey: "behavior", gradeKey: "behaviorGrade", commentKey: "behaviorComment" },
-  { key: "attendance", labelKey: "attendance", gradeKey: "attendanceGrade", commentKey: "attendanceComment" },
-  { key: "punctuality", labelKey: "punctuality", gradeKey: "punctualityGrade", commentKey: "punctualityComment" },
-  { key: "overall", labelKey: "overall", gradeKey: "overallGrade", commentKey: "overallComment" },
-] as const;
-
-function RubricField({
-  label,
-  commentPlaceholder,
-  grade,
-  comment,
-  onGradeChange,
-  onCommentChange,
-}: Readonly<{
-  label: string;
-  commentPlaceholder: string;
-  grade: number | null;
-  comment: string;
-  onGradeChange: (value: number | null) => void;
-  onCommentChange: (value: string) => void;
-}>) {
-  return (
-    <Box sx={{ mb: 2 }}>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {label}
-        </Typography>
-        <Rating
-          value={grade}
-          onChange={(_, newValue) => onGradeChange(newValue)}
-          max={5}
-          size="small"
-          emptyIcon={<StarBorderOutlined fontSize="inherit" />}
-          icon={<Star fontSize="inherit" />}
-        />
-      </Stack>
-      <TextField
-        fullWidth
-        size="small"
-        multiline
-        rows={2}
-        placeholder={commentPlaceholder}
-        value={comment}
-        onChange={e => onCommentChange(e.target.value)}
-        sx={{ mt: 0.5 }}
-      />
-    </Box>
-  );
 }
 
 export function AppraisalFormDialog({
@@ -128,20 +50,9 @@ export function AppraisalFormDialog({
   const t = useAppTranslation(Translation.Dashboard.MonthlyAppraisal);
   const locale = useAppLocale();
 
-  const [formData, setFormData] = useState<AppraisalFormData>({
-    studentId,
-    studentName,
-    month,
-    behaviorGrade: initialGrades?.behaviorGrade ?? existingAppraisal?.behaviorGrade ?? null,
-    behaviorComment: initialGrades?.behaviorComment ?? existingAppraisal?.behaviorComment ?? "",
-    attendanceGrade: initialGrades?.attendanceGrade ?? existingAppraisal?.attendanceGrade ?? null,
-    attendanceComment: initialGrades?.attendanceComment ?? existingAppraisal?.attendanceComment ?? "",
-    punctualityGrade: initialGrades?.punctualityGrade ?? existingAppraisal?.punctualityGrade ?? null,
-    punctualityComment: initialGrades?.punctualityComment ?? existingAppraisal?.punctualityComment ?? "",
-    overallGrade: initialGrades?.overallGrade ?? existingAppraisal?.overallGrade ?? null,
-    overallComment: initialGrades?.overallComment ?? existingAppraisal?.overallComment ?? "",
-    learningTargets: initialGrades?.learningTargets ?? existingAppraisal?.learningTargets ?? "",
-  });
+  const [formData, setFormData] = useState<AppraisalFormData>(() =>
+    buildInitialFormData({ studentId, studentName, month, initialGrades, existingAppraisal })
+  );
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -166,21 +77,7 @@ export function AppraisalFormDialog({
     setError(null);
     setSubmitting(true);
     void submitAppraisal({
-      variables: {
-        input: {
-          studentId: studentId,
-          month: month,
-          behaviorGrade: formData.behaviorGrade,
-          behaviorComment: formData.behaviorComment || null,
-          attendanceGrade: formData.attendanceGrade,
-          attendanceComment: formData.attendanceComment || null,
-          punctualityGrade: formData.punctualityGrade,
-          punctualityComment: formData.punctualityComment || null,
-          overallGrade: formData.overallGrade,
-          overallComment: formData.overallComment || null,
-          learningTargets: formData.learningTargets,
-        },
-      },
+      variables: { input: buildSubmitAppraisalInput(formData, studentId, month) },
       onCompleted: () => {
         setSubmitting(false);
         onSubmitted();
@@ -197,69 +94,28 @@ export function AppraisalFormDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Box>
-          <Typography variant="h6">
-            {studentName} — {monthLabel}
-          </Typography>
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.form.subtitle}
-          </Typography>
-        </Box>
-        <IconButton size="small" onClick={onClose} aria-label="close">
-          <CloseOutlined fontSize="small" />
-        </IconButton>
-      </DialogTitle>
+      <AppraisalDialogHeader
+        studentName={studentName}
+        monthLabel={monthLabel}
+        subtitle={t.form.subtitle}
+        onClose={onClose}
+      />
       <DialogContent>
-        {error ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        ) : null}
-        {RUBRIC_FIELDS.map(field => (
-          <RubricField
-            key={field.key}
-            label={t.form.rubric[field.labelKey]}
-            commentPlaceholder={t.form.rubric.commentPlaceholder}
-            grade={formData[field.gradeKey]}
-            comment={formData[field.commentKey]}
-            onGradeChange={v => updateGrade(field.gradeKey, v)}
-            onCommentChange={v => updateComment(field.commentKey, v)}
-          />
-        ))}
-        <Divider sx={{ my: 2 }} />
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            {`${t.form.learningTargets} *`}
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            multiline
-            rows={3}
-            placeholder={t.form.learningTargetsPlaceholder}
-            value={formData.learningTargets}
-            onChange={e => updateComment("learningTargets", e.target.value)}
-            required
-            error={!formData.learningTargets.trim() && error !== null}
-          />
-        </Box>
+        <AppraisalFormFields
+          formLabels={t.form}
+          formData={formData}
+          error={error}
+          onGradeChange={updateGrade}
+          onCommentChange={updateComment}
+        />
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>
-          {t.form.cancel}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<SaveOutlined />}
-          disabled={submitting}
-          onClick={handleSubmit}
-          sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-        >
-          {t.form.submit}
-        </Button>
-      </DialogActions>
+      <AppraisalDialogActions
+        cancelLabel={t.form.cancel}
+        submitLabel={t.form.submit}
+        submitting={submitting}
+        onCancel={onClose}
+        onSubmit={handleSubmit}
+      />
     </Dialog>
   );
 }

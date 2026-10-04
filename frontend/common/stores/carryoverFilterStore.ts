@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
+import { createPaginatedFilterActions } from "@/frontend/common/stores/__shared__";
 
 /**
  * Closed set of paid-status filter values shown by the filter bar radio group.
@@ -92,16 +93,6 @@ function defaultState(): CarryoverFilterState {
   };
 }
 
-function toNonNegativePage(page: number): number {
-  if (!Number.isFinite(page)) return 0;
-  return Math.max(0, Math.trunc(page));
-}
-
-function toPositivePageSize(pageSize: number): number {
-  if (!Number.isFinite(pageSize)) return CARRYOVER_DEFAULT_PAGE_SIZE;
-  return Math.max(1, Math.trunc(pageSize));
-}
-
 export const useCarryoverFilterStore = create<CarryoverFilterStore>(set => ({
   ...defaultState(),
   setTeacher: teacher => set({ teacherOption: teacher, teacherId: teacher?.id ?? null, page: 0 }),
@@ -110,15 +101,9 @@ export const useCarryoverFilterStore = create<CarryoverFilterStore>(set => ({
   setDateTo: dateTo => set({ dateTo, page: 0 }),
   setIncludeDisabledTeachers: includeDisabledTeachers => set({ includeDisabledTeachers, page: 0 }),
   setSearch: search => set({ search, page: 0 }),
-  setPage: page => set({ page: toNonNegativePage(page) }),
-  setPageSize: pageSize => set({ pageSize: toPositivePageSize(pageSize), page: 0 }),
-  toggleSelected: id =>
-    set(state => ({
-      selectedIds: state.selectedIds.includes(id)
-        ? state.selectedIds.filter(selectedId => selectedId !== id)
-        : [...state.selectedIds, id],
-    })),
-  clearSelection: () => set({ selectedIds: [] }),
-  clearFilters: () => set({ ...DEFAULT_FILTERS, page: 0, selectedIds: [] }),
-  reset: () => set(defaultState()),
+  ...createPaginatedFilterActions<CarryoverFilterState>(set, {
+    defaultPageSize: CARRYOVER_DEFAULT_PAGE_SIZE,
+    defaultFilters: DEFAULT_FILTERS,
+    createDefaultState: defaultState,
+  }),
 }));

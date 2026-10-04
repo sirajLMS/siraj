@@ -1,14 +1,16 @@
 "use client";
 
 import { KeyOutlined } from "@mui/icons-material";
-import { Box, Checkbox, Dialog, FormControlLabel, Stack, Typography } from "@mui/material";
+import { Checkbox, Dialog, FormControlLabel, Stack, Typography } from "@mui/material";
 import { useState } from "react";
-import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog";
 import type { ResetPasswordDialogProps } from "@/frontend/common/components/ui/dialog/types/resetPasswordDialog.types";
-import { SecretTextField } from "@/frontend/common/components/ui/input/secretTextField";
+import {
+  buildResetPasswordFieldErrors,
+  type ResetPasswordFieldErrors,
+} from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog.helpers";
+import { ResetPasswordFields } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog.parts";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
 export function ResetPasswordDialog({
   open,
@@ -24,23 +26,10 @@ export function ResetPasswordDialog({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<ResetPasswordFieldErrors>({});
 
   const validate = (): boolean => {
-    const newErrors: { password?: string; confirmPassword?: string } = {};
-
-    if (!password) {
-      newErrors.password = t.adminResetPassword.passwordRequired;
-    } else if (password.length < PASSWORD_MIN_LENGTH) {
-      newErrors.password = t.adminResetPassword.passwordMinLength;
-    } else if (countPasswordClasses(password) < 2) {
-      newErrors.password = t.adminResetPassword.passwordWeakComplexity;
-    }
-
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = t.adminResetPassword.passwordsDoNotMatch;
-    }
-
+    const newErrors = buildResetPasswordFieldErrors(password, confirmPassword, t.adminResetPassword);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,45 +73,16 @@ export function ResetPasswordDialog({
             {t.adminResetPassword.description(userName, userEmail)}
           </Typography>
 
-          <Box>
-            <SecretTextField
-              revealed={showPassword}
-              onToggleReveal={() => setShowPassword(prev => !prev)}
-              showValueLabel={t.adminResetPassword.showPassword}
-              hideValueLabel={t.adminResetPassword.hidePassword}
-              value={password}
-              label={t.adminResetPassword.newPassword}
-              onChange={e => handlePasswordChange(e.target.value)}
-              error={!!errors.password}
-              helperText={errors.password}
-              fullWidth
-              autoComplete="new-password"
-              disabled={isLoading}
-            />
-            <PasswordStrengthMeter
-              password={password}
-              labels={{
-                strength: t.adminResetPassword.passwordStrength,
-                weak: t.adminResetPassword.strengthWeak,
-                fair: t.adminResetPassword.strengthFair,
-                strong: t.adminResetPassword.strengthStrong,
-              }}
-            />
-          </Box>
-
-          <SecretTextField
+          <ResetPasswordFields
+            password={password}
+            confirmPassword={confirmPassword}
+            errors={errors}
             revealed={showPassword}
             onToggleReveal={() => setShowPassword(prev => !prev)}
-            showValueLabel={t.adminResetPassword.showPassword}
-            hideValueLabel={t.adminResetPassword.hidePassword}
-            value={confirmPassword}
-            label={t.adminResetPassword.confirmPassword}
-            onChange={e => handleConfirmPasswordChange(e.target.value)}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword}
-            fullWidth
-            autoComplete="new-password"
+            onPasswordChange={handlePasswordChange}
+            onConfirmPasswordChange={handleConfirmPasswordChange}
             disabled={isLoading}
+            labels={t.adminResetPassword}
           />
 
           <FormControlLabel

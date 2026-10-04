@@ -1,23 +1,19 @@
 "use client";
 
-import { DeleteOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip, Typography, type TypographyProps } from "@mui/material";
+import { Box, Typography, type TypographyProps } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
 import type { BaseDeleteDialogSharedProps } from "@/frontend/common/components/ui/dialog/types/baseDeleteDialogShared.types";
 import type { MeetingJoinActionProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
+import { studentHref } from "@/frontend/common/utils/profileHref";
+import {
+  SlotItemActions,
+  SlotItemDeleteDialog,
+  SlotItemSubject,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/weeklyScheduleSlotItemShared.parts";
 import { useWeeklyScheduleSlotItem } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type { ScheduledClass } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
-import { Link } from "@/shared/i18n";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
-
-const linkTypographySx = {
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  display: "block",
-} as const;
 
 export interface WeeklyScheduleSlotItemSharedOptions {
   readonly cardBorderRadius: number;
@@ -69,7 +65,7 @@ export function WeeklyScheduleSlotItemShared({
     handleDeleteClick,
   } = useWeeklyScheduleSlotItem(classItem, labels, onRemove);
 
-  const { JoinAction, DeleteDialog, renderStudentLink } = options;
+  const { renderStudentLink } = options;
   const showActions = canJoin || (showDelete && hasScheduleDeleteClass);
 
   return (
@@ -94,29 +90,11 @@ export function WeeklyScheduleSlotItemShared({
         })}
       >
         <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
-          {classInstanceId ? (
-            <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
-              <Typography
-                variant={options.subjectVariant}
-                sx={theme => ({
-                  ...linkTypographySx,
-                  fontWeight: 700,
-                  color: theme.palette.primary.main,
-                  lineHeight: 1.25,
-                  "&:hover": { textDecoration: "underline" },
-                })}
-              >
-                {subjectLabel}
-              </Typography>
-            </Link>
-          ) : (
-            <Typography
-              variant={options.subjectVariant}
-              sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}
-            >
-              {subjectLabel}
-            </Typography>
-          )}
+          <SlotItemSubject
+            classInstanceId={classInstanceId}
+            subjectLabel={subjectLabel}
+            variant={options.subjectVariant}
+          />
 
           {renderStudentLink(
             classItem.studentId ? studentHref(classItem.studentId) : undefined,
@@ -129,55 +107,25 @@ export function WeeklyScheduleSlotItemShared({
         </Box>
 
         {showActions ? (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: options.actionsGap,
-              minHeight: options.actionsMinHeight,
-            }}
-          >
-            {canJoin ? (
-              <JoinAction
-                variant="icon"
-                joinUrl={classItem.meetingJoinUrl}
-                meeting={classItem.effectiveMeeting}
-                emptyRole="teacher"
-                label={meetingJoinLabels.joinMeeting}
-                setupHref="/profile?tab=meeting"
-              />
-            ) : null}
-            {showDelete && hasScheduleDeleteClass ? (
-              <Tooltip title={labels.actions.deleteClass}>
-                <IconButton
-                  size="small"
-                  aria-label={labels.actions.deleteClass}
-                  onClick={handleDeleteClick}
-                  sx={theme => ({
-                    p: options.deleteButtonPadding,
-                    color: theme.palette.onPrimaryContainer,
-                    opacity: 0.7,
-                    "&:hover": { color: theme.palette.error.main, opacity: 1 },
-                  })}
-                >
-                  <DeleteOutlined fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            ) : null}
-          </Box>
+          <SlotItemActions
+            classItem={classItem}
+            canJoin={canJoin}
+            showDelete={showDelete}
+            hasScheduleDeleteClass={hasScheduleDeleteClass}
+            labels={labels}
+            meetingJoinLabels={meetingJoinLabels}
+            options={options}
+            handleDeleteClick={handleDeleteClick}
+          />
         ) : null}
       </Box>
 
-      <DeleteDialog
+      <SlotItemDeleteDialog
         open={deleteDialogOpen}
         onClose={closeDeleteConfirm}
         onConfirm={handleDeleteDialogConfirm}
-        isLoading={false}
-        title={labels.dialogs.deleteClassTitle}
-        body={labels.dialogs.deleteClassMessage}
-        cancelLabel={labels.dialogs.cancel}
-        confirmLabel={labels.dialogs.confirmYes}
+        labels={labels}
+        DeleteDialog={options.DeleteDialog}
       />
     </>
   );

@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  AddOutlined,
-  ArchiveOutlined,
-  CheckCircleOutlined,
-  EditOutlined,
-  InventoryOutlined,
-  TrendingUpOutlined,
-} from "@mui/icons-material";
-import { Stack, Typography } from "@mui/material";
+import { AddOutlined } from "@mui/icons-material";
+import { Stack } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
   MobileListCardSkeletons,
   MobileListEmptyNotice,
@@ -23,55 +14,25 @@ import {
 import type { PackagePlansListViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlansListViewModel";
 import {
   MobileCardList,
-  MobileCardListItem,
   MobileFab,
   MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import {
+  buildPackagePlansMetricItems,
+  getTopPricedActiveRow,
+} from "@/frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile.helpers";
+import { PackagePlanCard } from "@/frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile.parts";
 
 export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel>) {
   const { t, rows, loading, error, activeCount, archivedCount, canManagePackages } = props;
   const router = useRouter();
 
-  const priceLeader = useMemo(() => {
-    const active = rows.filter(row => row.active);
-    if (active.length === 0) return null;
-    return active.reduce((top, row) => (Number(row.priceAmount) > Number(top.priceAmount) ? row : top), active[0]);
-  }, [rows]);
+  const priceLeader = useMemo(() => getTopPricedActiveRow(rows), [rows]);
 
   const metricItems = useMemo<MetricItem[]>(
-    () => [
-      {
-        key: "plans-total",
-        count: rows.length,
-        label: t.pageTitle,
-        labelKey: "dashboard.accounting.package-plans.pageTitle",
-        icon: InventoryOutlined,
-      },
-      {
-        key: "plans-active",
-        count: activeCount,
-        label: t.columns.active,
-        labelKey: "dashboard.accounting.package-plans.columns.active",
-        icon: CheckCircleOutlined,
-      },
-      {
-        key: "plans-archived",
-        count: archivedCount,
-        label: t.archived,
-        labelKey: "dashboard.accounting.package-plans.archived",
-        icon: ArchiveOutlined,
-      },
-      {
-        key: "plans-price-leader",
-        count: priceLeader ? `${formatAccountingMoney(priceLeader.priceAmount)} ${priceLeader.currency ?? ""}` : "—",
-        label: priceLeader?.displayName ?? t.columns.price,
-        labelKey: "dashboard.accounting.package-plans.columns.price",
-        icon: TrendingUpOutlined,
-        variant: "highlight",
-      },
-    ],
+    () => buildPackagePlansMetricItems({ t, rows, activeCount, archivedCount, priceLeader }),
     [t, rows, activeCount, archivedCount, priceLeader]
   );
 
@@ -90,57 +51,7 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
           paginationOptions={{ mode: "client" }}
           layout="rounded"
           renderItem={row => {
-            const card = (
-              <MobileCardListItem
-                variant="rounded"
-                dimmed={!row.active}
-                dimmedOpacity={0.72}
-                interactive={canManagePackages}
-              >
-                <Stack direction="row" spacing={1.5} sx={{ justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                    {row.displayName}
-                  </Typography>
-                  <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-                    <StatusBadge
-                      category="session"
-                      status={row.active ? "active" : "cancelled"}
-                      label={row.active ? t.columns.active : t.archived}
-                    />
-                    {canManagePackages ? (
-                      <EditOutlined
-                        fontSize="small"
-                        sx={theme => ({ color: theme.palette.onSurfaceVariant })}
-                        aria-hidden
-                      />
-                    ) : null}
-                  </Stack>
-                </Stack>
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{ mt: 1, justifyContent: "space-between", alignItems: "baseline" }}
-                >
-                  <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-                    {`${formatAccountingMoney(row.priceAmount)} ${row.currency ?? ""}`}
-                  </Typography>
-                  <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {t.hoursUnit(Number(row.creditHours ?? 0).toFixed(0))}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" spacing={1.5} sx={{ mt: 1, justifyContent: "space-between" }}>
-                  <Typography
-                    variant="labelSm"
-                    sx={theme => ({ fontFamily: "monospace", color: theme.palette.text.secondary })}
-                  >
-                    {row.codename}
-                  </Typography>
-                  <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {`#${row.sortOrder ?? 0}`}
-                  </Typography>
-                </Stack>
-              </MobileCardListItem>
-            );
+            const card = <PackagePlanCard row={row} labels={t} canManagePackages={canManagePackages} />;
             if (!canManagePackages) return card;
             return (
               <Link href={`/accounting/packages/${row.id}/edit`} style={{ textDecoration: "none" }}>

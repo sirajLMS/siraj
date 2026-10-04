@@ -1,115 +1,26 @@
 "use client";
 
-import { CheckOutlined, ContentCopyOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Tooltip,
   Typography,
 } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
 import { useId } from "react";
-import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
-import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
+import { formatDate } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TokenMetadataDialog.helpers";
 import {
-  srOnlySx,
-  useCopyFeedback,
-} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
+  MetadataField,
+  ScopesChips,
+  TokenIdRow,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TokenMetadataDialog.parts";
+import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/tabs/meetingIntegrations/__shared__/meetingIntegrationsTabShared.helpers";
 import type { MeetingIntegrationConnectedAccount } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
-
-const MEDIUM_SHORT_OPTIONS: Intl.DateTimeFormatOptions = {
-  dateStyle: "medium",
-  timeStyle: "short",
-};
-
-function formatDate(date: Date | null | undefined, locale: "en" | "ar"): string {
-  if (!date) {
-    return "—";
-  }
-  return getDateTimeFormatter(locale === "ar" ? "ar" : "en", MEDIUM_SHORT_OPTIONS).format(date);
-}
-
-const labelUppercaseSx = (theme: Theme) => ({
-  typography: "labelUppercase",
-  color: theme.palette.text.secondary,
-  mb: 0.5,
-});
-
-type MetadataFieldProps = {
-  readonly label: string;
-  readonly children: React.ReactNode;
-};
-
-function MetadataField({ label, children }: MetadataFieldProps) {
-  return (
-    <Box>
-      <Typography sx={labelUppercaseSx}>{label}</Typography>
-      {children}
-    </Box>
-  );
-}
-
-type TokenIdRowProps = {
-  readonly tokenId: string;
-  readonly labels: SettingsMeetingIntegrationsLabels;
-};
-
-function TokenIdRow({ tokenId, labels }: TokenIdRowProps) {
-  const [copied, copy] = useCopyFeedback();
-
-  const handleCopy = () => copy(tokenId);
-
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <Typography sx={{ typography: "bodyMd", fontFamily: "monospace", wordBreak: "break-all" }}>{tokenId}</Typography>
-      <Tooltip title={copied ? labels.metadata.tokenIdCopied : labels.metadata.copyTokenId}>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={copied ? <CheckOutlined /> : <ContentCopyOutlined />}
-          onClick={handleCopy}
-          aria-label={labels.metadata.copyTokenId}
-        >
-          {copied ? labels.metadata.tokenIdCopied : labels.metadata.copyTokenId}
-        </Button>
-      </Tooltip>
-      <Box component="output" sx={srOnlySx} aria-live="polite">
-        {copied ? labels.metadata.tokenIdCopied : ""}
-      </Box>
-    </Box>
-  );
-}
-
-type ScopesChipsProps = {
-  readonly scopes: readonly string[] | undefined;
-  readonly labels: SettingsMeetingIntegrationsLabels;
-};
-
-function ScopesChips({ scopes, labels }: ScopesChipsProps) {
-  const visibleScopes = scopes ?? [];
-  if (visibleScopes.length === 0) {
-    return (
-      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-        {labels.metadata.noScopes}
-      </Typography>
-    );
-  }
-  return (
-    <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-      {visibleScopes.map(scope => (
-        <Chip key={scope} size="small" label={scope} variant="outlined" />
-      ))}
-    </Box>
-  );
-}
 
 type TokenMetadataDialogProps = {
   readonly labels: SettingsMeetingIntegrationsLabels;

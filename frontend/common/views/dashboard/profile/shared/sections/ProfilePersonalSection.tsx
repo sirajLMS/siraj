@@ -1,150 +1,21 @@
 "use client";
 
-import CakeOutlined from "@mui/icons-material/CakeOutlined";
-import HomeOutlined from "@mui/icons-material/HomeOutlined";
-import PersonOutlined from "@mui/icons-material/PersonOutlined";
-import SchoolOutlined from "@mui/icons-material/SchoolOutlined";
-import WcOutlined from "@mui/icons-material/WcOutlined";
 import { FormControl, FormHelperText, Stack, TextField } from "@mui/material";
-import { type Control, Controller, type FieldPath, type FieldValues, type UseFormRegister } from "react-hook-form";
+import { Controller, type FieldValues } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { CountryDisplay } from "@/frontend/common/components/ui/display";
 import { DateOfBirthControllerField } from "@/frontend/common/components/ui/form/field";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
-import { CountryCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
-import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
+import { personalFieldPath } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection.helpers";
+import { usePersonalFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection.hooks";
+import { ProfilePersonalSectionView } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection.parts";
 import type {
-  ProfilePersonalFieldLabels,
-  ProfilePersonalFieldVisibility,
-  ProfileSharedBaseLabels,
-} from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
-import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+  ProfilePersonalEditProps,
+  ProfilePersonalFormFields,
+  ProfilePersonalSectionProps,
+} from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection.types";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
-import type { ProfileScope } from "@/shared/constants/profile.enum";
-import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
-
-const VALID_COUNTRY_CODES = new Set(Object.values(CountryCode) as readonly string[]);
-
-function isCountryCode(value: string): value is CountryCode {
-  return VALID_COUNTRY_CODES.has(value);
-}
-type ProfilePersonalFormFields = {
-  nationality?: string;
-  address?: string;
-  dateOfBirth?: string;
-  gender?: Gender | null;
-  qualifications?: string;
-};
-
-type ProfilePersonalFieldGroupKeys = {
-  readonly nationality?: ProfileFieldGroupKey;
-  readonly address?: ProfileFieldGroupKey;
-  readonly dateOfBirth?: ProfileFieldGroupKey;
-  readonly gender?: ProfileFieldGroupKey;
-  readonly qualifications?: ProfileFieldGroupKey;
-};
-
-type ProfilePersonalSectionBaseProps = {
-  readonly scope?: ProfileScope;
-  readonly fieldGroupKey: ProfileFieldGroupKey;
-  readonly qualificationsFieldGroupKey?: ProfileFieldGroupKey;
-  readonly fieldGroupKeys?: ProfilePersonalFieldGroupKeys;
-  readonly sectionTitle: string;
-  readonly fieldLabels: ProfilePersonalFieldLabels;
-  readonly baseLabels?: ProfileSharedBaseLabels;
-  readonly fields: ProfilePersonalFieldVisibility;
-};
-
-type ProfilePersonalViewProps = ProfilePersonalSectionBaseProps & {
-  readonly mode: "view";
-  readonly nationality?: string | null;
-  readonly address?: string | null;
-  readonly dateOfBirth?: string | null;
-  readonly gender?: string | null;
-  readonly qualifications?: string | null;
-};
-
-type ProfilePersonalEditProps<T extends ProfilePersonalFormFields & FieldValues = ProfilePersonalFormFields> =
-  ProfilePersonalSectionBaseProps & {
-    readonly mode: "edit";
-    readonly register: UseFormRegister<T>;
-    readonly control: Control<T>;
-  };
-
-type ProfilePersonalSectionProps<T extends ProfilePersonalFormFields & FieldValues = ProfilePersonalFormFields> =
-  | ProfilePersonalViewProps
-  | ProfilePersonalEditProps<T>;
-
-type PersonalFieldKey = keyof ProfilePersonalFieldVisibility;
-
-const PERSONAL_FIELD_KEYS: readonly PersonalFieldKey[] = [
-  "nationality",
-  "address",
-  "dateOfBirth",
-  "gender",
-  "qualifications",
-];
-
-function formatGender(
-  gender: string | null | undefined,
-  labels: Pick<ProfilePersonalFieldLabels, "male" | "female">
-): string {
-  if (gender === Gender.Male) {
-    return labels.male;
-  }
-  if (gender === Gender.Female) {
-    return labels.female;
-  }
-  return "";
-}
-
-function resolveFieldGroupKey(field: PersonalFieldKey, props: ProfilePersonalSectionBaseProps): ProfileFieldGroupKey {
-  const override = props.fieldGroupKeys?.[field];
-  if (override) {
-    return override;
-  }
-  if (field === "qualifications") {
-    return props.qualificationsFieldGroupKey ?? props.fieldGroupKey;
-  }
-  return props.fieldGroupKey;
-}
-
-function usePersonalFieldAccess(props: ProfilePersonalSectionBaseProps) {
-  const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
-
-  const isFieldEnabled = (field: PersonalFieldKey): boolean => props.fields[field] === true;
-
-  const canViewField = (field: PersonalFieldKey): boolean => {
-    if (!isFieldEnabled(field)) {
-      return false;
-    }
-    return canView(resolveFieldGroupKey(field, props));
-  };
-
-  const canEditField = (field: PersonalFieldKey): boolean => {
-    if (!isFieldEnabled(field)) {
-      return false;
-    }
-    return canEdit(resolveFieldGroupKey(field, props));
-  };
-
-  const hasAccessibleField = (): boolean => PERSONAL_FIELD_KEYS.some(field => canViewField(field));
-
-  return { canViewField, canEditField, hasAccessibleField };
-}
-
-function isPersonalFieldPath<T extends ProfilePersonalFormFields & FieldValues>(value: string): value is FieldPath<T> {
-  return typeof value === "string";
-}
-
-function personalFieldPath<T extends ProfilePersonalFormFields & FieldValues>(value: string): FieldPath<T> {
-  if (!isPersonalFieldPath<T>(value)) {
-    throw new Error(`Invalid personal field path: ${value}`);
-  }
-  return value;
-}
 
 function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields & FieldValues>({
   props,
@@ -230,64 +101,6 @@ function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields & FieldV
             rows={3}
             disabled={!canEditField("qualifications")}
             {...register(personalFieldPath<T>("qualifications"))}
-          />
-        ) : null}
-      </Stack>
-    </SectionPanel>
-  );
-}
-
-function ProfilePersonalSectionView({
-  props,
-  access,
-  baseLabels,
-}: {
-  readonly props: ProfilePersonalViewProps;
-  readonly access: ReturnType<typeof usePersonalFieldAccess>;
-  readonly baseLabels: ProfileSharedBaseLabels;
-}) {
-  const { canViewField } = access;
-  const labels = props.fieldLabels;
-
-  const genderDisplay = formatGender(props.gender, labels);
-
-  return (
-    <SectionPanel title={props.sectionTitle}>
-      <Stack spacing={1}>
-        {canViewField("nationality") ? (
-          <ProfileFieldRow
-            icon={PersonOutlined}
-            label={labels.nationality}
-            value={
-              props.nationality ? (
-                <CountryDisplay
-                  code={isCountryCode(props.nationality) ? props.nationality : null}
-                  fallback={baseLabels.notSet}
-                />
-              ) : (
-                baseLabels.notSet
-              )
-            }
-          />
-        ) : null}
-        {canViewField("address") ? (
-          <ProfileFieldRow icon={HomeOutlined} label={labels.address} value={props.address ?? baseLabels.notSet} />
-        ) : null}
-        {canViewField("dateOfBirth") ? (
-          <ProfileFieldRow
-            icon={CakeOutlined}
-            label={labels.dateOfBirth}
-            value={props.dateOfBirth ?? baseLabels.notSet}
-          />
-        ) : null}
-        {canViewField("gender") ? (
-          <ProfileFieldRow icon={WcOutlined} label={labels.gender} value={genderDisplay || baseLabels.notSet} />
-        ) : null}
-        {canViewField("qualifications") ? (
-          <ProfileFieldRow
-            icon={SchoolOutlined}
-            label={labels.qualifications}
-            value={props.qualifications ?? baseLabels.notSet}
           />
         ) : null}
       </Stack>

@@ -2,30 +2,24 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import {
-  type CheckedEmptyItem,
-  type ConflictGroup,
-  type DstMigrationMetrics,
+import type {
+  CheckedEmptyItem,
+  ConflictGroup,
+  DstMigrationMetrics,
   MigrationStatus,
-  type UpdatedSession,
+  UpdatedSession,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
+import {
+  detectDstOffsetMinutes,
+  useDstMigrationReport,
+} from "@/frontend/common/views/dashboard/tools/dst-migration/useDstMigrationViewModel.helpers";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
-function detectDstOffsetMinutes(): number | null {
-  const now = new Date();
-  const jan = new Date(now.getFullYear(), 0, 1);
-  const jul = new Date(now.getFullYear(), 6, 1);
-  const standardOffset = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-  const currentOffset = now.getTimezoneOffset();
-  const dstShiftMinutes = standardOffset - currentOffset;
-  if (dstShiftMinutes === 0) return null;
-  return dstShiftMinutes;
-}
+const NOTIFICATION_DURATION_MS = 5000;
 
 export interface DstMigrationViewModel {
   readonly labels: DstMigrationLabels;
@@ -44,61 +38,9 @@ export function useDstMigrationViewModel(): DstMigrationViewModel {
   const labels = useAppTranslation(Translation.Dashboard.AdminDstMigration);
   const [executeDstUpdate, { loading, data }] = useMutation(executeDstBulkUpdateMutationDocument);
 
-  const report = data?.executeDstBulkUpdate;
-
-  const metrics: DstMigrationMetrics = useMemo(
-    () => ({
-      totalAudited: report?.total ?? 0,
-      successful: report?.updated ?? 0,
-      conflicts: report?.conflicts ?? 0,
-      unchanged: report?.unchanged ?? 0,
-    }),
-    [report]
-  );
-
-  const migrationStatus: MigrationStatus = useMemo(() => {
-    if (loading) return MigrationStatus.RUNNING;
-    if (report) return MigrationStatus.COMPLETE;
-    return MigrationStatus.IDLE;
-  }, [loading, report]);
-
-  const updatedSessions: readonly UpdatedSession[] = useMemo(
-    () =>
-      report?.updatedSessions?.map(s => ({
-        id: s.id ?? "",
-        studentId: s.studentId ?? "",
-        teacherId: s.teacherId ?? "",
-        studentName: s.studentName ?? "",
-        teacherName: s.teacherName ?? "",
-        fromTime: s.fromTime ?? "",
-        toTime: s.toTime ?? "",
-      })) ?? [],
-    [report]
-  );
-
-  const conflictGroups: readonly ConflictGroup[] = useMemo(
-    () =>
-      report?.conflictGroups?.map(g => ({
-        id: g.id ?? "",
-        teacherName: g.teacherName ?? "",
-        conflicts:
-          g.conflicts?.map(c => ({
-            id: c.id ?? "",
-            studentName: c.studentName ?? "",
-            message: c.message ?? "",
-          })) ?? [],
-      })) ?? [],
-    [report]
-  );
-
-  const checkedEmptyItems: readonly CheckedEmptyItem[] = useMemo(
-    () =>
-      report?.checkedEmptyItems?.map(i => ({
-        id: i.id ?? "",
-        studentName: i.studentName ?? "",
-        reason: i.reason ?? "",
-      })) ?? [],
-    [report]
+  const { metrics, migrationStatus, updatedSessions, conflictGroups, checkedEmptyItems } = useDstMigrationReport(
+    data?.executeDstBulkUpdate,
+    loading
   );
 
   const onUpdate = async () => {
@@ -107,7 +49,7 @@ export function useDstMigrationViewModel(): DstMigrationViewModel {
       if (offsetMinutes === null) {
         notifications.show(labels.errors.noDstTransitionDetected, {
           severity: "warning",
-          autoHideDuration: 5000,
+          autoHideDuration: NOTIFICATION_DURATION_MS,
         });
         return;
       }
@@ -119,13 +61,13 @@ export function useDstMigrationViewModel(): DstMigrationViewModel {
       });
       notifications.show(labels.actions.successMessage, {
         severity: "success",
-        autoHideDuration: 5000,
+        autoHideDuration: NOTIFICATION_DURATION_MS,
       });
     } catch (error) {
       logger.error("DST bulk update failed", { error });
       notifications.show(labels.errors.mutationFailed, {
         severity: "error",
-        autoHideDuration: 5000,
+        autoHideDuration: NOTIFICATION_DURATION_MS,
       });
     }
   };

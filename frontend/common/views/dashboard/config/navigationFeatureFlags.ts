@@ -8,9 +8,7 @@ export const DEFAULT_NAV_FEATURE_FLAGS: NavFeatureFlags = {
   enableUsersDirectory: false,
 };
 
-export function isNavFeatureFlags(
-  value: readonly AppPermission[] | NavFeatureFlags | undefined
-): value is NavFeatureFlags {
+function isNavFeatureFlags(value: readonly AppPermission[] | NavFeatureFlags | undefined): value is NavFeatureFlags {
   return value !== undefined && !Array.isArray(value);
 }
 

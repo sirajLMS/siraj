@@ -1,27 +1,21 @@
 "use client";
 
-import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
-import { Box, Button, Checkbox, Typography } from "@mui/material";
+import { PersonAddOutlined } from "@mui/icons-material";
+import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { PermissionGroupDetailFieldsFragment_assignedUsers } from "@/frontend/common/graphql/generated/gql/graphql";
-import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import {
   AssignedUsersBulkActionBar,
   AssignedUsersTabShared,
 } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
-import {
-  StyledRemoveButton,
-  StyledUserToolbar,
-} from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared.styles";
+import { StyledUserToolbar } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared.styles";
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { assignedUsersTabLabels } from "@/frontend/common/views/dashboard/permissions/utils";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
+import { buildAssignedUsersColumns } from "@/frontend/desktop/views/dashboard/permissions/components/assignedUsersTab.columns";
 
 const StyledDesktopToolbar = styled(StyledUserToolbar)({
   flexDirection: "row",
@@ -75,113 +69,10 @@ function AssignedUsersDesktopToolbar({
 function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlotProps>) {
   const { group, filteredAssignedUsers, selectedAssignedUserIds, onRevokeUser, onUserToggle, loading } = props;
 
-  // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
-  const assignedUsersColumns = useMemo<GridColDef<PermissionGroupDetailFieldsFragment_assignedUsers>[]>(() => {
-    return [
-      {
-        field: "checkbox",
-        headerName: "",
-        width: 50,
-        sortable: false,
-        renderCell: (params: { row: PermissionGroupDetailFieldsFragment_assignedUsers }) => {
-          const id = params.row.id ?? "";
-          const checked = selectedAssignedUserIds.includes(id);
-          return (
-            <Checkbox
-              checked={checked}
-              onChange={e => onUserToggle(id, e.target.checked)}
-              aria-label={params.row.name ?? params.row.email ?? ""}
-              size="small"
-            />
-          );
-        },
-      },
-      {
-        field: "name",
-        headerName: labels.columnName,
-        flex: 1.5,
-        minWidth: 200,
-        renderCell: (params: { row: PermissionGroupDetailFieldsFragment_assignedUsers }) => {
-          const user = params.row;
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", py: 1, height: "100%" }}>
-              <DesktopPersonProfileLinkCell
-                href={user.id ? profileHrefForUser(user.id) : undefined}
-                name={user.name ?? ""}
-                avatarSize={32}
-                label={user.email ?? undefined}
-                typographyVariant="bodyMd"
-                fontWeight={600}
-              />
-            </Box>
-          );
-        },
-      },
-      {
-        field: "assignedDate",
-        headerName: labels.assignDate,
-        flex: 1.2,
-        minWidth: 150,
-        renderCell: () => {
-          const date = group.createdAt ? new Date(group.createdAt) : new Date();
-          return (
-            <Typography variant="bodyMd">
-              {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-            </Typography>
-          );
-        },
-      },
-      {
-        field: "assignedBy",
-        headerName: labels.assignedBy,
-        flex: 1,
-        minWidth: 120,
-        renderCell: () => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {labels.assignedBySystem}
-          </Typography>
-        ),
-      },
-      {
-        field: "actions",
-        headerName: "",
-        width: 160,
-        align: "right",
-        sortable: false,
-        renderCell: params => (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5 }}>
-            {params.row.id ? (
-              <ViewAsUserButton
-                variant="link"
-                targetUserId={params.row.id}
-                targetUserName={params.row.name ?? params.row.email ?? ""}
-                targetIsSuperAdmin={group.slug === "super_admin"}
-              />
-            ) : null}
-            <StyledRemoveButton
-              size="small"
-              color="error"
-              startIcon={<PersonRemoveOutlined fontSize="small" />}
-              onClick={() => params.row.id && onRevokeUser(params.row.id)}
-            >
-              {labels.removeUser}
-            </StyledRemoveButton>
-          </Box>
-        ),
-      },
-    ];
-  }, [
-    group.createdAt,
-    group.slug,
-    selectedAssignedUserIds,
-    onRevokeUser,
-    onUserToggle,
-    labels.columnName,
-    labels.assignDate,
-    labels.assignedBy,
-    labels.assignedBySystem,
-    labels.removeUser,
-  ]);
+  const assignedUsersColumns = useMemo(
+    () => buildAssignedUsersColumns({ group, selectedAssignedUserIds, onRevokeUser, onUserToggle, labels }),
+    [group, selectedAssignedUserIds, onRevokeUser, onUserToggle, labels]
+  );
 
   return (
     <DesktopSectionPanel contentPadding={false} title={labels.assignedGroupMembers}>

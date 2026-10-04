@@ -11,6 +11,10 @@ import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import {
+  isLifecycleStatusKey,
+  resolveLifecycleStatus,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/billingSection.helpers";
+import {
   type ParentAdminData,
   type ParentBillingViewLabels,
   type ParentSectionLabels,
@@ -32,24 +36,6 @@ type BillingSectionProps =
       readonly register: UseFormRegister<ParentAdminEditFormData>;
       readonly control: Control<ParentAdminEditFormData>;
     };
-
-function resolveLifecycleStatus(adminData: ParentAdminData): string {
-  let raw: string;
-  if ("lifecycleStatus" in adminData && adminData.lifecycleStatus) {
-    raw = adminData.lifecycleStatus;
-  } else if ("accountStatus" in adminData && adminData.accountStatus) {
-    raw = adminData.accountStatus;
-  } else {
-    raw = "REGULAR";
-  }
-  return raw.toLowerCase();
-}
-
-const LIFECYCLE_STATUS_KEYS = ["regular", "on_trial", "on_leave", "suspended", "deactivated"] as const;
-
-function isLifecycleStatusKey(value: string): value is (typeof LIFECYCLE_STATUS_KEYS)[number] {
-  return (LIFECYCLE_STATUS_KEYS as readonly string[]).includes(value);
-}
 
 function BillingEditSection({
   labels,

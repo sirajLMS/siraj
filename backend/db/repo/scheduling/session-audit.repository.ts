@@ -1,5 +1,6 @@
-import { and, asc, desc, eq, gte, isNull, lte, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, or, type SQL, sql } from "drizzle-orm";
 import { caseInsensitiveLike, type QueryDbHandle, queryDb } from "@/backend/db";
+import { buildInstanceReportDateConditions } from "@/backend/db/repo/scheduling/report-filters.helpers";
 import {
   classInstances,
   classSubjects,
@@ -30,16 +31,6 @@ import { parseClassExecutionState, parseClassOutcome } from "@/shared/lib/enum";
  * the filtering rule and the displayed value can never drift apart.
  */
 
-/** Start-of-day bound for an inclusive `YYYY-MM-DD` date filter. */
-function startOfUtcDay(isoDate: string): Date {
-  return new Date(`${isoDate}T00:00:00.000Z`);
-}
-
-/** End-of-day bound for an inclusive `YYYY-MM-DD` date filter. */
-function endOfUtcDay(isoDate: string): Date {
-  return new Date(`${isoDate}T23:59:59.999Z`);
-}
-
 /**
  * Free-text search condition. The query is split on whitespace and every
  * token must appear in either the teacher's or the student's name, so
@@ -64,18 +55,7 @@ function buildSessionAuditConditions(filters: SessionAuditReportFilters): (SQL |
   if (filters.includeDeleted !== true) {
     conditions.push(isNull(classInstances.deletedAt));
   }
-  if (filters.teacherId != null) {
-    conditions.push(eq(classInstances.teacherId, filters.teacherId));
-  }
-  if (filters.studentId != null) {
-    conditions.push(eq(classInstances.studentId, filters.studentId));
-  }
-  if (filters.dateFrom != null) {
-    conditions.push(gte(classInstances.scheduledStartAt, startOfUtcDay(filters.dateFrom)));
-  }
-  if (filters.dateTo != null) {
-    conditions.push(lte(classInstances.scheduledStartAt, endOfUtcDay(filters.dateTo)));
-  }
+  conditions.push(...buildInstanceReportDateConditions(filters));
   if (filters.search != null) {
     conditions.push(...searchTokenConditions(filters.search));
   }

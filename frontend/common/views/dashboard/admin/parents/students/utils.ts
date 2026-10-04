@@ -1,38 +1,22 @@
-import {
-  CancelOutlined,
-  EventBusyOutlined,
-  type SvgIconComponent,
-  TimerOutlined,
-  VerifiedUserOutlined,
-  WarningAmberOutlined,
-} from "@mui/icons-material";
-import { type StudentDirectoryQuery, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   StudentEnrollmentStatus as EnrollmentEnum,
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
   type StudentAccountStatus,
   type StudentDirectoryRowExtended,
-  type StudentEnrollmentStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { StudentsLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/students/types/studentsDirectory.types";
+import {
+  getEnrollmentStatus,
+  isStudentStatus,
+  type RawStudentRow,
+} from "@/frontend/common/views/dashboard/admin/parents/students/utils.helpers";
+import {
+  METRIC_DEFINITIONS,
+  toMetricItem,
+} from "@/frontend/common/views/dashboard/admin/parents/students/utils.metrics";
 import type { StudentDirectoryLabels } from "@/shared/locale";
-
-const METRIC_DEFINITIONS = [
-  { key: "deactivated" as const, icon: CancelOutlined },
-  { key: "regular" as const, icon: VerifiedUserOutlined },
-  { key: "on_leave" as const, icon: EventBusyOutlined },
-  { key: "suspended" as const, icon: WarningAmberOutlined },
-  { key: "on_trial" as const, icon: TimerOutlined },
-];
-
-type StudentMetricKey = keyof StudentDirectoryLabels["metrics"];
-
-const STUDENT_STATUS_VALUES: readonly string[] = Object.values(StudentStatus);
-
-function isStudentStatus(value: string): value is StudentStatus {
-  return STUDENT_STATUS_VALUES.includes(value);
-}
 
 export function mapStudentAccountStatus(status: string | null | undefined): StudentAccountStatus {
   if (!status) return "regular";
@@ -40,23 +24,6 @@ export function mapStudentAccountStatus(status: string | null | undefined): Stud
   if (!isStudentStatus(upper)) return "regular";
   return STUDENT_STATUS_TO_ACCOUNT_STATUS[upper] ?? "regular";
 }
-
-function getEnrollmentStatus(status: string | null | undefined): StudentEnrollmentStatus {
-  if (!status) return EnrollmentEnum.REGULAR;
-  const upper = status.toUpperCase();
-  if (!isStudentStatus(upper)) return EnrollmentEnum.REGULAR;
-  if (upper === StudentStatus.Deactivated) return EnrollmentEnum.WITHDRAWN;
-  if (upper === StudentStatus.OnTrial) return EnrollmentEnum.PROSPECT;
-  return EnrollmentEnum.REGULAR;
-}
-
-function getMetricTranslationKey(key: StudentAccountStatus): StudentMetricKey {
-  if (key === "on_leave") return "onLeave";
-  if (key === "on_trial") return "onTrial";
-  return key;
-}
-
-type RawStudentRow = NonNullable<NonNullable<StudentDirectoryQuery["studentDirectory"]>["rows"]>[number];
 
 export function buildStudentRows(data: StudentDirectoryQuery | undefined): StudentDirectoryRowExtended[] {
   if (!data?.studentDirectory?.rows) return [];
@@ -90,23 +57,6 @@ export function buildStatusCounts(rows: StudentDirectoryRowExtended[]): Record<S
     res[r.accountStatus] = (res[r.accountStatus] || 0) + 1;
   }
   return res;
-}
-
-function toMetricItem(
-  key: StudentAccountStatus,
-  count: number,
-  icon: SvgIconComponent,
-  t: StudentDirectoryLabels
-): MetricItem {
-  const metricKey = getMetricTranslationKey(key);
-  return {
-    key,
-    count,
-    labelKey: key,
-    label: t.metrics[metricKey],
-    icon,
-    variant: key === "suspended" ? ("error" as const) : undefined,
-  };
 }
 
 export function buildViewMetrics(

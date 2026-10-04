@@ -1,9 +1,8 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsDataGridProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
@@ -12,77 +11,7 @@ import {
   statusLabelKey,
 } from "@/frontend/common/views/dashboard/suggestions/utils/suggestionStatusMap";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-
-function actionButtons(
-  row: AdminSuggestionRow,
-  handlers: {
-    canManage: boolean;
-    canDelete: boolean;
-    labels: SuggestionsDataGridProps["labels"];
-    onMarkReviewed: (id: string) => void;
-    onRespond: (id: string) => void;
-    onMarkDuplicate: (id: string) => void;
-    onDelete: (id: string) => void;
-  }
-) {
-  const { canManage, canDelete, labels, onMarkReviewed, onRespond, onMarkDuplicate, onDelete } = handlers;
-
-  if (row.status === SuggestionStatus.Reviewed) {
-    return null;
-  }
-
-  return (
-    <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
-      {canManage && row.status === SuggestionStatus.Pending && (
-        <>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => {
-              onMarkReviewed(row.id);
-            }}
-            sx={{ fontWeight: 700, textTransform: "uppercase" }}
-          >
-            {labels.table.markReviewed}
-          </Button>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => {
-              onRespond(row.id);
-            }}
-            sx={{ fontWeight: 700, textTransform: "uppercase" }}
-          >
-            {labels.table.respond}
-          </Button>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => {
-              onMarkDuplicate(row.id);
-            }}
-            sx={{ fontWeight: 700, textTransform: "uppercase" }}
-          >
-            {labels.table.markDuplicate}
-          </Button>
-        </>
-      )}
-      {canDelete && (
-        <Button
-          variant="text"
-          color="error"
-          size="small"
-          onClick={() => {
-            onDelete(row.id);
-          }}
-          sx={{ fontWeight: 700, textTransform: "uppercase" }}
-        >
-          {labels.table.delete}
-        </Button>
-      )}
-    </Box>
-  );
-}
+import { suggestionActionButtons } from "@/frontend/desktop/views/dashboard/suggestions/components/suggestionsDataGrid.desktop.parts";
 
 export function SuggestionsDataGridDesktop({
   rows,
@@ -155,7 +84,7 @@ export function SuggestionsDataGridDesktop({
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) =>
-          actionButtons(row, {
+          suggestionActionButtons(row, {
             canManage,
             canDelete,
             labels,

@@ -1,5 +1,11 @@
 import { and, asc, count, eq, inArray, or, type SQL } from "drizzle-orm";
 import { caseInsensitiveLike, db, queryDb } from "@/backend/db";
+import {
+  type BootstrapUserUpsertInput,
+  selectSafeUserRows,
+  type UserProfileUpdateInput,
+  updateUserColumn,
+} from "@/backend/db/repo/users/user.repository.helpers";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -61,32 +67,6 @@ export namespace UserRepository {
     const result = await q.select().from(users).where(eq(users.phone, phone)).orderBy(asc(users.createdAt)).limit(1);
     return result[0] ?? null;
   };
-
-  const SAFE_USER_SELECT = {
-    id: users.id,
-    name: users.name,
-    email: users.email,
-    emailVerifiedAt: users.emailVerifiedAt,
-    password: users.password,
-    rememberTokenHash: users.rememberTokenHash,
-    avatarFilePath: users.avatarFilePath,
-    avatarUrl: users.avatarUrl,
-    phone: users.phone,
-    status: users.status,
-    isSuperAdmin: users.isSuperAdmin,
-    timezone: users.timezone,
-    displayCurrency: users.displayCurrency,
-    lastLoginAt: users.lastLoginAt,
-    createdAt: users.createdAt,
-    updatedAt: users.updatedAt,
-    deletedAt: users.deletedAt,
-  } as const;
-
-  async function selectSafeUserRows(where: SQL, tx?: DBTransaction, limit?: number): Promise<UserSelectType[]> {
-    const q = queryDb(tx);
-    const base = q.select(SAFE_USER_SELECT).from(users).where(where);
-    return limit === undefined ? base : base.limit(limit);
-  }
 
   /**
    * Batch-fetch contact info (email/phone) for multiple users in a single
@@ -221,15 +201,6 @@ export namespace UserRepository {
     }
   };
 
-  type UserProfileUpdateInput = {
-    readonly name?: string;
-    readonly email?: string;
-    readonly avatarUrl?: string | null;
-    readonly avatarFilePath?: string | null;
-    readonly displayCurrency?: CurrencyCode | null;
-    readonly phone?: string | null;
-  };
-
   export const updateProfileFields = async (
     userId: string,
     input: UserProfileUpdateInput,
@@ -286,28 +257,6 @@ export namespace UserRepository {
     return AuthUtils.toUserReturnType(updated);
   };
 
-  async function updateUserColumn(
-    userId: string,
-    set: Partial<UserInsertType>,
-    tx?: DBTransaction,
-    locale?: string
-  ): Promise<UserSelectType> {
-    const executor = tx ?? db;
-    const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    const [updated] = await executor
-      .update(users)
-      .set({ ...set, updatedAt: new Date() })
-      .where(eq(users.id, userId))
-      .returning();
-
-    if (!updated) {
-      throw new Error(errorsTranslations.userNotFound(userId));
-    }
-
-    return updated;
-  }
-
   export const updatePassword = async (
     userId: string,
     hashedPassword: string,
@@ -358,13 +307,6 @@ export namespace UserRepository {
    */
   export const scrubSecurityRemnants = async (userId: string, tx: DBTransaction): Promise<UserSelectType> => {
     return updateUserColumn(userId, { rememberTokenHash: null, emailVerifiedAt: null }, tx);
-  };
-
-  type BootstrapUserUpsertInput = {
-    name: string;
-    email: string;
-    hashedPassword: string;
-    isSuperAdmin?: boolean;
   };
 
   export const upsertBootstrapUser = async (

@@ -1,15 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useForm } from "react-hook-form";
-import {
-  AccountStatus,
-  AppPermission,
-  ComplaintCategory,
-  ComplaintStatus,
-  CurrencyCode,
-} from "@/frontend/common/graphql/generated/gql/graphql";
+import { AccountStatus, ComplaintCategory, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { logger } from "@/frontend/common/utils/logger";
+import {
+  MOCK_PARENT_COMPLAINTS,
+  mockActions,
+  PARENT_PERMISSIONS,
+} from "@/frontend/common/views/dashboard/complaints/ParentComplaintsDesktopView.fixtures";
 import {
   type ComplaintFormData,
   complaintFormSchema,
@@ -18,49 +16,6 @@ import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/co
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { ParentComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-const MOCK_PARENT_COMPLAINTS: readonly ParentComplaintRecord[] = [
-  {
-    id: "rec-1001",
-    regarding: "Tuition Fee Processing",
-    summary: "The online payment portal is not reflecting the scholarship discount for Semester 2.",
-    status: ComplaintStatus.Answered,
-    adminResponse: {
-      text: "We have updated the ledger to reflect the 15% academic scholarship. Please refresh your portal; the balance should now be correct.",
-      answeredAt: "Oct 24, 2023 • 10:15 AM",
-    },
-  },
-  {
-    id: "rec-1002",
-    regarding: "Transportation Service",
-    summary: "Bus #42 was delayed by 30 minutes this morning without notification.",
-    status: ComplaintStatus.Unanswered,
-  },
-  {
-    id: "rec-1003",
-    regarding: "Grade Discrepancy",
-    summary: "Mathematics mid-term score shows 78, but the physical script has 87.",
-    status: ComplaintStatus.Answered,
-    adminResponse: {
-      text: "This was a clerical error during data entry. The system has been updated to reflect the correct score of 87. Apologies for the confusion.",
-      answeredAt: "Sep 12, 2023 • 02:45 PM",
-    },
-  },
-];
-
-const PARENT_PERMISSIONS = [AppPermission.SupportSubmitComplaint, AppPermission.SupportViewHistory];
-
-const mockActions = {
-  onDismissSuccess: () => {
-    logger.info("onDismissSuccess");
-  },
-  onFormSubmit: () => {
-    logger.info("onFormSubmit");
-  },
-  onLoadOlderRecords: () => {
-    logger.info("onLoadOlderRecords");
-  },
-};
 
 interface ParentComplaintsDesktopStoryProps {
   readonly records: readonly ParentComplaintRecord[];

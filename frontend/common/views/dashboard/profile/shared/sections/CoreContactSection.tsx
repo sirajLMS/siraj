@@ -2,135 +2,19 @@
 
 import PhoneOutlined from "@mui/icons-material/PhoneOutlined";
 import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
-import { Stack, TextField } from "@mui/material";
-import { type Control, Controller, type FieldPath, type FieldValues, type UseFormRegister } from "react-hook-form";
-import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
+import { Stack } from "@mui/material";
+import type { FieldValues } from "react-hook-form";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
-import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
+import { CoreContactEditSection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreContactSection.parts";
+import type {
+  CoreContactFormFields,
+  CoreContactSectionProps,
+} from "@/frontend/common/views/dashboard/profile/shared/sections/CoreContactSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
-import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import type { ProfileScope } from "@/shared/constants/profile.enum";
-
-type CoreContactFormFields = {
-  phone?: string;
-  timezone?: string;
-};
-
-type CoreContactViewProps = {
-  readonly mode: "view";
-  readonly scope?: ProfileScope;
-  readonly phone: string | null | undefined;
-  readonly timezone?: IanaTimezone | null;
-  readonly sectionTitle: string;
-  readonly phoneLabel: string;
-  readonly timezoneLabel?: string;
-  readonly baseLabels?: ProfileSharedBaseLabels;
-};
-
-type CoreContactEditWithRegisterProps = {
-  readonly mode: "edit";
-  readonly scope?: ProfileScope;
-  readonly sectionTitle: string;
-  readonly phoneLabel: string;
-  readonly timezoneLabel?: string;
-  readonly baseLabels?: ProfileSharedBaseLabels;
-  readonly register: UseFormRegister<CoreContactFormFields>;
-};
-
-type CoreContactEditWithControlProps<
-  T extends CoreContactFormFields & FieldValues = CoreContactFormFields & FieldValues,
-> = {
-  readonly mode: "edit";
-  readonly scope?: ProfileScope;
-  readonly sectionTitle: string;
-  readonly phoneLabel: string;
-  readonly timezoneLabel?: string;
-  readonly baseLabels?: ProfileSharedBaseLabels;
-  readonly control: Control<T>;
-};
-
-type CoreContactSectionProps<T extends CoreContactFormFields & FieldValues = CoreContactFormFields & FieldValues> =
-  | CoreContactViewProps
-  | CoreContactEditWithRegisterProps
-  | CoreContactEditWithControlProps<T>;
-
-function isCoreContactFieldPath<T extends CoreContactFormFields & FieldValues>(value: string): value is FieldPath<T> {
-  return typeof value === "string";
-}
-
-function coreContactFieldPath<T extends CoreContactFormFields & FieldValues>(name: string): FieldPath<T> {
-  if (!isCoreContactFieldPath<T>(name)) {
-    throw new Error(`Invalid core contact field path: ${name}`);
-  }
-  return name;
-}
-
-function CoreContactEditSection<T extends CoreContactFormFields & FieldValues>({
-  props,
-  contactEditable,
-}: {
-  readonly props: CoreContactEditWithControlProps<T> | CoreContactEditWithRegisterProps;
-  readonly contactEditable: boolean;
-}) {
-  const showTimezone = Boolean(props.timezoneLabel);
-
-  return (
-    <SectionPanel title={props.sectionTitle}>
-      <Stack spacing={2}>
-        {"control" in props ? (
-          <PhoneFormField
-            name={coreContactFieldPath<T>("phone")}
-            control={props.control}
-            label={props.phoneLabel}
-            disabled={!contactEditable}
-          />
-        ) : (
-          <TextField
-            label={props.phoneLabel}
-            fullWidth
-            size="small"
-            disabled={!contactEditable}
-            {...props.register("phone")}
-          />
-        )}
-        {showTimezone && "control" in props ? (
-          <Controller
-            name={coreContactFieldPath<T>("timezone")}
-            control={props.control}
-            render={({ field, fieldState }) => (
-              <TimezoneSelect
-                value={field.value ? toIanaTimezone(field.value) : null}
-                onChangeAction={value => {
-                  field.onChange(value ?? "");
-                }}
-                onBlurAction={field.onBlur}
-                label={props.timezoneLabel}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                fullWidth
-                disabled={!contactEditable}
-              />
-            )}
-          />
-        ) : null}
-        {showTimezone && "register" in props ? (
-          <TextField
-            label={props.timezoneLabel}
-            fullWidth
-            size="small"
-            disabled={!contactEditable}
-            {...props.register("timezone")}
-          />
-        ) : null}
-      </Stack>
-    </SectionPanel>
-  );
-}
 
 export function CoreContactSection<T extends CoreContactFormFields & FieldValues = CoreContactFormFields & FieldValues>(
   props: CoreContactSectionProps<T>

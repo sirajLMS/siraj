@@ -4,8 +4,15 @@ import type {
   WhatsappGroupJoinRequestFieldsFragment,
   WhatsappGroupMessageFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { WhatsappGroupsLabelsBySection } from "@/frontend/common/views/dashboard/whatsapp/groups/types/whatsappGroupsLabels.types";
 import type { CommonLabels } from "@/shared/locale/types/common";
-import type { WhatsappGroupsLabels } from "@/shared/locale/types/whatsappGroups";
+
+export type {
+  WhatsappGroupsCreateLabels,
+  WhatsappGroupsDetailLabels,
+  WhatsappGroupsListLabels,
+  WhatsappGroupsMessagesLabels,
+} from "@/frontend/common/views/dashboard/whatsapp/groups/types/whatsappGroupsLabels.types";
 
 /** Group row with a non-null id after Apollo normalization. */
 export type WhatsappGroupRow = WhatsappGroupFieldsFragment & { readonly id: string };
@@ -15,89 +22,6 @@ export type WhatsappGroupMessageRow = WhatsappGroupMessageFieldsFragment & { rea
 
 /** Join-request row with a non-null id after Apollo normalization. */
 export type WhatsappGroupJoinRequestRow = WhatsappGroupJoinRequestFieldsFragment & { readonly id: string };
-
-type WhatsappGroupsShellLabels = Pick<
-  WhatsappGroupsLabels,
-  "title" | "subtitle" | "noAccountsState" | "createGroup" | "syncGroups" | "permissionDenied"
->;
-
-export type WhatsappGroupsListLabels = Pick<
-  WhatsappGroupsLabels,
-  | "listTitle"
-  | "listSubtitle"
-  | "searchPlaceholder"
-  | "emptyState"
-  | "pendingBadge"
-  | "createdAtLabel"
-  | "suspendedBadge"
-  | "activeBadge"
-  | "refresh"
-  | "errorGeneric"
->;
-
-export type WhatsappGroupsCreateLabels = Pick<
-  WhatsappGroupsLabels,
-  | "createGroup"
-  | "createGroupTitle"
-  | "createGroupDescription"
-  | "subjectLabel"
-  | "subjectPlaceholder"
-  | "descriptionLabel"
-  | "descriptionPlaceholder"
-  | "approvalModeLabel"
-  | "approvalModeAuto"
-  | "approvalModeRequired"
->;
-
-export type WhatsappGroupsDetailLabels = Pick<
-  WhatsappGroupsLabels,
-  | "inviteLinkTitle"
-  | "inviteLinkEmpty"
-  | "copyInviteLink"
-  | "copied"
-  | "resetInviteLink"
-  | "resetInviteLinkConfirm"
-  | "resetInviteLinkWarning"
-  | "joinRequestsTitle"
-  | "joinRequestsEmpty"
-  | "approveRequest"
-  | "rejectRequest"
-  | "participantsTitle"
-  | "participantsEmpty"
-  | "removeParticipant"
-  | "removeParticipantConfirm"
-  | "deleteGroup"
-  | "deleteGroupConfirm"
-  | "deleteGroupWarning"
-  | "createdAtLabel"
-  | "lastSyncedAtLabel"
-  | "suspendedBadge"
-  | "activeBadge"
-  | "refresh"
-  | "errorGeneric"
->;
-
-export type WhatsappGroupsMessagesLabels = Pick<
-  WhatsappGroupsLabels,
-  | "messagesTitle"
-  | "messagesEmpty"
-  | "messagePlaceholder"
-  | "send"
-  | "sending"
-  | "pin"
-  | "unpin"
-  | "pinned"
-  | "refresh"
-  | "errorGeneric"
->;
-
-interface WhatsappGroupsLabelsBySection {
-  readonly shell: WhatsappGroupsShellLabels;
-  readonly list: WhatsappGroupsListLabels;
-  readonly create: WhatsappGroupsCreateLabels;
-  readonly detail: WhatsappGroupsDetailLabels;
-  readonly messages: WhatsappGroupsMessagesLabels;
-}
 
 /** One entry of the connected-numbers pool; the create action needs an owner. */
 export interface WhatsappGroupsAccountOption {

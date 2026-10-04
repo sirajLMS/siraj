@@ -1,20 +1,17 @@
 "use client";
 
-import { AccessTimeOutlined, CalendarTodayOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, Tooltip } from "@mui/material";
-import type * as React from "react";
-import { ActionIconLink } from "@/frontend/common/components/ui";
+import { AccessTimeOutlined, CalendarTodayOutlined } from "@mui/icons-material";
+import { Box } from "@mui/material";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
-import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  classHref,
-  profileHrefForTeacher,
-  studentHref,
-  studentProfileTabHref,
-} from "@/frontend/common/utils/profileHref";
+import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
-import { ScheduleTimezoneOffsetCell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleTimezoneOffsetCell";
+import {
+  PersonCell,
+  ScheduleCardActions,
+  ScheduleMetaStatBar,
+} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCard.parts";
+import { buildScheduleMetaItems } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewCardMetaItems";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
   formatDurationMinutes,
@@ -25,12 +22,6 @@ import {
   ScheduleSessionEmptyState,
 } from "@/frontend/common/views/dashboard/components/ScheduleSessionCardStates";
 import {
-  ScheduleSessionCardMetaBar,
-  ScheduleSessionCardPersonCell,
-  type ScheduleSessionMetaStatItem,
-} from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
-import {
-  StyledScheduleSessionCardActions,
   StyledScheduleSessionCardHeader,
   StyledScheduleSessionCardHeaderMain,
   StyledScheduleSessionPeopleRow,
@@ -44,7 +35,6 @@ import type {
   ScheduleOverviewDataHeaders,
   ScheduleOverviewDataStatusLabels,
 } from "@/frontend/common/views/dashboard/types/dashboard";
-import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ScheduleOverviewCardProps {
   readonly row: DailyScheduleRow;
@@ -53,93 +43,6 @@ export interface ScheduleOverviewCardProps {
   readonly detailsLabel: string;
   readonly showTimezones: boolean;
   readonly locale: string;
-}
-
-type MetaStatItem = ScheduleSessionMetaStatItem;
-
-function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[] }) {
-  return <ScheduleSessionCardMetaBar items={items} />;
-}
-
-function PersonCell(props: React.ComponentProps<typeof ScheduleSessionCardPersonCell>) {
-  return <ScheduleSessionCardPersonCell {...props} />;
-}
-
-interface ScheduleCardActionsProps {
-  readonly row: DailyScheduleRow;
-  readonly headers: ScheduleOverviewDataHeaders;
-  readonly detailsLabel: string;
-  readonly studentId: string | undefined;
-  readonly classId: string;
-}
-
-function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }: ScheduleCardActionsProps) {
-  const isJoinable = isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false });
-  const joinUrl = isJoinable ? row.meetingJoinUrl : undefined;
-  const meeting = isJoinable ? row.effectiveMeeting : undefined;
-
-  return (
-    <StyledScheduleSessionCardActions>
-      <MeetingJoinAction
-        variant="icon"
-        joinUrl={joinUrl}
-        meeting={meeting}
-        label={headers.joinVideo}
-        emptyRole="class"
-      />
-      {studentId ? (
-        <Tooltip title={headers.history}>
-          <ActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
-            <HistoryOutlined fontSize="small" />
-          </ActionIconLink>
-        </Tooltip>
-      ) : null}
-      {classId ? (
-        <Tooltip title={detailsLabel}>
-          <ActionIconLink href={`/classes/${classId}`} aria-label={detailsLabel}>
-            <VisibilityOutlined fontSize="small" />
-          </ActionIconLink>
-        </Tooltip>
-      ) : null}
-    </StyledScheduleSessionCardActions>
-  );
-}
-
-function buildScheduleMetaItems(
-  headers: ScheduleOverviewDataHeaders,
-  row: DailyScheduleRow,
-  duration: string,
-  showTimezones: boolean
-): MetaStatItem[] {
-  return [
-    ...(showTimezones
-      ? ([
-          {
-            label: headers.teacherTime,
-            value: (
-              <ScheduleTimezoneOffsetCell
-                timeValue={row.teacherTime}
-                timezone={row.teacherTimezone}
-                at={row.scheduledStartAt}
-              />
-            ),
-            tone: "teacher",
-          },
-          {
-            label: headers.studentTime,
-            value: (
-              <ScheduleTimezoneOffsetCell
-                timeValue={row.studentTime}
-                timezone={row.studentTimezone}
-                at={row.scheduledStartAt}
-              />
-            ),
-            tone: "student",
-          },
-        ] satisfies MetaStatItem[])
-      : []),
-    { label: headers.duration, value: duration, tone: "default" },
-  ];
 }
 
 export function ScheduleOverviewCard({

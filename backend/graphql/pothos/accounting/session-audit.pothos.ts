@@ -1,12 +1,12 @@
 import { SessionAuditStatusEnum } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
-  CalculationStatusPothosEnum,
   CurrencyCodePothosObject,
   OrderSortDirectionPothosObject,
   SessionAuditReportSortFieldPothosEnum,
   SessionAuditStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { payrollSnapshotFields } from "@/backend/graphql/pothos/shared/payroll-snapshot.fields";
 import type {
   SessionAuditReportAggregates,
   SessionAuditReportPage,
@@ -72,13 +72,7 @@ export const SessionAuditReportRowPothosObject = SessionAuditReportRowRef.implem
       type: SessionAuditStatusPothosEnum,
       resolve: row => STATUS_TO_POTHOS_ENUM[row.currentStatus],
     }),
-    calculatedDuration: t.exposeInt("calculatedDuration", { nullable: true }),
-    teacherPaidAmount: t.exposeString("teacherPaidAmount", { nullable: true }),
-    teacherPaidCurrency: t.expose("teacherPaidCurrency", { type: CurrencyCodePothosObject, nullable: true }),
-    calculationStatus: t.expose("calculationStatus", { type: CalculationStatusPothosEnum, nullable: true }),
-    isPartialPercentage: t.exposeInt("isPartialPercentage", { nullable: true }),
-    payrollNote: t.exposeString("payrollNote", { nullable: true }),
-    payrollCalculatedAt: t.expose("payrollCalculatedAt", { type: "DateTime", nullable: true }),
+    ...payrollSnapshotFields(t),
     carryoverBalanceId: t.exposeID("carryoverBalanceId", { nullable: true }),
     teacherId: t.exposeID("teacherId"),
     teacherName: t.exposeString("teacherName"),

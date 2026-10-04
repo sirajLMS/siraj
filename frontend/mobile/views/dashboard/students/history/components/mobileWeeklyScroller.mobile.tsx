@@ -1,87 +1,12 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { useMemo } from "react";
-import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
+import type { MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui";
-import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
-
-type CalendarDayKey = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
-
-interface WeekDayData {
-  readonly dayKey: CalendarDayKey;
-  readonly dayOfMonth: number;
-  readonly displayDate: number;
-  readonly hasSession: boolean;
-  readonly isInMonth: boolean;
-  readonly status: AttendanceStatus | null;
-}
-
-function isCalendarDayKey(value: string): value is CalendarDayKey {
-  return (
-    value === "sun" ||
-    value === "mon" ||
-    value === "tue" ||
-    value === "wed" ||
-    value === "thu" ||
-    value === "fri" ||
-    value === "sat"
-  );
-}
-
-const defaultDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.primary.main;
-const selectedDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.onPrimaryContainer;
-const absentDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.error.main;
-const lateDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.warning.main;
-
-function computeWeekDays(
-  currentMonth: Date,
-  selectedWeek: number,
-  classes: Readonly<Partial<Record<number, ClassSession>>>
-): WeekDayData[] {
-  const dayKeys: readonly CalendarDayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-
-  const weekStartDay = (selectedWeek - 1) * 7 + 1 - firstDayOfMonth;
-
-  const result: WeekDayData[] = [];
-  const weekDayIndices = [1, 2, 3, 4, 5, 6, 0];
-
-  for (let i = 0; i < 7; i++) {
-    const dayAbs = weekStartDay + i;
-    if (dayAbs < 1 || dayAbs > daysInMonth) {
-      const displayDate =
-        dayAbs < 1
-          ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate() + dayAbs
-          : dayAbs - daysInMonth;
-      result.push({
-        dayKey: dayKeys[weekDayIndices[i]],
-        dayOfMonth: -1,
-        displayDate,
-        hasSession: false,
-        isInMonth: false,
-        status: null,
-      });
-      continue;
-    }
-
-    const session = classes[dayAbs];
-    result.push({
-      dayKey: dayKeys[weekDayIndices[i]],
-      dayOfMonth: dayAbs,
-      displayDate: dayAbs,
-      hasSession: !!session,
-      isInMonth: true,
-      status: session?.status ?? null,
-    });
-  }
-
-  return result;
-}
+import { computeWeekDays } from "@/frontend/mobile/views/dashboard/students/history/components/mobileWeeklyScroller.mobile.helpers";
+import { WeekDayCell } from "@/frontend/mobile/views/dashboard/students/history/components/mobileWeeklyScroller.mobile.parts";
 
 export function MobileWeeklyScroller({
   selectedWeek,
@@ -127,66 +52,17 @@ export function MobileWeeklyScroller({
           "&::-webkit-scrollbar": { display: "none" },
         }}
       >
-        {weekDays.map(d => {
-          const isSelected = d.isInMonth && d.dayOfMonth === selectedDay && d.hasSession;
-
-          let dotColor: (theme: import("@mui/material/styles").Theme) => string = defaultDotColor;
-          if (isSelected) {
-            dotColor = selectedDotColor;
-          } else if (d.status === AttendanceStatus.ABSENT) {
-            dotColor = absentDotColor;
-          } else if (d.status === AttendanceStatus.LATE) {
-            dotColor = lateDotColor;
-          }
-
-          return (
-            <Box
-              key={d.dayKey}
-              sx={theme => ({
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                minWidth: 48,
-                py: 1.5,
-                borderRadius: "xl",
-                backgroundColor: isSelected ? theme.palette.primaryContainer : "transparent",
-                color: isSelected ? theme.palette.onPrimaryContainer : "inherit",
-                boxShadow: isSelected ? theme.palette.shadow.cardHover : "none",
-                ...(isSelected && { outline: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }),
-                "&:hover": {
-                  backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
-                },
-                opacity: d.hasSession ? 1 : 0.4,
-                cursor: d.isInMonth ? "pointer" : "default",
-              })}
-              onClick={() => {
-                if (d.isInMonth && d.hasSession) {
-                  onSelectDay(d.dayOfMonth);
-                }
-                onSelectWeek(selectedWeek);
-              }}
-            >
-              <Typography
-                variant="labelMd"
-                sx={theme => ({ color: isSelected ? "inherit" : theme.palette.onSurfaceVariant, mb: 0.5 })}
-              >
-                {isCalendarDayKey(d.dayKey) ? t.days[d.dayKey] : d.dayKey}
-              </Typography>
-              <Typography variant="titleLg">{d.displayDate}</Typography>
-              {d.hasSession && (
-                <Box
-                  sx={theme => ({
-                    width: 6,
-                    height: 6,
-                    borderRadius: "full",
-                    backgroundColor: dotColor(theme),
-                    mt: 0.5,
-                  })}
-                />
-              )}
-            </Box>
-          );
-        })}
+        {weekDays.map(day => (
+          <WeekDayCell
+            key={day.dayKey}
+            day={day}
+            selectedWeek={selectedWeek}
+            selectedDay={selectedDay}
+            labels={t.days}
+            onSelectWeek={onSelectWeek}
+            onSelectDay={onSelectDay}
+          />
+        ))}
       </Box>
     </MobileSectionPanel>
   );

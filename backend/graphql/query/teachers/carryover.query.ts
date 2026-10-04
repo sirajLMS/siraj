@@ -6,6 +6,7 @@ import {
   CarryoverLinkedSessionPothosObject,
   CarryoverPagePothosObject,
 } from "@/backend/graphql/pothos/teachers/carryover.pothos";
+import { reportPageWindow, reportPaginationArgs, reportResolverContext } from "@/backend/graphql/query/__shared__";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ValidationError } from "@/backend/lib";
 import { CarryoverBalanceService } from "@/backend/services";
@@ -65,17 +66,10 @@ gqlSchemaBuilder.queryField("carryoverBalances", t =>
     authScopes: { permission: AppPermission.ACCOUNTING_CARRYOVER_VIEW },
     args: {
       filter: t.arg({ type: CarryoverFilterPothosInput, required: false }),
-      limit: t.arg.int({
-        required: false,
-        defaultValue: 50,
-        description: "Max rows per page (max 200)",
-        directives: { constraint: { min: 1, max: 200 } },
-      }),
-      offset: t.arg.int({ required: false, defaultValue: 0 }),
+      ...reportPaginationArgs(t),
     },
     resolve: async (_root, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await reportResolverContext(ctx);
       const filter = args.filter;
       const filters: CarryoverFilters = {
         teacherId: narrowTeacherId(filter?.teacherId, tErrors),
@@ -85,12 +79,7 @@ gqlSchemaBuilder.queryField("carryoverBalances", t =>
         includeDisabledTeachers: filter?.includeDisabledTeachers ?? null,
         search: filter?.search ?? null,
       };
-      return CarryoverBalanceService.getReport(
-        actorUserId,
-        filters,
-        { limit: args.limit ?? 50, offset: args.offset ?? 0 },
-        tErrors
-      );
+      return CarryoverBalanceService.getReport(actorUserId, filters, reportPageWindow(args), tErrors);
     },
   })
 );

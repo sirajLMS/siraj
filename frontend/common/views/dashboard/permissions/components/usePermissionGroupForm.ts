@@ -1,6 +1,4 @@
-// NEW FOR PLAN v5 (newly created for the migration wave)
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo } from "react";
 import { type Control, type UseFormHandleSubmit, type UseFormSetValue, useForm, useWatch } from "react-hook-form";
 import type {
   PermissionsQuery_permissions as Permission,
@@ -8,18 +6,21 @@ import type {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
 import {
+  applyCategorySelection,
+  isCategoryFullySelected,
+  isCategoryIndeterminate,
+  type SelectablePermission,
+  togglePermissionId,
+} from "@/frontend/common/views/dashboard/permissions/components/usePermissionGroupForm.helpers";
+import {
+  useDialogOpenReset,
+  usePermissionFormFilters,
+} from "@/frontend/common/views/dashboard/permissions/components/usePermissionGroupForm.hooks";
+import {
   type PermissionGroupFormData,
   permissionGroupSchema,
 } from "@/frontend/common/views/dashboard/permissions/schemas/permissionGroupSchema";
 import type { ValidPermission } from "@/frontend/common/views/dashboard/permissions/types/validPermission.types";
-import { Translation, useAppTranslation } from "@/shared/locale";
-
-type SelectablePermission = Permission & { id: string };
-
-interface GroupedPermissions {
-  readonly categories: string[];
-  readonly groupedPermissions: Record<string, ValidPermission[]>;
-}
 
 export interface PermissionGroupFormState {
   readonly control: Control<PermissionGroupFormData>;
@@ -50,138 +51,13 @@ interface UsePermissionGroupFormParams {
   ) => Promise<void>;
 }
 
-function usePermissionFormFilters(
-  permissions: readonly Permission[],
-  searchTerm: string,
-  selectedCategory: string
-): GroupedPermissions {
-  const t = useAppTranslation(Translation.Dashboard.Permissions);
-
-  const validPermissions = useMemo(
-    () => permissions.filter((p): p is ValidPermission => !!p.id && !!p.key && !!p.category),
-    [permissions]
-  );
-
-  const categories = useMemo(() => {
-    const cats = validPermissions.map(p => p.category).filter((c): c is string => c.trim() !== "");
-    return Array.from(new Set(cats));
-  }, [validPermissions]);
-
-  const filteredPermissions = useMemo(() => {
-    const q = searchTerm.toLowerCase();
-    return validPermissions.filter(perm => {
-      const matchesSearch =
-        perm.key.toLowerCase().includes(q) || (perm.description?.toLowerCase().includes(q) ?? false);
-      const matchesCategory = selectedCategory === "ALL" || perm.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [validPermissions, searchTerm, selectedCategory]);
-
-  const groupedPermissions = useMemo(
-    () =>
-      filteredPermissions.reduce<Record<string, ValidPermission[]>>((acc, perm) => {
-        const cat = perm.category || t.allCategoriesOption;
-        if (!acc[cat]) {
-          acc[cat] = [];
-        }
-        acc[cat].push(perm);
-        return acc;
-      }, {}),
-    [filteredPermissions, t]
-  );
-
-  return { categories, groupedPermissions };
-}
-
-function buildPermissionGroupInitialValues(group: PermissionGroup | null): PermissionGroupFormData {
-  if (!group) {
-    return { name: {}, description: {}, permissionIds: [] };
-  }
-  return {
-    name: group.name ?? {},
-    description: group.description ?? {},
-    permissionIds: (group.permissionIds ?? []).filter((id): id is string => !!id),
-  };
-}
-
-function togglePermissionId(selectedIds: readonly string[], permId: string, isSystem: boolean): string[] | null {
-  if (isSystem) return null;
-  if (selectedIds.includes(permId)) {
-    return selectedIds.filter(id => id !== permId);
-  }
-  return [...selectedIds, permId];
-}
-
-function applyCategorySelection(
-  selectedIds: readonly string[],
-  categoryPerms: readonly SelectablePermission[],
-  checked: boolean
-): string[] {
-  const modifiableIds = categoryPerms.filter(p => !p.isSystem).map(p => p.id);
-  if (checked) {
-    return Array.from(new Set([...selectedIds, ...modifiableIds]));
-  }
-  return selectedIds.filter(id => !modifiableIds.includes(id));
-}
-
-function getModifiableInCategory(categoryPerms: readonly SelectablePermission[]): readonly SelectablePermission[] {
-  return categoryPerms.filter(p => !p.isSystem);
-}
-
-function isCategoryFullySelected(
-  selectedIds: readonly string[],
-  categoryPerms: readonly SelectablePermission[]
-): boolean {
-  const modifiable = getModifiableInCategory(categoryPerms);
-  if (modifiable.length === 0) return false;
-  return modifiable.every(p => selectedIds.includes(p.id));
-}
-
-function isCategoryIndeterminate(
-  selectedIds: readonly string[],
-  categoryPerms: readonly SelectablePermission[]
-): boolean {
-  const modifiable = getModifiableInCategory(categoryPerms);
-  if (modifiable.length === 0) return false;
-  const selectedInCategory = modifiable.filter(p => selectedIds.includes(p.id));
-  return selectedInCategory.length > 0 && selectedInCategory.length < modifiable.length;
-}
-
-/**
- * Owns the `useEffect` that resets the form whenever the dialog opens.
- * Re-derives values from `group` (edit) or falls back to empty defaults (create)
- * and clears the cross-tier filter state.
- */
-function useDialogOpenReset({
-  open,
-  group,
-  reset,
-  setSearchTerm,
-  setSelectedCategory,
-}: {
-  open: boolean;
-  group: PermissionGroup | null;
-  reset: (values: PermissionGroupFormData) => void;
-  setSearchTerm: (term: string) => void;
-  setSelectedCategory: (category: string) => void;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    reset(buildPermissionGroupInitialValues(group));
-    setSearchTerm("");
-    setSelectedCategory("ALL");
-  }, [open, group, reset, setSearchTerm, setSelectedCategory]);
-}
-
 /**
  * Common hook owning the entire Permission Group create/edit form:
- * - `useForm` + `zodResolver(permissionGroupSchema)` (lifted per N4 + N26)
- * - `useEffect` to reset the form when the dialog opens (lifted per N6)
+ * - `useForm` + `zodResolver(permissionGroupSchema)` validation
+ * - the dialog-open reset effect
  * - the cross-tier `searchTerm` + `selectedCategory` filter state stored in
- *   `permissionManagementStore` (lifted per N7 — survives tier switches)
- * - `usePermissionFormFilters` + selection helpers (lifted per N25 — they were
- *   previously inline `function useX(...)` declarations duplicated inside both
- *   tier views)
+ *   `permissionManagementStore` (survives tier switches)
+ * - permission filtering and category selection helpers
  *
  * The tier `permissionGroupForm.{mobile,desktop}.tsx` files consume the
  * returned bag as props and render against it — no own state.

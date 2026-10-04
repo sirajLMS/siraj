@@ -5,7 +5,7 @@ import type {
   userPaymentMethods,
 } from "@/backend/db/schema";
 import type { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { LocalizedString } from "@/shared/types";
+import type { LocalizedString, PaymentMethodDetailsShape } from "@/shared/types";
 
 // ============================================================================
 // Details discriminated union (spec § Data model)
@@ -99,28 +99,16 @@ export type UserPaymentMethodReturnType = Omit<UserPaymentMethodSelectType, "typ
 };
 
 /**
- * Public (GraphQL) projection of `PaymentMethodDetails`.
+ * Public (GraphQL) projection of `PaymentMethodDetails`, bound directly by the
+ * Pothos `PaymentMethodDetails` object ref. Field keys come from the canonical
+ * cross-layer `PaymentMethodDetailsShape` in `shared/types`.
  *
  * Sensitive identifier fields (iban, accountNumber, routingNumber, phone, url,
  * identifier) reach this boundary only in masked form — the service layer
  * applies `buildMaskedPaymentMethod` / `buildMaskedTransactionSnapshot` before
  * rows are returned to callers, and raw/encrypted values never surface here.
  */
-export type PaymentMethodDetailsPublicReturnType = {
-  readonly walletId?: string;
-  readonly phone?: string;
-  readonly paymentLinkId?: string;
-  readonly url?: string;
-  readonly onlineAccountId?: string;
-  readonly identifier?: string;
-  readonly iban?: string;
-  readonly bankName?: string;
-  readonly beneficiaryName?: string;
-  readonly swiftBic?: string;
-  readonly accountNumber?: string;
-  readonly routingNumber?: string;
-  readonly note?: string;
-};
+export type PaymentMethodDetailsPublicReturnType = PaymentMethodDetailsShape;
 
 /**
  * Public (GraphQL) DTO for `user_payment_methods`, bound directly by the

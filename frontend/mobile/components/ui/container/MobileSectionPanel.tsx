@@ -1,10 +1,11 @@
 "use client";
 
-import { alpha, Box, Paper, type SxProps, Typography } from "@mui/material";
+import { alpha, Box, Paper, type SxProps } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { mobileContentGutterSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
+import { MobileSectionPanelTitleBar } from "@/frontend/mobile/components/ui/container/MobileSectionPanel.parts";
 
 export interface MobileSectionPanelProps {
   readonly id?: string;
@@ -40,106 +41,48 @@ export function MobileSectionPanel({
   sx,
 }: MobileSectionPanelProps) {
   return (
-    <Paper
-      id={id}
-      elevation={0}
-      sx={mergeSx(
-        {
-          backgroundColor: theme => alpha(theme.palette.surfaceContainer, 0.95),
-          overflow: "hidden",
-        },
-        edgeToEdge
-          ? {
-              borderRadius: "0 !important",
-              borderInlineStart: "none",
-              borderInlineEnd: "none",
-              borderLeft: "none",
-              borderRight: "none",
-              borderTop: theme => `1px solid ${theme.palette.outlineVariant}`,
-              borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-            }
-          : undefined,
-        sx
-      )}
-    >
-      {(title ?? actions) && (
-        <Box
-          sx={mergeSx(mobileContentGutterSx, {
-            py: 2,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
-            borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
-          })}
-        >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                flexWrap: "wrap",
-              }}
-            >
-              {title ? renderTitle(title) : null}
-            </Box>
-            {subTitle ? (
-              <Typography
-                variant="bodyMd"
-                sx={{
-                  color: theme => alpha(theme.palette.onSurfaceVariant, 0.85),
-                  paddingInlineStart: 0.25,
-                }}
-              >
-                {subTitle}
-              </Typography>
-            ) : null}
-          </Box>
-          {actions ? (
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                "& > *": { flex: "1 1 auto", minWidth: 0 },
-              }}
-            >
-              {actions}
-            </Box>
-          ) : null}
-        </Box>
-      )}
-      {renderChildren()}
+    <Paper id={id} elevation={0} sx={buildSectionPanelSx(edgeToEdge, sx)}>
+      {(title ?? actions) ? <MobileSectionPanelTitleBar title={title} subTitle={subTitle} actions={actions} /> : null}
+      {renderSectionPanelBody(children, contentInset)}
     </Paper>
   );
-
-  function renderChildren(): ReactNode {
-    let content: ReactNode = null;
-    if (children) {
-      content = contentInset ? (
-        <Box
-          sx={mergeSx(mobileContentGutterSx, {
-            py: 2,
-          })}
-        >
-          {children}
-        </Box>
-      ) : (
-        children
-      );
-    }
-    return content;
-  }
 }
 
-function renderTitle(title: ReactNode): ReactNode {
-  let content: ReactNode;
-  if (typeof title === "string") {
-    content = (
-      <Typography sx={theme => ({ typography: "titleLg", color: theme.palette.onSurface })}>{title}</Typography>
+function buildSectionPanelSx(edgeToEdge: boolean, sx?: SxProps<Theme>): SxProps<Theme> {
+  return mergeSx(
+    {
+      backgroundColor: theme => alpha(theme.palette.surfaceContainer, 0.95),
+      overflow: "hidden",
+    },
+    edgeToEdge
+      ? {
+          borderRadius: "0 !important",
+          borderInlineStart: "none",
+          borderInlineEnd: "none",
+          borderLeft: "none",
+          borderRight: "none",
+          borderTop: theme => `1px solid ${theme.palette.outlineVariant}`,
+          borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
+        }
+      : undefined,
+    sx
+  );
+}
+
+function renderSectionPanelBody(children: ReactNode, contentInset: boolean): ReactNode {
+  let content: ReactNode = null;
+  if (children) {
+    content = contentInset ? (
+      <Box
+        sx={mergeSx(mobileContentGutterSx, {
+          py: 2,
+        })}
+      >
+        {children}
+      </Box>
+    ) : (
+      children
     );
-  } else {
-    content = title;
   }
   return content;
 }

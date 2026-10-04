@@ -1,24 +1,23 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
-import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  adminSuggestionsQueryDocument,
-  deleteSuggestionMutationDocument,
-  markSuggestionDuplicateMutationDocument,
-  markSuggestionReviewedMutationDocument,
-  respondToSuggestionMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents";
+import { AppPermission, type SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { adminSuggestionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents";
 import { useAdminSuggestionsStore } from "@/frontend/common/stores/adminSuggestionsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
+import {
+  buildAdminSuggestionsSummary,
+  mapAdminSuggestionRows,
+} from "@/frontend/common/views/dashboard/suggestions/adminSuggestionsData.helpers";
 import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,
 } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
+import { useAdminSuggestionsActions } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsActions.hooks";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { filterSuggestionsByTab } from "@/frontend/common/views/dashboard/suggestions/utils/suggestionFilters";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -63,31 +62,13 @@ export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & Admi
   const labels = buildSuggestionsLabels(useAppTranslation(Translation.Dashboard.Suggestions));
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
+  const notifySuccess = (msg: string) => notifications.show(msg, { severity: "success", autoHideDuration: 4000 });
+  const notifyError = (msg: string) => notifications.show(msg, { severity: "error", autoHideDuration: 4000 });
 
   const searchQuery = useAdminSuggestionsStore(state => state.searchQuery);
   const activeTab = useAdminSuggestionsStore(state => state.activeTab);
   const setSearchQuery = useAdminSuggestionsStore(state => state.setSearchQuery);
   const setActiveTab = useAdminSuggestionsStore(state => state.setActiveTab);
-
-  const deletingId = useAdminSuggestionsStore(state => state.deletingId);
-  const isDeleting = useAdminSuggestionsStore(state => state.isDeleting);
-  const deleteDialogOpen = useAdminSuggestionsStore(state => state.deleteDialogOpen);
-  const openDeleteDialog = useAdminSuggestionsStore(state => state.openDeleteDialog);
-  const closeDeleteDialog = useAdminSuggestionsStore(state => state.closeDeleteDialog);
-  const setIsDeleting = useAdminSuggestionsStore(state => state.setIsDeleting);
-
-  const respondDialogOpen = useAdminSuggestionsStore(state => state.respondDialogOpen);
-  const isResponding = useAdminSuggestionsStore(state => state.isResponding);
-  const openRespondDialog = useAdminSuggestionsStore(state => state.openRespondDialog);
-  const closeRespondDialog = useAdminSuggestionsStore(state => state.closeRespondDialog);
-  const setIsResponding = useAdminSuggestionsStore(state => state.setIsResponding);
-
-  const duplicateDialogOpen = useAdminSuggestionsStore(state => state.duplicateDialogOpen);
-  const markingDuplicateId = useAdminSuggestionsStore(state => state.markingDuplicateId);
-  const isMarkingDuplicate = useAdminSuggestionsStore(state => state.isMarkingDuplicate);
-  const openDuplicateDialog = useAdminSuggestionsStore(state => state.openDuplicateDialog);
-  const closeDuplicateDialog = useAdminSuggestionsStore(state => state.closeDuplicateDialog);
-  const setIsMarkingDuplicate = useAdminSuggestionsStore(state => state.setIsMarkingDuplicate);
 
   const canManage = hasPermission(AppPermission.SuggestionsReview);
   const canDelete = hasPermission(AppPermission.SuggestionsDelete);
@@ -103,128 +84,22 @@ export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & Admi
     },
   });
 
-  const [markReviewed] = useMutation(markSuggestionReviewedMutationDocument, {
-    onCompleted: () => {
-      notifications.show(labels.admin.notifications.markReviewedSuccess, {
-        severity: "success",
-        autoHideDuration: 4000,
-      });
-      void refetch();
-    },
-    onError: () => {
-      notifications.show(labels.admin.notifications.markReviewedError, { severity: "error", autoHideDuration: 4000 });
-    },
-  });
+  const dialogHandlers = useAdminSuggestionsActions({ notifySuccess, notifyError, labels: labels.admin, refetch });
 
-  const [respondToSuggestion] = useMutation(respondToSuggestionMutationDocument, {
-    onCompleted: () => {
-      closeRespondDialog();
-      setIsResponding(false);
-      notifications.show(labels.admin.notifications.respondSuccess, { severity: "success", autoHideDuration: 4000 });
-      void refetch();
-    },
-    onError: () => {
-      setIsResponding(false);
-      notifications.show(labels.admin.notifications.respondError, { severity: "error", autoHideDuration: 4000 });
-    },
-  });
+  const summary: AdminSuggestionsSummary = useMemo(
+    () => buildAdminSuggestionsSummary(data?.adminSuggestions?.metrics),
+    [data?.adminSuggestions?.metrics]
+  );
 
-  const [markDuplicate] = useMutation(markSuggestionDuplicateMutationDocument, {
-    onCompleted: () => {
-      closeDuplicateDialog();
-      setIsMarkingDuplicate(false);
-      notifications.show(labels.admin.notifications.markDuplicateSuccess, {
-        severity: "success",
-        autoHideDuration: 4000,
-      });
-      void refetch();
-    },
-    onError: () => {
-      setIsMarkingDuplicate(false);
-      notifications.show(labels.admin.notifications.markDuplicateError, { severity: "error", autoHideDuration: 4000 });
-    },
-  });
-
-  const [deleteSuggestion] = useMutation(deleteSuggestionMutationDocument, {
-    onCompleted: () => {
-      closeDeleteDialog();
-      setIsDeleting(false);
-      notifications.show(labels.admin.notifications.deleteSuccess, { severity: "success", autoHideDuration: 4000 });
-      void refetch();
-    },
-    onError: () => {
-      setIsDeleting(false);
-      notifications.show(labels.admin.notifications.deleteError, { severity: "error", autoHideDuration: 4000 });
-    },
-  });
-
-  const summary: AdminSuggestionsSummary = useMemo(() => {
-    const metrics = data?.adminSuggestions?.metrics;
-    return {
-      pending: metrics?.pending ?? 0,
-      reviewed: metrics?.reviewed ?? 0,
-      duplicateCount: metrics?.duplicate ?? 0,
-      avgResponseHours: metrics?.avgResponseTime ?? "0.0 Hours",
-    };
-  }, [data?.adminSuggestions?.metrics]);
-
-  const rows: readonly AdminSuggestionRow[] = useMemo(() => {
-    if (!data?.adminSuggestions?.rows) return [];
-    return data.adminSuggestions.rows.map(row => ({
-      id: row.id ?? "",
-      parentId: row.parentId ?? null,
-      parentUserId: row.parentUserId ?? null,
-      parentName: row.parentName ?? "",
-      suggestionPreview: row.body ?? "",
-      status: row.status ?? SuggestionStatus.Pending,
-      submittedAt: row.createdAt ?? "",
-      adminResponse: row.adminResponse ?? null,
-      duplicateOfBody: row.duplicateOfBody ?? null,
-      duplicateOfSubmitterName: row.duplicateOfSubmitterName ?? null,
-      responseCount: row.responseCount ?? null,
-    }));
-  }, [data]);
+  const rows: readonly AdminSuggestionRow[] = useMemo(
+    () => mapAdminSuggestionRows(data?.adminSuggestions?.rows),
+    [data]
+  );
 
   const filteredRows = useMemo(
     () => filterSuggestionsByTab(rows, activeTab, searchQuery),
     [activeTab, rows, searchQuery]
   );
-
-  const handleMarkReviewed = (id: string) => {
-    void markReviewed({ variables: { suggestionId: id } });
-  };
-
-  const handleRespond = (id: string) => {
-    openRespondDialog(id);
-  };
-
-  const handleRespondConfirm = (suggestionId: string, adminResponse: string) => {
-    setIsResponding(true);
-    void respondToSuggestion({
-      variables: { input: { suggestionId, adminResponse } },
-    });
-  };
-
-  const handleMarkDuplicate = (id: string) => {
-    openDuplicateDialog(id);
-  };
-
-  const handleMarkDuplicateConfirm = (suggestionId: string, duplicateOfId: string) => {
-    setIsMarkingDuplicate(true);
-    void markDuplicate({
-      variables: { input: { suggestionId, duplicateOfId } },
-    });
-  };
-
-  const handleDelete = (id: string) => {
-    openDeleteDialog(id);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (!deletingId) return;
-    setIsDeleting(true);
-    void deleteSuggestion({ variables: { suggestionId: deletingId } });
-  };
 
   if (error) {
     logger.error("Error loading suggestions:", { error });
@@ -242,24 +117,6 @@ export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & Admi
     error: Boolean(error),
     onSearchChange: setSearchQuery,
     onTabChange: setActiveTab,
-    onMarkReviewed: handleMarkReviewed,
-    onRespond: handleRespond,
-    onMarkDuplicate: handleMarkDuplicate,
-    onDelete: handleDelete,
-    respondDialogOpen,
-    isResponding,
-    duplicateDialogOpen,
-    markingDuplicateId,
-    isMarkingDuplicate,
-    deleteDialogOpen,
-    deletingId,
-    isDeleting,
-    dialogLabels: labels.admin.dialogs,
-    closeDeleteDialog,
-    closeRespondDialog,
-    closeDuplicateDialog,
-    onRespondConfirm: handleRespondConfirm,
-    onMarkDuplicateConfirm: handleMarkDuplicateConfirm,
-    onDeleteConfirm: handleDeleteConfirm,
+    ...dialogHandlers,
   };
 }

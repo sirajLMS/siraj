@@ -8,76 +8,14 @@ import { OnAppChannel } from "@/backend/services/communication/channels/on-app.c
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import { getChannelForPurpose } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
-import type {
-  ChannelDispatchResult,
-  CommunicationPayload,
-  NotificationDeliverySelectType,
-  NotificationEntityKind,
-  NotificationMetadata,
-  WhatsappTemplateComponent,
-  WhatsappTemplateMetadata,
-} from "@/backend/types";
+import {
+  asNotificationMetadata,
+  buildWhatsappTemplateComponents,
+  isStringRecord,
+  isWhatsappTemplateMetadata,
+} from "@/backend/services/communication/communication.service.helpers";
+import type { ChannelDispatchResult, CommunicationPayload, NotificationDeliverySelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-const NOTIFICATION_ENTITY_KINDS: readonly NotificationEntityKind[] = [
-  "invoice",
-  "class",
-  "student",
-  "complaint",
-  "suggestion",
-  "paymentMethod",
-  "schedule",
-  "lessonReport",
-];
-
-/** Type guard: narrows an untyped `metadata` blob to a valid `NotificationMetadata`. */
-function isNotificationMetadata(metadata: unknown): metadata is NotificationMetadata {
-  if (metadata === null || typeof metadata !== "object") return false;
-  const entityKind = Reflect.get(metadata, "entityKind");
-  const entityId = Reflect.get(metadata, "entityId");
-  if (typeof entityKind !== "string" || typeof entityId !== "string") {
-    return false;
-  }
-  return NOTIFICATION_ENTITY_KINDS.some(kind => kind === entityKind);
-}
-
-function asNotificationMetadata(metadata: Record<string, unknown> | undefined): NotificationMetadata | null {
-  return isNotificationMetadata(metadata) ? metadata : null;
-}
-
-/** Type guard: narrows an untyped value to `Record<string, string>` (for push `data`). */
-function isStringRecord(value: unknown): value is Record<string, string> {
-  if (value === null || typeof value !== "object") return false;
-  return Object.values(value).every(v => typeof v === "string");
-}
-
-const WHATSAPP_PURPOSE_VALUES: ReadonlySet<string> = new Set(Object.values(WhatsappAccountPurpose));
-
-function isWhatsappAccountPurposeValue(value: unknown): value is WhatsappAccountPurpose {
-  return typeof value === "string" && WHATSAPP_PURPOSE_VALUES.has(value);
-}
-
-/**
- * Type guard: validates that an untyped value matches `WhatsappTemplateMetadata`.
- * Avoids unsafe `as` assertions by validating each property at runtime.
- */
-function isWhatsappTemplateMetadata(value: unknown): value is WhatsappTemplateMetadata {
-  if (value === null || typeof value !== "object") return false;
-  const name = Reflect.get(value, "name");
-  if (typeof name !== "string") return false;
-  const languageCode = Reflect.get(value, "languageCode");
-  if (languageCode != null && typeof languageCode !== "string") {
-    return false;
-  }
-  const purpose = Reflect.get(value, "purpose");
-  if (purpose != null && !isWhatsappAccountPurposeValue(purpose)) return false;
-  const paramsOrder = Reflect.get(value, "paramsOrder");
-  if (paramsOrder !== undefined) {
-    if (!Array.isArray(paramsOrder)) return false;
-    if (!paramsOrder.every(p => typeof p === "string")) return false;
-  }
-  return true;
-}
 
 export namespace CommunicationService {
   async function dispatchOnApp(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
@@ -199,68 +137,12 @@ export namespace CommunicationService {
       templateName: templateRaw.name,
     });
 
-    const components: WhatsappTemplateComponent[] | undefined = templateRaw.paramsOrder
-      ? templateRaw.paramsOrder.map(paramName => {
-          const paramValue = payload.metadata?.[paramName];
-          if (paramValue == null || paramValue === "") {
-            // r7-021: Log a warning before substituting with empty string
-            // so missing template params are observable — silently sending
-            // blank values masks data-integrity bugs.
-            logger.warn("dispatchWhatsapp: missing template param substituted with empty string", {
-              paramName,
-              userId: payload.userId,
-              eventType: payload.eventType,
-              templateName: templateRaw.name,
-            });
-          }
-          // Safely stringify paramValue to avoid "[object Object]" for objects
-          // (paramValue is unknown from Record<string, unknown>)
-          const textValue = (() => {
-            if (paramValue == null) {
-              return "";
-            }
-            if (Array.isArray(paramValue)) {
-              // For arrays, join elements safely - each element stringified
-              // Note: we must handle each element individually to avoid "[object Object]"
-              // when an array contains objects
-              return paramValue
-                .map(v => {
-                  if (v == null) {
-                    return "";
-                  }
-                  if (typeof v === "object") {
-                    return JSON.stringify(v);
-                  }
-                  return String(v);
-                })
-                .join(", ");
-            }
-            if (typeof paramValue === "object") {
-              // Plain objects - use JSON.stringify
-              return JSON.stringify(paramValue);
-            }
-            // Primitives (string, number, boolean, etc.)
-            return typeof paramValue === "string" ? paramValue : JSON.stringify(paramValue);
-          })();
-          return {
-            type: "body" as const,
-            parameters: [
-              {
-                type: "text" as const,
-                text: textValue,
-              },
-            ],
-          };
-        })
-      : undefined;
+    const components = buildWhatsappTemplateComponents(templateRaw, payload);
 
-    // r7-020: Resolve languageCode from the recipient's locale.
-    // The pure builder stamps `languageCode: null` (previously hardcoded "en").
-    // If the dispatch layer has a locale, use its language code; fall back to "en"
-    // only as a last resort.
-    // NOTE: A fully locale-correct selection would look up the synced template
-    // row's `languageCode` from the template service (B6) instead of deriving
-    // from the locale string alone.
+    // Resolve `languageCode` from the recipient's locale; fall back to "en" only
+    // as a last resort. A fully locale-correct selection would look up the
+    // synced template row's `languageCode` from the template service instead of
+    // deriving it from the locale string alone.
     const languageCode = templateRaw.languageCode ?? (locale ? locale.split("-")[0] : "en");
 
     const notificationMetadata = asNotificationMetadata(payload.metadata);

@@ -1,12 +1,11 @@
 "use client";
 
-import { useApolloClient, useMutation } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
 import { Box } from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { bulkDeleteExpensesMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
+import { useBulkDeleteConfirm } from "@/frontend/common/views/dashboard/accounting/__shared__";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
   type ConfirmSummaryDetail,
@@ -45,39 +44,25 @@ function buildBulkDeleteDetails(rows: readonly ExpenseConfirmRow[]): ConfirmSumm
 export function BulkDeleteExpensesDialog({ open, rows, onClose, onDone }: Readonly<BulkDeleteExpensesDialogProps>) {
   const labels = useAppTranslation(DashboardAccountingExpenses);
   const commonLabels = useAppTranslation(Translation.Common);
-  const client = useApolloClient();
-  const notifications = useNotifications();
   const [runMutation, { loading }] = useMutation(bulkDeleteExpensesMutationDocument, {
     // Domain errors reject with CombinedGraphQLErrors carrying extensions.code.
     errorPolicy: "none",
   });
-  const ids = useMemo(() => rows.map(row => row.id).filter((id): id is string => id !== null), [rows]);
+  const run = useCallback(
+    (ids: string[]) => runMutation({ variables: { input: { ids, reason: null } } }),
+    [runMutation]
+  );
   const details = useMemo(() => buildBulkDeleteDetails(rows), [rows]);
-
-  const startedRef = useRef(false);
-  useEffect(() => {
-    if (open) startedRef.current = false;
-  }, [open]);
-
-  const confirm = useCallback(() => {
-    const run = async (): Promise<void> => {
-      if (startedRef.current || ids.length === 0) return;
-      startedRef.current = true;
-      try {
-        await runMutation({ variables: { input: { ids, reason: null } } });
-      } catch (error: unknown) {
-        startedRef.current = false;
-        notifications.show(getGraphQLErrorMessage(error, commonLabels.operationFailed), { severity: "error" });
-        return;
-      }
-      client.cache.evict({ fieldName: EXPENSES_LIST_FIELD });
-      client.cache.gc();
-      notifications.show(labels.success.bulkDeleted(ids.length), { severity: "success" });
-      onDone();
-      onClose();
-    };
-    void run();
-  }, [ids, runMutation, client, notifications, labels, commonLabels, onDone, onClose]);
+  const { confirm, ids } = useBulkDeleteConfirm({
+    open,
+    rows,
+    run,
+    evictFieldName: EXPENSES_LIST_FIELD,
+    successMessage: labels.success.bulkDeleted,
+    operationFailedLabel: commonLabels.operationFailed,
+    onDone,
+    onClose,
+  });
 
   return (
     <BaseDeleteDialog

@@ -1,403 +1,72 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import type { ClassInstanceQuery, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { useUserStore } from "@/frontend/common/stores/userStore";
-import { formatScheduleTimeOnly } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
-import { useClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassActionHandlers";
-import { useClassDetailsContainerState } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsContainerState";
-import { useClassDetailsPermissions } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsPermissions";
-import { useClassDetailsData } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsQuery";
-import { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
-import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/details/hooks/useEventLogDownload";
 import {
-  type ClassDetailsHeaderLabels,
-  formatClassDetailDate,
-} from "@/frontend/common/views/dashboard/classes/details/types";
-import { useRouter } from "@/shared/i18n/navigation";
-import { type ClassDetailsLabels, Translation, useAppTranslation } from "@/shared/locale";
+  buildEarlyReturnViewModel,
+  buildReadyViewModel,
+  buildSessionActionProps,
+  formatClassInstanceSchedule,
+} from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel.helpers";
+import { useClassDetailsViewModelCore } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel.hooks";
+import type {
+  ClassDetailsViewModel,
+  ClassInstance,
+  OverrideRateDialogState,
+} from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel.types";
 
-const noopAsync = () => Promise.resolve();
-
-export type ClassInstance = NonNullable<ClassInstanceQuery["classInstance"]>;
-
-type SessionActionProps = {
-  readonly onStart: () => Promise<void>;
-  readonly onAbsent: () => Promise<void>;
-  readonly onLeave: (reason: string) => Promise<void>;
-  readonly onReset: () => Promise<void>;
-  readonly isStarting: boolean;
-  readonly isMarkingAbsent: boolean;
-  readonly isProcessingLeave: boolean;
-  readonly isResetting: boolean;
-  readonly error: null;
-};
-
-const noopSessionActionProps = {
-  onStart: noopAsync,
-  onAbsent: noopAsync,
-  onLeave: noopAsync,
-  onReset: noopAsync,
-  isStarting: false,
-  isMarkingAbsent: false,
-  isProcessingLeave: false,
-  isResetting: false,
-  error: null,
-};
-
-type Translations = ClassDetailsLabels;
-type Handlers = ReturnType<typeof useClassActionHandlers>;
-type FeedbackState = { readonly message: string; readonly severity: "success" | "error" } | null;
-
-/**
- * Store-backed state + handlers for the admin override-rate dialog. The dialog
- * lives in `classDetailsStore` so it survives viewport tier switches; handlers
- * are bound to the container's action handlers by the ViewModel.
- */
-export interface OverrideRateDialogState {
-  readonly open: boolean;
-  readonly amount: string;
-  readonly currency: CurrencyCode | null;
-  readonly onOpen: () => void;
-  readonly onClose: () => void;
-  readonly onAmountChange: (value: string) => void;
-  readonly onCurrencyChange: (value: CurrencyCode | null) => void;
-  readonly onSubmit: (clearOverride: boolean) => Promise<void>;
-}
-
-type OverrideRateDialogStoreSlice = {
-  readonly open: boolean;
-  readonly amount: string;
-  readonly currency: CurrencyCode | null;
-  readonly setAmount: (value: string) => void;
-  readonly setCurrency: (value: CurrencyCode | null) => void;
-  readonly setOpen: (value: boolean) => void;
-  readonly openDialog: (amount: string, currency: CurrencyCode | null) => void;
-};
-
-function buildOverrideRateDialog(
-  store: OverrideRateDialogStoreSlice,
-  handlers: Handlers,
-  seedAmount: string,
-  seedCurrency: CurrencyCode | null
-): OverrideRateDialogState {
-  return {
-    open: store.open,
-    amount: store.amount,
-    currency: store.currency,
-    onOpen: () => store.openDialog(seedAmount, seedCurrency),
-    onClose: () => store.setOpen(false),
-    onAmountChange: store.setAmount,
-    onCurrencyChange: store.setCurrency,
-    onSubmit: async (clearOverride: boolean) => {
-      // An empty amount (or an explicit clear action) removes the override entirely.
-      const normalizedAmount = store.amount.trim();
-      const rateAmount = clearOverride || normalizedAmount.length === 0 ? null : normalizedAmount;
-      const rateCurrency = rateAmount ? store.currency : null;
-      await handlers.handleOverrideRate(rateAmount, rateCurrency);
-      store.setOpen(false);
-    },
-  };
-}
-
-function buildClassDetailsHeaderLabels(
-  t: ClassDetailsLabels,
-  classTypes: ClassDetailsHeaderLabels["classTypes"]
-): ClassDetailsHeaderLabels {
-  return {
-    pageSubtitleAdmin: t.pageSubtitleAdmin,
-    pageSubtitleTeacher: t.pageSubtitleTeacher,
-    pageSubtitleStudent: t.pageSubtitleStudent,
-    classTypes,
-    breadcrumbs: {
-      dashboard: t.breadcrumbs.dashboard,
-      classes: t.breadcrumbs.classes,
-    },
-  };
-}
-
-function useClassDetailsTranslations() {
-  const t = useAppTranslation(Translation.Dashboard.ClassDetails);
-  const session = useAppTranslation(Translation.Session);
-  return { t, headerLabels: buildClassDetailsHeaderLabels(t, session.classTypes) };
-}
-
-function useClassInstanceId(): string {
-  const params = useParams();
-  const rawId = params?.id;
-  return typeof rawId === "string" ? rawId : "";
-}
-
-function formatClassInstanceSchedule(instance: ClassInstance, locale: string) {
-  return {
-    formattedScheduledDate: formatClassDetailDate(instance.scheduledDate, locale),
-    formattedStartTime: formatScheduleTimeOnly(instance.startTime, locale),
-    formattedEndTime: formatScheduleTimeOnly(instance.endTime, locale),
-  };
-}
-
-type CommonViewModelFields = {
-  readonly canOverride: boolean;
-  readonly isParentView: boolean;
-  readonly isStudentView: boolean;
-  readonly canViewSessionDetails: boolean;
-  readonly isWarningDismissed: boolean;
-  readonly setIsWarningDismissed: (value: boolean) => void;
-  readonly handlers: Handlers;
-  readonly sessionActionProps: SessionActionProps;
-  readonly feedbackState: FeedbackState;
-  readonly deleteDialogOpen: boolean;
-  readonly setDeleteDialogOpen: (value: boolean) => void;
-  readonly onGenerateLog: () => void;
-  readonly overrideRateDialog: OverrideRateDialogState;
-  readonly t: Translations;
-  readonly headerLabels: ClassDetailsHeaderLabels;
-  readonly formattedScheduledDate: string;
-  readonly formattedStartTime: string;
-  readonly formattedEndTime: string;
-};
-
-type EarlyReturnStatus = "loading" | "invalidId" | "error";
-
-type EarlyReturnSharedFields = {
-  readonly isWarningDismissed: boolean;
-  readonly setIsWarningDismissed: (value: boolean) => void;
-  readonly handlers: Handlers;
-  readonly feedbackState: FeedbackState;
-  readonly deleteDialogOpen: boolean;
-  readonly setDeleteDialogOpen: (value: boolean) => void;
-  readonly onGenerateLog: () => void;
-  readonly overrideRateDialog: OverrideRateDialogState;
-  readonly t: Translations;
-  readonly headerLabels: ClassDetailsHeaderLabels;
-  readonly canViewSessionDetails: boolean;
-};
-
-function buildEarlyReturnViewModel(status: EarlyReturnStatus, shared: EarlyReturnSharedFields): ClassDetailsViewModel {
-  return {
-    status,
-    instance: null,
-    canOverride: false,
-    isParentView: false,
-    isStudentView: false,
-    canViewSessionDetails: shared.canViewSessionDetails,
-    isWarningDismissed: shared.isWarningDismissed,
-    setIsWarningDismissed: shared.setIsWarningDismissed,
-    handlers: shared.handlers,
-    sessionActionProps: noopSessionActionProps,
-    feedbackState: shared.feedbackState,
-    deleteDialogOpen: shared.deleteDialogOpen,
-    setDeleteDialogOpen: shared.setDeleteDialogOpen,
-    onGenerateLog: shared.onGenerateLog,
-    overrideRateDialog: shared.overrideRateDialog,
-    t: shared.t,
-    headerLabels: shared.headerLabels,
-    formattedScheduledDate: "",
-    formattedStartTime: "",
-    formattedEndTime: "",
-  };
-}
-
-type MutationsShape = {
-  startSession: () => Promise<void>;
-  markAbsent: () => Promise<void>;
-  processLeave: (reason: string) => Promise<void>;
-  resetSession: () => Promise<void>;
-  isStarting: boolean;
-  isMarkingAbsent: boolean;
-  isProcessingLeave: boolean;
-  isResetting: boolean;
-};
-
-function buildSessionActionProps(mutations: MutationsShape): CommonViewModelFields["sessionActionProps"] {
-  return {
-    onStart: () => mutations.startSession(),
-    onAbsent: () => mutations.markAbsent(),
-    onLeave: (reason: string) => mutations.processLeave(reason),
-    onReset: () => mutations.resetSession(),
-    isStarting: mutations.isStarting,
-    isMarkingAbsent: mutations.isMarkingAbsent,
-    isProcessingLeave: mutations.isProcessingLeave,
-    isResetting: mutations.isResetting,
-    error: null,
-  };
-}
-
-type ReadyInputs = {
-  readonly instance: ClassInstance;
-  readonly canOverride: boolean;
-  readonly isParentView: boolean;
-  readonly isStudentView: boolean;
-  readonly canViewSessionDetails: boolean;
-  readonly isWarningDismissed: boolean;
-  readonly setIsWarningDismissed: (value: boolean) => void;
-  readonly handlers: Handlers;
-  readonly sessionActionProps: CommonViewModelFields["sessionActionProps"];
-  readonly feedbackState: FeedbackState;
-  readonly deleteDialogOpen: boolean;
-  readonly setDeleteDialogOpen: (value: boolean) => void;
-  readonly onGenerateLog: () => void;
-  readonly overrideRateDialog: OverrideRateDialogState;
-  readonly t: Translations;
-  readonly headerLabels: ClassDetailsHeaderLabels;
-  readonly formattedScheduledDate: string;
-  readonly formattedStartTime: string;
-  readonly formattedEndTime: string;
-};
-
-function buildReadyViewModel(inputs: ReadyInputs): ClassDetailsViewModel {
-  return {
-    status: "ready",
-    instance: inputs.instance,
-    canOverride: inputs.canOverride,
-    isParentView: inputs.isParentView,
-    isStudentView: inputs.isStudentView,
-    canViewSessionDetails: inputs.canViewSessionDetails,
-    isWarningDismissed: inputs.isWarningDismissed,
-    setIsWarningDismissed: inputs.setIsWarningDismissed,
-    handlers: inputs.handlers,
-    sessionActionProps: inputs.sessionActionProps,
-    feedbackState: inputs.feedbackState,
-    deleteDialogOpen: inputs.deleteDialogOpen,
-    setDeleteDialogOpen: inputs.setDeleteDialogOpen,
-    onGenerateLog: inputs.onGenerateLog,
-    overrideRateDialog: inputs.overrideRateDialog,
-    t: inputs.t,
-    headerLabels: inputs.headerLabels,
-    formattedScheduledDate: inputs.formattedScheduledDate,
-    formattedStartTime: inputs.formattedStartTime,
-    formattedEndTime: inputs.formattedEndTime,
-  };
-}
-
-export interface ClassDetailsViewModel {
-  readonly status: "loading" | "invalidId" | "error" | "ready";
-  readonly instance: ClassInstance | null;
-  readonly canOverride: boolean;
-  readonly isParentView: boolean;
-  readonly isStudentView: boolean;
-  readonly canViewSessionDetails: boolean;
-  readonly isWarningDismissed: boolean;
-  readonly setIsWarningDismissed: (value: boolean) => void;
-  readonly handlers: ReturnType<typeof useClassActionHandlers>;
-  readonly sessionActionProps: SessionActionProps;
-  readonly feedbackState: { readonly message: string; readonly severity: "success" | "error" } | null;
-  readonly deleteDialogOpen: boolean;
-  readonly setDeleteDialogOpen: (value: boolean) => void;
-  readonly onGenerateLog: () => void;
-  readonly overrideRateDialog: OverrideRateDialogState;
-  readonly t: ClassDetailsLabels;
-  readonly headerLabels: ClassDetailsHeaderLabels;
-  readonly formattedScheduledDate: string;
-  readonly formattedStartTime: string;
-  readonly formattedEndTime: string;
-}
+export type { ClassDetailsViewModel, ClassInstance, OverrideRateDialogState };
 
 export function useClassDetailsViewModel(): ClassDetailsViewModel {
-  const router = useRouter();
-  const locale = useAppLocale();
-  const { t, headerLabels } = useClassDetailsTranslations();
-  const id = useClassInstanceId();
-  const hasPermission = useUserStore(state => state.hasPermission);
-
-  const {
-    isWarningDismissed,
-    setIsWarningDismissed,
-    feedbackState,
-    setFeedbackState,
-    shouldLoadEvents,
-    setShouldLoadEvents,
-    deleteDialogOpen,
-    setDeleteDialogOpen,
-    overrideDialogOpen,
-    setOverrideDialogOpen,
-    overrideRateAmount,
-    setOverrideRateAmount,
-    overrideRateCurrency,
-    setOverrideRateCurrency,
-    openOverrideDialog,
-  } = useClassDetailsContainerState();
-
-  const { data, loading, error } = useClassDetailsData(id);
-  useEventLogDownload(id, shouldLoadEvents, setShouldLoadEvents, setFeedbackState, t);
-
-  const mutations = useClassMutations({
-    id,
-    onError: message => setFeedbackState({ message, severity: "error" }),
-  });
-
-  const handlers = useClassActionHandlers(id, mutations, router, setFeedbackState, t);
-  const { canOverride, isParentView, isStudentView, canViewSessionDetails } = useClassDetailsPermissions(hasPermission);
-
-  // Triggers the lazy class-status-events query inside useEventLogDownload; when
-  // the events resolve, the hook serializes them into a JSON file download.
-  const onGenerateLog = () => setShouldLoadEvents(true);
-
-  const overrideRateDialog = buildOverrideRateDialog(
-    {
-      open: overrideDialogOpen,
-      amount: overrideRateAmount,
-      currency: overrideRateCurrency,
-      setAmount: setOverrideRateAmount,
-      setCurrency: setOverrideRateCurrency,
-      setOpen: setOverrideDialogOpen,
-      openDialog: openOverrideDialog,
-    },
-    handlers,
-    data?.classInstance?.rateAmount ?? "",
-    data?.classInstance?.rateCurrency ?? null
-  );
+  const core = useClassDetailsViewModelCore();
 
   const earlyReturnShared = {
-    isWarningDismissed,
-    setIsWarningDismissed,
-    handlers,
-    feedbackState,
-    deleteDialogOpen,
-    setDeleteDialogOpen,
-    onGenerateLog,
-    overrideRateDialog,
-    t,
-    headerLabels,
-    canViewSessionDetails,
+    isWarningDismissed: core.isWarningDismissed,
+    setIsWarningDismissed: core.setIsWarningDismissed,
+    handlers: core.handlers,
+    feedbackState: core.feedbackState,
+    deleteDialogOpen: core.deleteDialogOpen,
+    setDeleteDialogOpen: core.setDeleteDialogOpen,
+    onGenerateLog: core.onGenerateLog,
+    overrideRateDialog: core.overrideRateDialog,
+    t: core.t,
+    headerLabels: core.headerLabels,
+    canViewSessionDetails: core.canViewSessionDetails,
   };
 
-  if (loading) {
+  if (core.loading) {
     return buildEarlyReturnViewModel("loading", earlyReturnShared);
   }
 
-  if (!id) {
+  if (!core.id) {
     return buildEarlyReturnViewModel("invalidId", earlyReturnShared);
   }
 
-  if (error || !data?.classInstance) {
+  if (core.error || !core.data?.classInstance) {
     return buildEarlyReturnViewModel("error", earlyReturnShared);
   }
 
-  const instance = data.classInstance;
+  const instance = core.data.classInstance;
   const { formattedScheduledDate, formattedStartTime, formattedEndTime } = formatClassInstanceSchedule(
     instance,
-    locale
+    core.locale
   );
 
   return buildReadyViewModel({
     instance,
-    canOverride,
-    isParentView,
-    isStudentView,
-    canViewSessionDetails,
-    isWarningDismissed,
-    setIsWarningDismissed,
-    handlers,
-    sessionActionProps: buildSessionActionProps(mutations),
-    feedbackState,
-    deleteDialogOpen,
-    setDeleteDialogOpen,
-    onGenerateLog,
-    overrideRateDialog,
-    t,
-    headerLabels,
+    canOverride: core.canOverride,
+    isParentView: core.isParentView,
+    isStudentView: core.isStudentView,
+    canViewSessionDetails: core.canViewSessionDetails,
+    isWarningDismissed: core.isWarningDismissed,
+    setIsWarningDismissed: core.setIsWarningDismissed,
+    handlers: core.handlers,
+    sessionActionProps: buildSessionActionProps(core.mutations),
+    feedbackState: core.feedbackState,
+    deleteDialogOpen: core.deleteDialogOpen,
+    setDeleteDialogOpen: core.setDeleteDialogOpen,
+    onGenerateLog: core.onGenerateLog,
+    overrideRateDialog: core.overrideRateDialog,
+    t: core.t,
+    headerLabels: core.headerLabels,
     formattedScheduledDate,
     formattedStartTime,
     formattedEndTime,

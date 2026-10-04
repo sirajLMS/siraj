@@ -16,6 +16,10 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { logger } from "@/frontend/common/utils/logger";
+import {
+  buildLifecycleHandlers,
+  buildSessionHandlers,
+} from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations.helpers";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface UseClassMutationsOptions {
@@ -49,134 +53,72 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
     onError?.(getGraphQLErrorMessage(err, fallbackMessage));
   };
 
+  const refetchCompleted = () => {
+    void client.refetchQueries({ include: [classInstanceQueryDocument] });
+  };
+
   const [activateClass] = useMutation(activateClassMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Activate class failed:", err, t.actionFeedback.activateError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Activate class failed:", err, t.actionFeedback.activateError),
   });
 
   const [activateOverrideClass] = useMutation(activateOverrideClassMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Activate override class failed:", err, t.actionFeedback.forceActivateError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Activate override class failed:", err, t.actionFeedback.forceActivateError),
   });
 
   const [stopClassMutation] = useMutation(stopClassMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Stop class failed:", err, t.actionFeedback.stopError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Stop class failed:", err, t.actionFeedback.stopError),
   });
 
   const [deleteClassMutation] = useMutation(deleteClassInstanceMutationDocument, {
-    onError: err => {
-      reportMutationError("Delete class failed:", err, t.actionFeedback.deleteError);
-    },
+    onError: err => reportMutationError("Delete class failed:", err, t.actionFeedback.deleteError),
   });
 
   const [startSessionMutation, { loading: isStarting }] = useMutation(updateSessionStatusStartMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Start session failed:", err, t.actionFeedback.startError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Start session failed:", err, t.actionFeedback.startError),
   });
 
   const [markAbsentMutation, { loading: isMarkingAbsent }] = useMutation(updateSessionStatusAbsentMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Mark absent failed:", err, t.actionFeedback.markAbsentError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Mark absent failed:", err, t.actionFeedback.markAbsentError),
   });
 
   const [processLeaveMutation, { loading: isProcessingLeave }] = useMutation(updateSessionStatusLeaveMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Process leave failed:", err, t.actionFeedback.leaveError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Process leave failed:", err, t.actionFeedback.leaveError),
   });
 
   const [resetSessionMutation, { loading: isResetting }] = useMutation(resetClassMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Reset session failed:", err, t.actionFeedback.resetError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Reset session failed:", err, t.actionFeedback.resetError),
   });
 
   const [overrideRateMutation, { loading: isOverridingRate }] = useMutation(overrideClassInstanceRateMutationDocument, {
-    onCompleted: () => {
-      void client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      reportMutationError("Override rate failed:", err, t.instanceDetails.overrideError);
-    },
+    onCompleted: refetchCompleted,
+    onError: err => reportMutationError("Override rate failed:", err, t.instanceDetails.overrideError),
   });
 
-  const forceActivate = async () => {
-    await activateOverrideClass({ variables: { classInstanceId: id } });
-    logger.info("Admin force-activated session:", id);
-  };
+  const lifecycleHandlers = buildLifecycleHandlers(id, {
+    forceActivate: vars => activateOverrideClass(vars),
+    activate: vars => activateClass(vars),
+    stopClass: vars => stopClassMutation(vars),
+    deleteClass: vars => deleteClassMutation(vars),
+  });
 
-  const activate = async () => {
-    await activateClass({ variables: { classInstanceId: id } });
-    logger.info("Teacher activated session:", id);
-  };
-
-  const stopClass = async () => {
-    await stopClassMutation({ variables: { classInstanceId: id } });
-    logger.info("Stopped session:", id);
-  };
-
-  const deleteClass = async () => {
-    await deleteClassMutation({ variables: { classInstanceId: id } });
-    logger.warn("Deleted class instance:", id);
-  };
-
-  const startSession = async () => {
-    await startSessionMutation({ variables: { classInstanceId: id } });
-  };
-
-  const markAbsent = async () => {
-    await markAbsentMutation({ variables: { classInstanceId: id } });
-  };
-
-  const processLeave = async (reason: string) => {
-    await processLeaveMutation({ variables: { classInstanceId: id, leaveReason: reason } });
-  };
-
-  const resetSession = async () => {
-    await resetSessionMutation({ variables: { classInstanceId: id } });
-  };
-
-  const overrideRate = async (rateAmount: string | null, rateCurrency: CurrencyCode | null) => {
-    await overrideRateMutation({ variables: { classInstanceId: id, rateAmount, rateCurrency } });
-  };
+  const sessionHandlers = buildSessionHandlers(id, {
+    start: vars => startSessionMutation(vars),
+    markAbsent: vars => markAbsentMutation(vars),
+    processLeave: vars => processLeaveMutation(vars),
+    reset: vars => resetSessionMutation(vars),
+    overrideRate: vars => overrideRateMutation(vars),
+  });
 
   return {
-    forceActivate,
-    activate,
-    stopClass,
-    deleteClass,
-    startSession,
-    markAbsent,
-    processLeave,
-    resetSession,
-    overrideRate,
+    ...lifecycleHandlers,
+    ...sessionHandlers,
     isStarting,
     isMarkingAbsent,
     isProcessingLeave,

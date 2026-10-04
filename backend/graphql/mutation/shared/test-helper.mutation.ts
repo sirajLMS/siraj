@@ -8,6 +8,26 @@ import { logger } from "@/backend/lib/logger";
 import { assertTestHelperAllowed, isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
 import { TestHelperService } from "@/backend/services";
 
+/**
+ * Registers a single-argument cleanup mutation: the same shape, gate, and
+ * resolver prelude for every test-helper cleanup root field.
+ */
+function registerTestHelperCleanupMutation(name: string, cleanup: (userId: string) => Promise<boolean>) {
+  gqlSchemaBuilder.mutationField(name, t =>
+    t.field({
+      type: "Boolean",
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
+      args: {
+        userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      },
+      resolve: async (_query, args) => {
+        assertTestHelperAllowed();
+        return await cleanup(args.userId);
+      },
+    })
+  );
+}
+
 if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("ensureDemoUsers", t =>
     t.field({
@@ -97,33 +117,9 @@ if (isTestHelperEnabled()) {
     })
   );
 
-  gqlSchemaBuilder.mutationField("cleanupTestSuperAdmin", t =>
-    t.field({
-      type: "Boolean",
-      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
-      args: {
-        userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      },
-      resolve: async (_query, args) => {
-        assertTestHelperAllowed();
-        return await TestHelperService.cleanupTestSuperAdmin(args.userId);
-      },
-    })
-  );
+  registerTestHelperCleanupMutation("cleanupTestSuperAdmin", userId => TestHelperService.cleanupTestSuperAdmin(userId));
 
-  gqlSchemaBuilder.mutationField("cleanupTestManager", t =>
-    t.field({
-      type: "Boolean",
-      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
-      args: {
-        userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      },
-      resolve: async (_query, args) => {
-        assertTestHelperAllowed();
-        return await TestHelperService.cleanupTestManager(args.userId);
-      },
-    })
-  );
+  registerTestHelperCleanupMutation("cleanupTestManager", userId => TestHelperService.cleanupTestManager(userId));
 } else if (process.env.NODE_ENV !== "production") {
   logger.warn("Test-helper mutations are NOT registered: TEST_SERVER and TEST_CI are unset", {
     testServer: process.env.TEST_SERVER ?? null,

@@ -1,7 +1,7 @@
 "use client";
 
-import { AccessTimeOutlined, CancelOutlined, CheckCircleOutlined, RateReviewOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { AccessTimeOutlined } from "@mui/icons-material";
+import { Box } from "@mui/material";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -12,7 +12,6 @@ import {
   type ScheduleSessionMetaStatItem,
 } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout";
 import {
-  StyledScheduleSessionCardActions,
   StyledScheduleSessionCardHeader,
   StyledScheduleSessionCardHeaderMain,
   StyledScheduleSessionPeopleRow,
@@ -26,6 +25,7 @@ import type {
   PendingReviewsViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { PendingReviewCardActions } from "@/frontend/mobile/views/dashboard/supervisor/lesson-reviews/components/pendingReviewCard.parts";
 
 function statusLabel(status: PendingReviewRow["status"], labels: PendingReviewsViewModel["labels"]): string {
   if (!status) return labels.statusLabels.PENDING_REVIEW;
@@ -90,34 +90,14 @@ export function PendingReviewCardMobile({
           />
         </StyledScheduleSessionCardHeaderMain>
 
-        <StyledScheduleSessionCardActions>
-          <Tooltip title={labels.reviewButton}>
-            <IconButton size="small" aria-label={labels.reviewButton} onClick={() => onSelect(row)}>
-              <RateReviewOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={labels.approveButton}>
-            <IconButton
-              size="small"
-              aria-label={labels.approveButton}
-              onClick={() => onApprove(row.id)}
-              disabled={approving}
-              sx={theme => ({ color: theme.palette.primary.main })}
-            >
-              <CheckCircleOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={labels.rejectButton}>
-            <IconButton
-              size="small"
-              aria-label={labels.rejectButton}
-              onClick={() => onReject(row)}
-              sx={theme => ({ color: theme.palette.error.main })}
-            >
-              <CancelOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </StyledScheduleSessionCardActions>
+        <PendingReviewCardActions
+          row={row}
+          labels={labels}
+          approving={approving}
+          onApprove={onApprove}
+          onReject={onReject}
+          onSelect={onSelect}
+        />
       </StyledScheduleSessionCardHeader>
 
       <StyledScheduleSessionTimeHighlight>

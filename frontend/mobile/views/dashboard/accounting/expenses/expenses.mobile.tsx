@@ -1,12 +1,8 @@
 "use client";
 
-import { AddOutlined, DeleteOutlined, EditOutlined, LinkOutlined, MoreVertOutlined } from "@mui/icons-material";
-import { Box, ButtonBase, IconButton, Menu, MenuItem, Paper, Stack, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
-import { type ReactNode, useState } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui";
+import { AddOutlined } from "@mui/icons-material";
+import { IconButton, Paper, Stack, Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
   MobileListCardSkeletons,
@@ -14,228 +10,20 @@ import {
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/mobileListStateShared";
 import { ExpenseFilterBar } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFilterBar";
 import type { ExpensesViewProps } from "@/frontend/common/views/dashboard/accounting/expenses/ExpensesContainer";
-import type {
-  ExpenseAggregates,
-  ExpenseRow,
-} from "@/frontend/common/views/dashboard/accounting/expenses/useExpensesViewModel";
+import type { ExpenseAggregates } from "@/frontend/common/views/dashboard/accounting/expenses/useExpensesViewModel";
 import { usePageBreadcrumbs } from "@/frontend/common/views/dashboard/lib/usePageBreadcrumbs";
 import {
   MobileCardList,
-  MobileCardListItem,
   MobileContentInset,
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
-import { EXPENSE_SOURCE_CARRYOVER_BALANCES } from "@/shared/constants/expenses";
+import { ExpenseCard } from "@/frontend/mobile/views/dashboard/accounting/expenses/expenses.mobile.card";
 import type { ExpensesLabels } from "@/shared/locale/types/dashboard/accounting/expenses";
 
 /** Height of each placeholder card while the first page loads. */
 const LIST_SKELETON_HEIGHT = 128;
-
-/** Native-button reset for the tappable card body that opens the detail drawer. */
-const CARD_TAP_TARGET_SX = (theme: Theme) => ({
-  flex: 1,
-  minWidth: 0,
-  padding: 0,
-  border: "none",
-  background: "none",
-  cursor: "pointer",
-  textAlign: "start",
-  color: "inherit",
-  font: "inherit",
-  borderRadius: 1,
-  "&:focus-visible": {
-    outline: `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: 2,
-  },
-});
-
-interface ExpenseMenuItem {
-  readonly key: "edit" | "delete" | "viewSource";
-  readonly icon: ReactNode;
-  readonly label: string;
-  readonly run: () => void;
-  readonly disabled?: boolean;
-  readonly danger?: boolean;
-}
-
-/** Localized label for an expense type, so badge cells carry the full copy. */
-function expenseTypeLabel(labels: ExpensesLabels, type: ExpenseType): string {
-  const labelsByType: Record<ExpenseType, string> = {
-    [ExpenseType.Salaries]: labels.type.Salaries,
-    [ExpenseType.Marketing]: labels.type.Marketing,
-    [ExpenseType.Logistics]: labels.type.Logistics,
-    [ExpenseType.Technology]: labels.type.Technology,
-  };
-  return labelsByType[type];
-}
-
-/** Provenance badge row: Manual for hand-entered rows, From Carryover for settlement rows. */
-function expenseSourceBadges(row: ExpenseRow, labels: ExpensesLabels): ReactNode {
-  if (row.sourceEntity === EXPENSE_SOURCE_CARRYOVER_BALANCES && row.sourceEntityId !== null) {
-    return (
-      <StatusBadge
-        category="expenseSource"
-        status="carryover"
-        label={labels.source.FromCarryover}
-        icon={<LinkOutlined fontSize="small" />}
-      />
-    );
-  }
-  if (row.sourceEntity !== null) return null;
-  return <StatusBadge category="expenseSource" status="manual" label={labels.source.Manual} />;
-}
-
-interface ExpenseRowMenuProps {
-  readonly row: ExpenseRow;
-  readonly labels: ExpensesLabels;
-  readonly menuAriaLabel: string;
-  /** Manager-only items (Edit / Delete) are omitted when false; View Source stays. */
-  readonly canManage: boolean;
-  readonly onOpenForm: (row: ExpenseRow) => void;
-  readonly onOpenDelete: (rows: readonly ExpenseRow[]) => void;
-  readonly onViewSource: (sourceEntityId: string) => void;
-}
-
-/** Builds the overflow menu entries; write actions sit behind the manage gate while View Source stays a read affordance. */
-function buildRowMenuItems(args: Omit<ExpenseRowMenuProps, "menuAriaLabel">): ExpenseMenuItem[] {
-  const { row, labels, canManage, onOpenForm, onOpenDelete, onViewSource } = args;
-  const deleted = row.deletedAt !== null;
-  const items: ExpenseMenuItem[] = [
-    {
-      key: "viewSource",
-      icon: <LinkOutlined fontSize="small" />,
-      label: labels.action.viewSource,
-      run: () => {
-        const sourceId = row.sourceEntityId;
-        if (sourceId !== null) onViewSource(sourceId);
-      },
-      disabled: row.sourceEntityId === null,
-    },
-  ];
-  if (!canManage) return items;
-  items.unshift({
-    key: "edit",
-    icon: <EditOutlined fontSize="small" />,
-    label: labels.action.edit,
-    run: () => onOpenForm(row),
-    disabled: deleted,
-  });
-  items.push({
-    key: "delete",
-    icon: <DeleteOutlined fontSize="small" />,
-    label: labels.action.delete,
-    run: () => onOpenDelete([row]),
-    disabled: deleted,
-    danger: true,
-  });
-  return items;
-}
-
-/** Per-card overflow menu holding the row actions in the compact mobile layout. */
-function ExpenseRowMenu(props: Readonly<ExpenseRowMenuProps>) {
-  const { row, menuAriaLabel } = props;
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const menuOpen = anchorEl !== null;
-  const items = buildRowMenuItems(props);
-  const rowId = row.id ?? "";
-
-  return (
-    <>
-      <IconButton
-        size="small"
-        onClick={event => setAnchorEl(event.currentTarget)}
-        aria-label={menuAriaLabel}
-        aria-haspopup="menu"
-        aria-expanded={menuOpen}
-        aria-controls={menuOpen ? `expense-card-menu-${rowId}` : undefined}
-      >
-        <MoreVertOutlined fontSize="small" />
-      </IconButton>
-      <Menu id={`expense-card-menu-${rowId}`} anchorEl={anchorEl} open={menuOpen} onClose={() => setAnchorEl(null)}>
-        {items.map(item => (
-          <MenuItem
-            key={item.key}
-            disabled={item.disabled ?? false}
-            onClick={() => {
-              setAnchorEl(null);
-              item.run();
-            }}
-            sx={item.danger === true ? theme => ({ color: theme.palette.error.main }) : undefined}
-          >
-            <Box component="span" sx={{ marginInlineEnd: 1, display: "inline-flex" }}>
-              {item.icon}
-            </Box>
-            {item.label}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
-  );
-}
-
-interface ExpenseCardProps extends Omit<ExpenseRowMenuProps, "menuAriaLabel"> {
-  readonly menuAriaLabel: string;
-  readonly onOpenDrawer: (row: ExpenseRow) => void;
-}
-
-/**
- * One expense row as a mobile card: tappable body (opens the detail drawer)
- * with title + amount, the type/source badge row with the deleted badge, the
- * teacher line when set, and a per-card overflow menu holding the row actions.
- * Soft-deleted rows render dimmed with a struck-through title.
- */
-function ExpenseCard({
-  row,
-  labels,
-  menuAriaLabel,
-  canManage,
-  onOpenDrawer,
-  ...callbacks
-}: Readonly<ExpenseCardProps>) {
-  const deleted = row.deletedAt !== null;
-  const title = row.title ?? "";
-  return (
-    <MobileCardListItem variant="rounded" dimmed={deleted}>
-      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-        <ButtonBase
-          type="button"
-          onClick={() => onOpenDrawer(row)}
-          aria-label={labels.drawer.title(title)}
-          sx={CARD_TAP_TARGET_SX}
-        >
-          <Stack sx={{ gap: 1 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 1 }}>
-              <Typography
-                variant="titleLg"
-                sx={{ minWidth: 0, ...(deleted ? { textDecoration: "line-through" } : null) }}
-              >
-                {title}
-              </Typography>
-              <Typography variant="titleLg" sx={{ flexShrink: 0 }}>
-                {formatAccountingMoney(row.expenseValue)} {row.expenseCurrency ?? ""}
-              </Typography>
-            </Box>
-            <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-              {row.type !== null ? (
-                <StatusBadge category="expenseType" status={row.type} label={expenseTypeLabel(labels, row.type)} />
-              ) : null}
-              {expenseSourceBadges(row, labels)}
-              {deleted ? <StatusBadge category="session" status="cancelled" label={labels.deletedBadge} /> : null}
-            </Stack>
-            {row.teacherName !== null && row.teacherName !== "" ? (
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {row.teacherName}
-              </Typography>
-            ) : null}
-          </Stack>
-        </ButtonBase>
-        <ExpenseRowMenu row={row} labels={labels} menuAriaLabel={menuAriaLabel} canManage={canManage} {...callbacks} />
-      </Box>
-    </MobileCardListItem>
-  );
-}
 
 /** Totals strip above the list: the filtered set's total value and record count. */
 function ExpenseAggregateStrip({

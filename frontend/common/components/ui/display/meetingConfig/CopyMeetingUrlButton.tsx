@@ -2,9 +2,19 @@
 
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
-import { alpha, Box, Button, Fade, IconButton, type Theme, Tooltip, useMediaQuery } from "@mui/material";
-import { type ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { logger } from "@/frontend/common/utils/logger";
+import { Box, Fade, type Theme, useMediaQuery } from "@mui/material";
+import type { ReactElement } from "react";
+import {
+  type CopyState,
+  useClipboardCopyState,
+} from "@/frontend/common/components/ui/display/meetingConfig/CopyMeetingUrlButton.hooks";
+import {
+  CopyMeetingUrlButtonTrigger,
+  CopyMeetingUrlIconTrigger,
+  CopyMeetingUrlLiveRegion,
+  CopyMeetingUrlTextTrigger,
+  type CopyMeetingUrlTriggerProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/CopyMeetingUrlButton.parts";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type CopyMeetingUrlVariant = "icon" | "button" | "text";
@@ -30,63 +40,8 @@ export interface CopyMeetingUrlButtonProps {
   readonly copiedDurationMs?: number;
 }
 
-type CopyState = "default" | "copied" | "error";
-
 const DEFAULT_COPIED_MS = 2000;
 const ICON_SWAP_MS = 150;
-
-/** Visually-hidden style for the screen-reader live region announcing copy feedback. */
-const visuallyHiddenSx = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  border: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  whiteSpace: "nowrap",
-} as const;
-
-/**
- * Clipboard write with fallback for older browsers.
- * Returns `true` if the text was written, `false` otherwise.
- */
-async function writeClipboardText(text: string, allowFallback: boolean): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    if (allowFallback) {
-      return execFallbackCopy(text);
-    }
-    return false;
-  }
-}
-
-/**
- * Fallback using a hidden `textarea` + legacy clipboard copy.
- * Required for older browsers and insecure contexts where `navigator.clipboard` is unavailable.
- */
-function execFallbackCopy(text: string): boolean {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  const execCopy: (commandId: string) => boolean = document.execCommand.bind(document);
-  let succeeded = false;
-  try {
-    succeeded = execCopy("copy");
-  } catch {
-    // execCommand not supported — succeeded stays false
-  }
-  document.body.removeChild(textarea);
-  return succeeded;
-}
 
 function resolveIconColor(state: CopyState): (theme: Theme) => string {
   if (state === "copied") {
@@ -115,48 +70,13 @@ export function CopyMeetingUrlButton({
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
   const fadeTimeout = reducedMotion ? 0 : ICON_SWAP_MS;
 
-  const [copyState, setCopyState] = useState<CopyState>("default");
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-      if (timerRef.current !== null) {
-        globalThis.clearTimeout(timerRef.current);
-      }
-    };
-  }, []);
-
-  const handleCopy = useCallback(async () => {
-    if (disabled) return;
-
-    const allowFallback = typeof navigator !== "undefined" && !navigator.clipboard;
-    const succeeded = await writeClipboardText(meetingUrl, allowFallback);
-
-    if (!mountedRef.current) return;
-
-    if (succeeded) {
-      if (timerRef.current !== null) {
-        globalThis.clearTimeout(timerRef.current);
-      }
-      setCopyState("copied");
-
-      timerRef.current = globalThis.setTimeout(() => {
-        if (mountedRef.current) {
-          setCopyState("default");
-          timerRef.current = null;
-        }
-      }, copiedDurationMs);
-
-      onCopySuccess?.();
-    } else {
-      logger.warn("Clipboard write failed for meeting URL");
-      setCopyState("error");
-      onCopyError?.();
-    }
-  }, [disabled, meetingUrl, copiedDurationMs, onCopySuccess, onCopyError]);
+  const { copyState, handleCopy } = useClipboardCopyState({
+    text: meetingUrl,
+    disabled,
+    copiedDurationMs,
+    onCopySuccess,
+    onCopyError,
+  });
 
   const resolvedAriaLabel = ariaLabel ?? labels.copyMeetingUrl;
   const isCopied = copyState === "copied";
@@ -187,36 +107,24 @@ export function CopyMeetingUrlButton({
     liveFeedback = labels.urlCopyFailed;
   }
 
-  const liveRegion = (
-    <Box component="output" aria-live="polite" sx={visuallyHiddenSx}>
-      {liveFeedback}
-    </Box>
-  );
+  const triggerProps: CopyMeetingUrlTriggerProps = {
+    size,
+    disabled,
+    onClick: handleCopy,
+    ariaLabel: resolvedAriaLabel,
+    pressed: isCopied,
+    tooltipText,
+    icon: iconNode,
+    iconColor,
+    label: labels.copyMeetingUrl,
+  };
+
+  const liveRegion = <CopyMeetingUrlLiveRegion message={liveFeedback} />;
 
   if (variant === "button") {
     return (
       <>
-        <Tooltip title={tooltipText}>
-          <span>
-            <Button
-              size={size}
-              variant="text"
-              disabled={disabled}
-              onClick={handleCopy}
-              aria-label={resolvedAriaLabel}
-              aria-pressed={isCopied}
-              startIcon={iconNode}
-              sx={theme => ({
-                color: iconColor(theme),
-                "&:hover": {
-                  backgroundColor: alpha(theme.palette.success.main, 0.08),
-                },
-              })}
-            >
-              {labels.copyMeetingUrl}
-            </Button>
-          </span>
-        </Tooltip>
+        <CopyMeetingUrlButtonTrigger {...triggerProps} />
         {liveRegion}
       </>
     );
@@ -225,65 +133,15 @@ export function CopyMeetingUrlButton({
   if (variant === "text") {
     return (
       <>
-        <Tooltip title={tooltipText}>
-          <Box
-            sx={theme => ({
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              color: iconColor(theme),
-              "&:hover": disabled ? {} : { color: theme.palette.primary.main },
-            })}
-          >
-            <button
-              type="button"
-              onClick={handleCopy}
-              disabled={disabled}
-              aria-label={resolvedAriaLabel}
-              aria-pressed={isCopied}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                background: "none",
-                border: "none",
-                cursor: disabled ? "default" : "pointer",
-                padding: 0,
-                color: "inherit",
-                font: "inherit",
-              }}
-            >
-              {iconNode}
-              <Box sx={{ typography: "bodyMd" }}>{labels.copyMeetingUrl}</Box>
-            </button>
-          </Box>
-        </Tooltip>
+        <CopyMeetingUrlTextTrigger {...triggerProps} />
         {liveRegion}
       </>
     );
   }
 
-  const iconButton = (
-    <IconButton
-      size={size}
-      disabled={disabled}
-      onClick={handleCopy}
-      aria-label={resolvedAriaLabel}
-      aria-pressed={isCopied}
-      sx={theme => ({
-        color: iconColor(theme),
-        "&:hover": {
-          backgroundColor: alpha(iconColor(theme), 0.08),
-        },
-      })}
-    >
-      {iconNode}
-    </IconButton>
-  );
-
   return (
     <>
-      <Tooltip title={tooltipText}>{disabled ? <span>{iconButton}</span> : iconButton}</Tooltip>
+      <CopyMeetingUrlIconTrigger {...triggerProps} />
       {liveRegion}
     </>
   );

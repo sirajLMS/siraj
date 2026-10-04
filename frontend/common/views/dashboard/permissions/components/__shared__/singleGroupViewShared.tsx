@@ -1,8 +1,11 @@
 "use client";
 
-import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import { Box } from "@mui/material";
 import type { ComponentType } from "react";
-import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
+import {
+  GroupLoadingIndicator,
+  GroupSubTabs,
+} from "@/frontend/common/views/dashboard/permissions/components/__shared__/singleGroupViewShared.parts";
 import type {
   AddPermissionsTabProps,
   AssignedUsersTabProps,
@@ -65,34 +68,16 @@ export function SingleGroupViewShared({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <SingleGroupHeader labels={labels} group={group} onBack={onBack} onEditGroup={onEditGroup} />
 
-      <Box sx={theme => ({ borderBottom: `1px solid ${theme.palette.divider}` })}>
-        <Tabs
-          value={activeSubTab}
-          onChange={(_, val: SubTabKey) => handleSubTabChange(val)}
-          textColor="primary"
-          indicatorColor="primary"
-          variant={options.tabsVariant}
-          scrollButtons={options.scrollButtons}
-        >
-          <Tab
-            value="current"
-            label={`${t.currentPermissions} (${permissionsCount})`}
-            sx={{ textTransform: "none", fontWeight: 600 }}
-          />
-          <Tab value="add" label={t.addPermissions} sx={{ textTransform: "none", fontWeight: 600 }} />
-          <Tab
-            value="users"
-            label={`${t.assignedUsers} (${assignedUsersCount})`}
-            sx={{ textTransform: "none", fontWeight: 600 }}
-          />
-        </Tabs>
-      </Box>
+      <GroupSubTabs
+        t={t}
+        activeSubTab={activeSubTab}
+        onSubTabChange={handleSubTabChange}
+        permissionsCount={permissionsCount}
+        assignedUsersCount={assignedUsersCount}
+        options={options}
+      />
 
-      {isLoading && !permissions && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress color="primary" />
-        </Box>
-      )}
+      {isLoading && !permissions && <GroupLoadingIndicator />}
 
       {(!isLoading || permissions) && (
         <Box sx={{ mt: 1 }}>

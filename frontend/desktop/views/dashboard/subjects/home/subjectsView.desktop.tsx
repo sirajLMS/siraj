@@ -1,7 +1,6 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box, Grid, Typography } from "@mui/material";
 import { SubjectCategoryTabsShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/subjectCategoryTabsShared";
 import { SubjectDialogsShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/subjectDialogsShared";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
@@ -13,7 +12,7 @@ import { DeleteCategoryDialogDesktop } from "@/frontend/desktop/views/dashboard/
 import { DeleteSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/deleteSubjectDialog.desktop";
 import { EditCategoryDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/editCategoryDialog.desktop";
 import { EditSubjectDialogDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/editSubjectDialog.desktop";
-import { SubjectCardDesktop } from "@/frontend/desktop/views/dashboard/subjects/home/components/subjectCard.desktop";
+import { SubjectsGridArea } from "@/frontend/desktop/views/dashboard/subjects/home/subjectsView.desktop.parts";
 
 export function SubjectsViewDesktop({
   labels,
@@ -78,42 +77,15 @@ export function SubjectsViewDesktop({
         onCategoryChange={onCategoryChange}
       />
 
-      {(() => {
-        if (isLoading) {
-          return (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t.loading}
-              </Typography>
-            </Box>
-          );
-        }
-        if (filteredSubjects.length === 0) {
-          return (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                {t.noSubjects}
-              </Typography>
-            </Box>
-          );
-        }
-        return (
-          <Grid container spacing={2}>
-            {filteredSubjects.map(subject => (
-              <Grid key={subject.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <SubjectCardDesktop
-                  labels={labels}
-                  subject={subject}
-                  onEdit={() => onEditSubject(subject.id ?? "")}
-                  onDelete={() => onDeleteSubject(subject.id ?? "")}
-                  onClick={() => onSubjectClick(subject.id ?? "")}
-                  canManage={canManageSubjects}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        );
-      })()}
+      <SubjectsGridArea
+        labels={labels}
+        filteredSubjects={filteredSubjects}
+        isLoading={isLoading}
+        onEditSubject={onEditSubject}
+        onDeleteSubject={onDeleteSubject}
+        onSubjectClick={onSubjectClick}
+        canManageSubjects={canManageSubjects}
+      />
 
       <SubjectDialogsShared
         createSubjectDialog={createSubjectDialog}

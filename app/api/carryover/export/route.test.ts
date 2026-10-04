@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
 
 import { AppPermission } from "@/backend/enum";
+import { isUuidShape } from "@/backend/lib/id-shape";
 import type { CarryoverFilters, CarryoverPage, CarryoverRow } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -106,6 +107,7 @@ await mock.module("@/backend/lib", () => ({
   ForbiddenError,
   ValidationError,
   getServerUserContext: getServerUserContextMock,
+  isUuidShape,
   logger: { log: () => {}, info: () => {}, warn: () => {}, error: () => {}, debug: () => {} },
 }));
 

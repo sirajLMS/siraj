@@ -1,5 +1,23 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db";
+import {
+  collectGroupsWithPermissions,
+  collectGroupUsersMap,
+  collectUniqueUserIds,
+  localizedOrderExpr,
+  permissionGroupWithPermissionSelect,
+  runInTransaction,
+  toGroupReturn,
+  toPermissionReturn,
+} from "@/backend/db/repo/permissions/permission-management.repository.helpers";
+import {
+  createGroupRecord,
+  deleteBulkUsersFromGroup,
+  deleteGroupRecord,
+  insertBulkUsersToGroup,
+  replaceUserOverrides,
+  updateGroupRecord,
+} from "@/backend/db/repo/permissions/permission-management.repository.operations";
 import {
   groupPermissions,
   permissionGroups,
@@ -16,57 +34,22 @@ import type {
   GroupUserEntity,
   GroupWithPermissionIds,
   PermissionReturnType,
-  PermissionSelectType,
   UpdateGroupInput,
   UserOverrideInput,
   UserPermissionOverrideSelectType,
 } from "@/backend/types";
-import { localeJsonKey, omitEmptyLocalizedString, resolveLocalizedString } from "@/shared/lib/localized-string";
-import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
-function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
-  return {
-    id: row.id,
-    key: row.key,
-    resource: row.resource,
-    action: row.action,
-    description: resolveLocalizedString(row.description, locale),
-    category: resolveLocalizedString(row.category, locale),
-    isSystem: row.isSystem,
-  };
-}
-
-function toGroupReturn(
-  group: {
-    id: string;
-    name: LocalizedString;
-    slug: string;
-    description: LocalizedString | null;
-    isSystem: boolean;
-    createdByUserId: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  },
-  permissionIds: string[],
-  _locale?: string
-): GroupWithPermissionIds {
-  return {
-    id: group.id,
-    name: group.name,
-    slug: group.slug,
-    description: group.description,
-    isSystem: group.isSystem,
-    createdByUserId: group.createdByUserId,
-    createdAt: group.createdAt,
-    updatedAt: group.updatedAt,
-    permissionIds,
-    assignedUsers: [],
-  };
-}
-
-function localizedOrderExpr(column: typeof permissions.category | typeof permissionGroups.name, locale?: string) {
-  const key = localeJsonKey(locale);
-  return sql`coalesce(${column}->>${key}, ${column}->>${DEFAULT_CONTENT_LOCALE})`;
+async function runInTxWithLogging<T>(
+  tx: DBTransaction | undefined,
+  run: (t: DBTransaction) => Promise<T>,
+  buildLogMessage: () => string
+): Promise<T> {
+  try {
+    return await runInTransaction(tx, run);
+  } catch (error) {
+    logger.error(buildLogMessage(), error);
+    throw error;
+  }
 }
 
 export namespace PermissionManagementRepository {
@@ -136,47 +119,11 @@ export namespace PermissionManagementRepository {
     try {
       const client = tx ?? db;
       const rows = await client
-        .select({
-          id: permissionGroups.id,
-          name: permissionGroups.name,
-          slug: permissionGroups.slug,
-          description: permissionGroups.description,
-          isSystem: permissionGroups.isSystem,
-          createdByUserId: permissionGroups.createdByUserId,
-          createdAt: permissionGroups.createdAt,
-          updatedAt: permissionGroups.updatedAt,
-          permissionId: groupPermissions.permissionId,
-        })
+        .select(permissionGroupWithPermissionSelect)
         .from(permissionGroups)
         .leftJoin(groupPermissions, eq(groupPermissions.groupId, permissionGroups.id))
         .orderBy(localizedOrderExpr(permissionGroups.name, locale));
-
-      const groupMap = new Map<string, GroupWithPermissionIds>();
-      for (const row of rows) {
-        if (!groupMap.has(row.id)) {
-          groupMap.set(
-            row.id,
-            toGroupReturn(
-              {
-                id: row.id,
-                name: row.name,
-                slug: row.slug,
-                description: row.description,
-                isSystem: row.isSystem,
-                createdByUserId: row.createdByUserId,
-                createdAt: row.createdAt,
-                updatedAt: row.updatedAt,
-              },
-              [],
-              locale
-            )
-          );
-        }
-        if (row.permissionId) {
-          groupMap.get(row.id)?.permissionIds.push(row.permissionId);
-        }
-      }
-      return [...groupMap.values()];
+      return collectGroupsWithPermissions(rows, locale);
     } catch (error) {
       logger.error("Error listing all permission groups:", error);
       throw error;
@@ -237,85 +184,10 @@ export namespace PermissionManagementRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<GroupWithPermissionIds> {
-    const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
-      const now = new Date();
-      const nameMap = omitEmptyLocalizedString(input.name);
-      const descriptionMap = input.description == null ? null : omitEmptyLocalizedString(input.description);
-
-      const [insertedGroup] = await t
-        .insert(permissionGroups)
-        .values({
-          name: nameMap,
-          slug: input.slug,
-          description: descriptionMap,
-          isSystem: input.isSystem ?? false,
-          createdByUserId: input.createdByUserId ?? null,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      if (input.permissionIds.length > 0) {
-        await t.insert(groupPermissions).values(
-          input.permissionIds.map(permissionId => ({
-            groupId: insertedGroup.id,
-            permissionId,
-          }))
-        );
-      }
-
-      return toGroupReturn(insertedGroup, input.permissionIds, locale);
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error("Error creating group:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Replaces the permission bundle for a group and returns the group with updated permission IDs.
-   * If `permissionIds` is `undefined`, the existing bundle is left untouched.
-   */
-  async function replaceGroupPermissionsAndReturn(
-    t: DBTransaction,
-    groupId: string,
-    group: {
-      id: string;
-      name: LocalizedString;
-      slug: string;
-      description: LocalizedString | null;
-      isSystem: boolean;
-      createdByUserId: string | null;
-      createdAt: Date;
-      updatedAt: Date;
-    },
-    permissionIds: string[] | undefined,
-    locale?: string
-  ): Promise<GroupWithPermissionIds> {
-    if (permissionIds !== undefined) {
-      await t.delete(groupPermissions).where(eq(groupPermissions.groupId, groupId));
-
-      if (permissionIds.length > 0) {
-        await t.insert(groupPermissions).values(
-          permissionIds.map(pid => ({
-            groupId,
-            permissionId: pid,
-          }))
-        );
-      }
-    }
-
-    const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, groupId));
-    return toGroupReturn(
-      group,
-      gpList.map(gp => gp.permissionId),
-      locale
+    return runInTxWithLogging(
+      tx,
+      t => createGroupRecord(t, input, locale),
+      () => "Error creating group:"
     );
   }
 
@@ -333,44 +205,12 @@ export namespace PermissionManagementRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<GroupWithPermissionIds> {
-    const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
-      const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, input.id)).limit(1);
-
-      const now = new Date();
-      const nextName = input.name === undefined ? existing.name : omitEmptyLocalizedString(input.name);
-      let nextDescription: typeof existing.description;
-      if (input.description === undefined) {
-        nextDescription = existing.description;
-      } else if (input.description === null) {
-        nextDescription = null;
-      } else {
-        nextDescription = omitEmptyLocalizedString(input.description);
-      }
-
-      const [updatedGroup] = await t
-        .update(permissionGroups)
-        .set({
-          name: nextName,
-          slug: input.slug ?? existing.slug,
-          description: nextDescription,
-          isSystem: input.isSystem ?? existing.isSystem,
-          updatedAt: now,
-        })
-        .where(eq(permissionGroups.id, input.id))
-        .returning();
-
-      return replaceGroupPermissionsAndReturn(t, input.id, updatedGroup, input.permissionIds, locale);
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error(`Error updating group with ID ${input.id}:`, error);
-      throw error;
-    }
+    const logMessage = `Error updating group with ID ${input.id}:`;
+    return runInTxWithLogging(
+      tx,
+      t => updateGroupRecord(t, input, locale),
+      () => logMessage
+    );
   }
 
   /**
@@ -380,20 +220,11 @@ export namespace PermissionManagementRepository {
    * by the service layer, not here.
    */
   export async function deleteGroup(groupId: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
-    const run = async (t: DBTransaction): Promise<{ id: string }> => {
-      await t.delete(permissionGroups).where(eq(permissionGroups.id, groupId));
-      return { id: groupId };
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error(`Error deleting group with ID ${groupId}:`, error);
-      throw error;
-    }
+    return runInTxWithLogging(
+      tx,
+      t => deleteGroupRecord(t, groupId),
+      () => `Error deleting group with ID ${groupId}:`
+    );
   }
 
   /**
@@ -428,31 +259,12 @@ export namespace PermissionManagementRepository {
   ): Promise<void> {
     if (userIds.length === 0) return;
 
-    const run = async (t: DBTransaction): Promise<void> => {
-      const now = new Date();
-      await t
-        .insert(userPermissionGroups)
-        .values(
-          userIds.map(userId => ({
-            userId,
-            groupId,
-            assignedAt: now,
-            assignedByUserId: assignedByUserId ?? null,
-          }))
-        )
-        .onConflictDoNothing();
-    };
-
-    try {
-      if (tx) {
-        await run(tx);
-      } else {
-        await db.transaction(run);
-      }
-    } catch (error) {
-      logger.error(`Error in bulkAssignUsersToGroup for group ${groupId}:`, error);
-      throw error;
-    }
+    const assignedAt = new Date();
+    await runInTxWithLogging(
+      tx,
+      t => insertBulkUsersToGroup(t, userIds, groupId, assignedByUserId ?? null, assignedAt),
+      () => `Error in bulkAssignUsersToGroup for group ${groupId}:`
+    );
   }
 
   /**
@@ -465,22 +277,11 @@ export namespace PermissionManagementRepository {
   ): Promise<void> {
     if (userIds.length === 0) return;
 
-    const run = async (t: DBTransaction): Promise<void> => {
-      await t
-        .delete(userPermissionGroups)
-        .where(and(eq(userPermissionGroups.groupId, groupId), inArray(userPermissionGroups.userId, userIds)));
-    };
-
-    try {
-      if (tx) {
-        await run(tx);
-      } else {
-        await db.transaction(run);
-      }
-    } catch (error) {
-      logger.error(`Error in bulkRevokeUsersFromGroup for group ${groupId}:`, error);
-      throw error;
-    }
+    await runInTxWithLogging(
+      tx,
+      t => deleteBulkUsersFromGroup(t, userIds, groupId),
+      () => `Error in bulkRevokeUsersFromGroup for group ${groupId}:`
+    );
   }
 
   /**
@@ -508,31 +309,11 @@ export namespace PermissionManagementRepository {
     assignedByUserId?: string | null,
     tx?: DBTransaction
   ): Promise<void> {
-    const run = async (t: DBTransaction): Promise<void> => {
-      await t.delete(userPermissionOverrides).where(eq(userPermissionOverrides.userId, userId));
-
-      if (overrides.length > 0) {
-        await t.insert(userPermissionOverrides).values(
-          overrides.map(override => ({
-            userId,
-            permissionId: override.permissionId,
-            state: override.state,
-            assignedByUserId: assignedByUserId ?? null,
-          }))
-        );
-      }
-    };
-
-    try {
-      if (tx) {
-        await run(tx);
-      } else {
-        await db.transaction(run);
-      }
-    } catch (error) {
-      logger.error(`Error setting overrides for user ${userId}:`, error);
-      throw error;
-    }
+    await runInTxWithLogging(
+      tx,
+      t => replaceUserOverrides(t, userId, overrides, assignedByUserId ?? null),
+      () => `Error setting overrides for user ${userId}:`
+    );
   }
 
   export async function listAllGroupUsers(tx?: DBTransaction): Promise<Map<string, GroupUserEntity[]>> {
@@ -547,19 +328,7 @@ export namespace PermissionManagementRepository {
         })
         .from(userPermissionGroups)
         .innerJoin(users, eq(users.id, userPermissionGroups.userId));
-
-      const map = new Map<string, GroupUserEntity[]>();
-      for (const row of rows) {
-        if (!map.has(row.groupId)) {
-          map.set(row.groupId, []);
-        }
-        map.get(row.groupId)?.push({
-          id: row.userId,
-          name: row.userName,
-          email: row.userEmail,
-        });
-      }
-      return map;
+      return collectGroupUsersMap(rows);
     } catch (error) {
       logger.error("Error listing all group users:", error);
       throw error;
@@ -582,10 +351,7 @@ export namespace PermissionManagementRepository {
         .innerJoin(groupPermissions, eq(groupPermissions.groupId, userPermissionGroups.groupId))
         .innerJoin(permissions, eq(permissions.id, groupPermissions.permissionId))
         .where(eq(permissions.key, permissionKey));
-
-      const unique = new Set<string>();
-      for (const row of rows) unique.add(row.userId);
-      return [...unique];
+      return collectUniqueUserIds(rows);
     } catch (error) {
       logger.error(`Error listing user ids with permission ${permissionKey}:`, error);
       throw error;

@@ -13,10 +13,7 @@
  */
 
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
-
-const PROJECT_ROOT = process.cwd();
+import { updateEnvFile } from "@/scripts/__shared__";
 
 interface Options {
   bytes: number;
@@ -114,27 +111,6 @@ function parseArgs(args: string[]): Options {
 function generateSecret(bytes: number, format: "base64" | "hex"): string {
   const buffer = randomBytes(bytes);
   return format === "hex" ? buffer.toString("hex") : buffer.toString("base64");
-}
-
-function updateEnvFile(filePath: string, secretKey: string, secretValue: string): boolean {
-  const absPath = resolve(PROJECT_ROOT, filePath);
-  if (!existsSync(absPath)) {
-    return false;
-  }
-
-  const content = readFileSync(absPath, "utf8");
-  const regex = new RegExp(`^${secretKey}=.*$`, "m");
-
-  let updatedContent: string;
-  if (regex.test(content)) {
-    updatedContent = content.replace(regex, `${secretKey}=${secretValue}`);
-  } else {
-    const trailingNewline = content.endsWith("\n") ? "" : "\n";
-    updatedContent = `${content}${trailingNewline}${secretKey}=${secretValue}\n`;
-  }
-
-  writeFileSync(absPath, updatedContent, "utf8");
-  return true;
 }
 
 function handleWriteEnv(secrets: string[], bytes: number, format: "base64" | "hex"): void {

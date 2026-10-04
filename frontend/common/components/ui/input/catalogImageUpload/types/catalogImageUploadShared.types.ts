@@ -80,3 +80,24 @@ export type UrlFallbackFieldProps = {
   readonly urlFieldSize?: "small" | "medium";
   readonly urlFieldFullWidth?: boolean;
 };
+
+export interface CatalogImageUploadPreviewAndActionsProps {
+  readonly previewUrl: string | null;
+  readonly label: string | undefined;
+  readonly showError: boolean;
+  readonly isUploading: boolean;
+  readonly resolvedError: string | null;
+  readonly resolvedHelperText: string;
+  readonly uploadLabel: string;
+  readonly uploadingLabel: string;
+  readonly removeLabel: string;
+  readonly previewAlt: string;
+  readonly previewShape: CatalogImageUploadPreviewShape;
+  readonly previewSize: number;
+  readonly buttonSize: "small" | "medium" | "large" | undefined;
+  readonly buttonLayout: CatalogImageUploadButtonLayout;
+  readonly helperTextTypography: string;
+  readonly onUploadClick: () => void;
+  readonly onRemoveClick: () => void;
+  readonly disabled: boolean;
+}

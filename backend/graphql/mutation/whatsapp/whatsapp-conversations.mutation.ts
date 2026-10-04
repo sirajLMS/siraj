@@ -83,7 +83,9 @@ gqlSchemaBuilder.mutationFields(t => ({
       });
     },
   }),
+}));
 
+gqlSchemaBuilder.mutationFields(t => ({
   sendWhatsappConversationMessage: t.field({
     type: WhatsappConversationSendResultPothosObject,
     description:

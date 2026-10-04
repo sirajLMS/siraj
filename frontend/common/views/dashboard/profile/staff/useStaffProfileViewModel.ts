@@ -1,15 +1,9 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import type { CurrencyCode, ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  profileByUserIdQueryDocument,
-  updateOwnProfileMutationDocument,
-  updateUserProfileMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments";
-import { toIanaTimezone } from "@/frontend/common/lib/timezone";
-import { logger } from "@/frontend/common/utils/logger";
+import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type {
   StaffProfileData,
   StaffProfileViewLabels,
@@ -18,6 +12,10 @@ import type {
   StaffAdminEditFormData,
   StaffOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import {
+  type StaffProfileSubmitHandlers,
+  useStaffProfileSubmit,
+} from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileSubmit.hooks";
 import { type ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -89,9 +87,6 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
     fetchPolicy: "cache-and-network",
   });
 
-  const [updateOwnProfile] = useMutation(updateOwnProfileMutationDocument);
-  const [updateUserProfile] = useMutation(updateUserProfileMutationDocument);
-
   const profile = data?.profileByUserId;
   const staffData = buildEditSource(scope, profile);
   const avatarUrl = profile?.avatarUrl ?? staffData?.avatarUrl;
@@ -99,65 +94,11 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
   const profileTimezone = profile?.timezone ?? null;
   const profilePhone = profile?.phone ?? null;
 
-  const onSubmitOwn = async (formData: StaffOwnEditFormData) => {
-    setIsSaving(true);
-    try {
-      await updateOwnProfile({
-        variables: {
-          input: {
-            core: {
-              name: formData.name,
-              email: formData.email,
-              avatarUrl: formData.avatarUrl,
-              displayCurrency: formData.displayCurrency,
-              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
-            },
-            staff: {
-              phone: formData.phone ?? null,
-            },
-          },
-        },
-      });
-      await refetch();
-    } catch (submitError) {
-      logger.error("Failed to update own staff profile", { error: submitError });
-      throw submitError;
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const onSubmitAdmin = async (formData: StaffAdminEditFormData) => {
-    setIsSaving(true);
-    try {
-      await updateUserProfile({
-        variables: {
-          userId: targetUserId,
-          input: {
-            core: {
-              name: formData.name,
-              email: formData.email,
-              avatarUrl: formData.avatarUrl,
-              displayCurrency: formData.displayCurrency,
-              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
-            },
-            staff: {
-              phone: formData.phone ?? null,
-              status: formData.status ?? null,
-              hourlyRate: formData.hourlyRate ?? null,
-              rateCurrency: formData.rateCurrency ?? null,
-            },
-          },
-        },
-      });
-      await refetch();
-    } catch (submitError) {
-      logger.error("Failed to update staff profile", { error: submitError });
-      throw submitError;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const { onSubmitOwn, onSubmitAdmin }: StaffProfileSubmitHandlers = useStaffProfileSubmit({
+    targetUserId,
+    refetch,
+    setIsSaving,
+  });
 
   const canView = useMemo(() => (_field: string) => true, []);
 

@@ -1,275 +1,84 @@
 "use client";
 
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
-import Box from "@mui/material/Box";
-import InputAdornment from "@mui/material/InputAdornment";
-import type { SxProps, Theme } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 import type * as React from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import {
+  buildAutocompleteSx,
+  currencyFilterOptions,
+  resolveCurrencyOptions,
+} from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared.helpers";
+import { useCurrencyAutocomplete } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared.hooks";
+import {
+  renderCurrencyInput,
+  renderCurrencyOption,
+} from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared.parts";
 import { getCurrencyOptionRowLabel } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.utils";
-import type {
-  CurrencyAutocompleteSharedProps,
-  CurrencyOptionRowComponent,
-  LocaleEmojiComponent,
-} from "@/frontend/common/components/ui/input/currencySelect/types/currencyAutocompleteShared.types";
-import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import type { CurrencyAutocompleteSharedProps } from "@/frontend/common/components/ui/input/currencySelect/types/currencyAutocompleteShared.types";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-const filterOptions = createFilterOptions<CurrencyOption>({
-  matchFrom: "any",
-  stringify: option => `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabel(option, "en")}`,
-});
-
-type RenderInputParams = {
-  readonly params: Parameters<
-    NonNullable<React.ComponentProps<typeof Autocomplete<CurrencyOption, false, false, false>>["renderInput"]>
-  >[0];
-  readonly resolvedLabel: string | undefined;
-  readonly resolvedPlaceholder: string | undefined;
-  readonly required: boolean | undefined;
-  readonly showError: boolean;
-  readonly resolvedHelperText: string | undefined;
-  readonly onBlur: (() => void) | undefined;
-  readonly autoFocus: boolean | undefined;
-  readonly autoComplete: string;
-  readonly currency: CurrencyOption | null | undefined;
-  readonly showSymbol: boolean;
-  readonly LocaleEmojiComponent: LocaleEmojiComponent;
-};
-
-const renderCurrencyInput = ({
-  params,
-  resolvedLabel,
-  resolvedPlaceholder,
-  required,
-  showError,
-  resolvedHelperText,
-  onBlur,
-  autoFocus,
-  autoComplete,
-  currency,
-  showSymbol,
-  LocaleEmojiComponent,
-}: RenderInputParams): React.ReactNode => {
-  return (
-    <TextField
-      {...params}
-      autoFocus={autoFocus}
-      label={resolvedLabel}
-      placeholder={resolvedPlaceholder}
-      required={required}
-      error={showError}
-      helperText={resolvedHelperText}
-      onBlur={onBlur}
-      slotProps={{
-        ...params.slotProps,
-        input: {
-          ...params.slotProps.input,
-          startAdornment: (
-            <>
-              <InputAdornment position="start">
-                <SearchOutlinedIcon fontSize="small" />
-              </InputAdornment>
-              {currency ? (
-                <InputAdornment position="start">
-                  <LocaleEmojiComponent emoji={currency.flagEmoji} />
-                </InputAdornment>
-              ) : null}
-              {params.slotProps.input?.startAdornment}
-            </>
-          ),
-          endAdornment: currency ? (
-            <>
-              {params.slotProps.input?.endAdornment}
-              <InputAdornment position="end">
-                <Box
-                  component="span"
-                  sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, direction: "ltr" })}
-                >
-                  {showSymbol ? getCurrencySymbol(currency.code) : (currency.code as string)}
-                </Box>
-              </InputAdornment>
-            </>
-          ) : (
-            params.slotProps.input?.endAdornment
-          ),
-        },
-        htmlInput: {
-          ...params.slotProps.htmlInput,
-          autoComplete,
-        },
-      }}
-    />
-  );
-};
-
-type RenderOptionParams = {
-  readonly props: React.HTMLAttributes<HTMLLIElement> & { key?: React.Key };
-  readonly option: CurrencyOption;
-  readonly locale: string;
-  readonly showSymbol: boolean;
-  readonly OptionRowComponent: CurrencyOptionRowComponent;
-  readonly optionRowSx: SxProps<Theme> | undefined;
-};
-
-const renderCurrencyOption = ({
-  props,
-  option,
-  locale,
-  showSymbol,
-  OptionRowComponent,
-  optionRowSx,
-}: RenderOptionParams): React.ReactNode => {
-  const { key, ...optionProps } = props;
-  return (
-    <Box key={key} component="li" sx={optionRowSx} {...optionProps}>
-      <OptionRowComponent currency={option} locale={locale} showSymbol={showSymbol} />
-    </Box>
-  );
-};
-
-const buildAutocompleteSx = (
-  style: React.CSSProperties | undefined,
-  listAttached: boolean,
-  isOpen: boolean
-): React.CSSProperties => ({
-  ...style,
-  ...(listAttached && {
-    "& .MuiOutlinedInput-root": {
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      ...(isOpen && {
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-      }),
-    },
-  }),
-});
-
-export const CurrencyAutocompleteShared: React.FC<CurrencyAutocompleteSharedProps> = ({
-  currency,
-  onChangeAction,
-  onClearAction,
-  autoComplete = "off",
-  fullWidth,
-  required,
-  disabled,
-  label,
-  placeholder,
-  error,
-  helperText,
-  onBlurAction: onBlur,
-  style,
-  open: openProp,
-  onOpenAction,
-  onCloseAction,
-  autoFocus,
-  allowedCodes,
-  excludedCodes,
-  matchAnchorWidth = true,
-  disablePortal = false,
-  listAttached = false,
-  showSymbol = true,
-  LocaleEmojiComponent,
-  CurrencyOptionRowComponent,
-  getPopperSlotProps,
-  getPaperSlotProps,
-  optionRowSx,
-  fullWidthDefault,
-  options: allOptions,
-  catalogLoaded = true,
-}: Readonly<CurrencyAutocompleteSharedProps>): React.ReactNode => {
+export const CurrencyAutocompleteShared: React.FC<CurrencyAutocompleteSharedProps> = (
+  props: Readonly<CurrencyAutocompleteSharedProps>
+): React.ReactNode => {
   const t = useAppTranslation(Translation.Ui.CurrencySelect);
   const locale = useAppLocale();
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isOpen = openProp ?? internalOpen;
+  const { isOpen, handleOpen, handleClose, handleChange } = useCurrencyAutocomplete({
+    openProp: props.open,
+    onOpenAction: props.onOpenAction,
+    onCloseAction: props.onCloseAction,
+    onChangeAction: props.onChangeAction,
+    onClearAction: props.onClearAction,
+  });
 
-  const options = useMemo(() => {
-    if (!catalogLoaded && currency) {
-      const selected = allOptions.find(opt => opt.code === currency.code);
-      return selected ? [selected] : [];
-    }
-    let filtered = allOptions;
-    if (allowedCodes && allowedCodes.length > 0) {
-      filtered = filtered.filter(option => allowedCodes.includes(option.code));
-    }
-    if (excludedCodes && excludedCodes.length > 0) {
-      // Keep the currently-selected currency visible even if it is excluded
-      // (e.g. edit mode for an already-activated currency).
-      filtered = filtered.filter(option => !excludedCodes.includes(option.code) || option.code === currency?.code);
-    }
-    return filtered;
-  }, [allOptions, allowedCodes, excludedCodes, catalogLoaded, currency]);
+  const { options: allOptions, allowedCodes, excludedCodes, catalogLoaded = true, currency } = props;
+  const options = useMemo(
+    () => resolveCurrencyOptions(allOptions, allowedCodes, excludedCodes, catalogLoaded, currency),
+    [allOptions, allowedCodes, excludedCodes, catalogLoaded, currency]
+  );
 
   const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
 
-  const handleOpen = useCallback(() => {
-    if (openProp === undefined) {
-      setInternalOpen(true);
-    }
-    onOpenAction?.();
-  }, [openProp, onOpenAction]);
-
-  const handleClose = useCallback(() => {
-    if (openProp === undefined) {
-      setInternalOpen(false);
-    }
-    onCloseAction?.();
-  }, [openProp, onCloseAction]);
-
-  const handleChange = useCallback(
-    (_: React.SyntheticEvent, newValue: CurrencyOption | null) => {
-      if (newValue) {
-        onChangeAction(newValue);
-      } else if (onClearAction) {
-        onClearAction();
-      }
-    },
-    [onChangeAction, onClearAction]
-  );
-
+  const { required, error, helperText, label, placeholder, listAttached = false, fullWidth, fullWidthDefault } = props;
   const showRequiredError = Boolean(required) && !currency;
   const showError = Boolean(error) || showRequiredError;
   const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
   const resolvedLabel = listAttached ? undefined : (label ?? t.selectCurrency);
   const resolvedPlaceholder = listAttached ? (label ?? t.selectCurrency) : (placeholder ?? t.searchByCodeOrName);
-  const effectiveFullWidth = fullWidth ?? fullWidthDefault;
 
   return (
     <Autocomplete<CurrencyOption>
-      fullWidth={effectiveFullWidth}
+      fullWidth={fullWidth ?? fullWidthDefault}
       options={options}
       autoHighlight
-      disabled={disabled}
+      disabled={props.disabled}
       open={isOpen}
       onOpen={handleOpen}
       onClose={handleClose}
       value={currency ?? null}
-      sx={buildAutocompleteSx(style, listAttached, isOpen)}
+      sx={buildAutocompleteSx(props.style, listAttached, isOpen)}
       onChange={handleChange}
-      onBlur={onBlur}
+      onBlur={props.onBlurAction}
       isOptionEqualToValue={(option, value) => option.code === value.code}
       getOptionLabel={getOptionLabel}
-      filterOptions={filterOptions}
+      filterOptions={currencyFilterOptions}
       slotProps={{
-        popper: getPopperSlotProps({
-          matchAnchorWidth,
-          disablePortal: disablePortal || listAttached,
+        popper: props.getPopperSlotProps({
+          matchAnchorWidth: props.matchAnchorWidth ?? true,
+          disablePortal: (props.disablePortal ?? false) || listAttached,
           listAttached,
         }),
-        paper: getPaperSlotProps(listAttached),
+        paper: props.getPaperSlotProps(listAttached),
       }}
-      renderOption={(props, option) =>
+      renderOption={(optionProps, option) =>
         renderCurrencyOption({
-          props,
+          props: optionProps,
           option,
           locale,
-          showSymbol,
-          OptionRowComponent: CurrencyOptionRowComponent,
-          optionRowSx,
+          showSymbol: props.showSymbol ?? true,
+          OptionRowComponent: props.CurrencyOptionRowComponent,
+          optionRowSx: props.optionRowSx,
         })
       }
       renderInput={params =>
@@ -280,12 +89,12 @@ export const CurrencyAutocompleteShared: React.FC<CurrencyAutocompleteSharedProp
           required,
           showError,
           resolvedHelperText,
-          onBlur,
-          autoFocus,
-          autoComplete,
+          onBlur: props.onBlurAction,
+          autoFocus: props.autoFocus,
+          autoComplete: props.autoComplete ?? "off",
           currency,
-          showSymbol,
-          LocaleEmojiComponent,
+          showSymbol: props.showSymbol ?? true,
+          LocaleEmojiComponent: props.LocaleEmojiComponent,
         })
       }
     />

@@ -1,5 +1,4 @@
 import {
-  AccountingPaymentHistoryKind,
   AccountStatus,
   AppLanguage,
   AppPermission,
@@ -7,14 +6,10 @@ import {
   AttendanceStatus,
   AvailabilitySearchSortBy,
   AvailabilityStatus,
-  BilledUnit,
   BookingStatus,
-  CalculationStatus,
   ComplaintCategory,
   ComplaintStatus,
   CountryCode,
-  CreditAdjustmentType,
-  CreditReason,
   CronConcurrencyPolicy,
   CronJobKind,
   CronRunStatus,
@@ -22,20 +17,12 @@ import {
   CronTriggerSource,
   DayOfWeek,
   EffectiveMeetingSource,
-  ExpenseType,
-  FxProvider,
-  FxProviderConfigSource,
-  FxSyncStatus,
   Gender,
   GroupClassAttendanceStatus,
-  InvoicePaymentSubmissionStatus,
-  InvoiceStatus,
-  InvoiceType,
   LeaveRequesterType,
   LeaveRequestStatus,
   LeaveRequestType,
   LessonReportStatus,
-  ManagerAccountType,
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
@@ -43,10 +30,8 @@ import {
   NotificationEventType,
   OnDemandNoCreditsOutcome,
   OnDemandStatus,
-  OrderSortDirection,
   OverrideState,
   ParentStatus,
-  PaymentGateway,
   ProfileAudience,
   ProfileMode,
   ProfileScope,
@@ -54,7 +39,6 @@ import {
   QuotaLedgerReason,
   QuotaPeriodType,
   QuotaStatus,
-  RateSource,
   ReportGroupingMode,
   RescheduleDateLabel,
   SchedulingMode,
@@ -65,23 +49,7 @@ import {
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
   UserRole,
-  WhatsappAccountPurpose,
-  WhatsappConversationSendMode,
-  WhatsappGroupJoinApprovalMode,
-  WhatsappLimitTier,
-  WhatsappMessageDirection,
-  WhatsappOnboardingMode,
-  WhatsappQualityRating,
-  WhatsappSyncRequestStatus,
-  WhatsappSyncStatus,
-  WhatsappSyncType,
-  WhatsappTemplateCategory,
-  WhatsappTemplateStatus,
-  WhatsappTestRecipientStatus,
-  WhatsappTokenTestFailureKind,
-  WhatsappWebhookEventStatus,
 } from "@/backend/enum";
-import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { FileSortField, FileTypes, UploadType } from "@/backend/enum/storage/storage.enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students/student-order.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -89,28 +57,11 @@ import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
+export * from "@/backend/graphql/pothos/shared/enum.finance.pothos";
+export * from "@/backend/graphql/pothos/shared/enum.whatsapp.pothos";
+
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
   name: "AppPermission",
-});
-
-export const PaymentGatewayPothosObject = gqlSchemaBuilder.enumType(PaymentGateway, {
-  name: "PaymentGateway",
-});
-
-export const BilledUnitPothosObject = gqlSchemaBuilder.enumType(BilledUnit, {
-  name: "BilledUnit",
-});
-
-export const AccountingPaymentHistoryKindPothosObject = gqlSchemaBuilder.enumType(AccountingPaymentHistoryKind, {
-  name: "AccountingPaymentHistoryKind",
-});
-
-export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(ManagerAccountType, {
-  name: "ManagerAccountType",
-});
-
-export const OrderSortDirectionPothosObject = gqlSchemaBuilder.enumType(OrderSortDirection, {
-  name: "OrderSortDirection",
 });
 
 export const GenderPothosObject = gqlSchemaBuilder.enumType(Gender, {
@@ -135,22 +86,6 @@ export const StudentStatusPothosObject = gqlSchemaBuilder.enumType(StudentStatus
 
 export const ParentStatusPothosEnum = gqlSchemaBuilder.enumType(ParentStatus, {
   name: "ParentStatus",
-});
-
-export const InvoiceTypePothosObject = gqlSchemaBuilder.enumType(InvoiceType, {
-  name: "InvoiceType",
-});
-
-export const PaymentMethodTypePothosEnum = gqlSchemaBuilder.enumType(PaymentMethodType, {
-  name: "PaymentMethodType",
-});
-
-export const PaymentDirectionPothosEnum = gqlSchemaBuilder.enumType(PaymentDirection, {
-  name: "PaymentDirection",
-});
-
-export const IdentifierKindPothosEnum = gqlSchemaBuilder.enumType(IdentifierKind, {
-  name: "IdentifierKind",
 });
 
 export const ClassOutcomePothosObject = gqlSchemaBuilder.enumType(ClassOutcome, {
@@ -181,10 +116,6 @@ export const AvailabilityStatusPothosObject = gqlSchemaBuilder.enumType(Availabi
 
 export const DayOfWeekPothosObject = gqlSchemaBuilder.enumType(DayOfWeek, {
   name: "DayOfWeek",
-});
-
-export const InvoiceStatusPothosObject = gqlSchemaBuilder.enumType(InvoiceStatus, {
-  name: "InvoiceStatus",
 });
 
 export const BookingStatusPothosObject = gqlSchemaBuilder.enumType(BookingStatus, {
@@ -223,14 +154,6 @@ export const CurrencyCodePothosObject = gqlSchemaBuilder.enumType(CurrencyCode, 
   name: "CurrencyCode",
 });
 
-export const FxProviderPothosEnum = gqlSchemaBuilder.enumType(FxProvider, {
-  name: "FxProvider",
-});
-
-export const FxSyncStatusPothosEnum = gqlSchemaBuilder.enumType(FxSyncStatus, {
-  name: "FxSyncStatus",
-});
-
 export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType(ProfileAudience, {
   name: "ProfileAudience",
 });
@@ -247,14 +170,6 @@ export const UserRolePothosEnum = gqlSchemaBuilder.enumType(UserRole, {
   name: "UserRole",
 });
 
-export const CreditReasonPothosEnum = gqlSchemaBuilder.enumType(CreditReason, {
-  name: "CreditReason",
-});
-
-export const CreditAdjustmentTypePothosEnum = gqlSchemaBuilder.enumType(CreditAdjustmentType, {
-  name: "CreditAdjustmentType",
-});
-
 export const LessonReportStatusPothosEnum = gqlSchemaBuilder.enumType(LessonReportStatus, {
   name: "LessonReportStatus",
 });
@@ -267,28 +182,12 @@ export const TeacherDueStatusPothosEnum = gqlSchemaBuilder.enumType(TeacherDueSt
   name: "TeacherDueStatus",
 });
 
-export const CalculationStatusPothosEnum = gqlSchemaBuilder.enumType(CalculationStatus, {
-  name: "CalculationStatus",
-});
-
-export const RateSourcePothosEnum = gqlSchemaBuilder.enumType(RateSource, {
-  name: "RateSource",
-});
-
 export const SystemSettingCategoryPothos = gqlSchemaBuilder.enumType(SystemSettingCategory, {
   name: "SystemSettingCategory",
 });
 
 export const SystemSettingDataTypePothos = gqlSchemaBuilder.enumType(SystemSettingDataType, {
   name: "SystemSettingDataType",
-});
-
-export const InvoicePaymentSubmissionStatusPothosEnum = gqlSchemaBuilder.enumType(InvoicePaymentSubmissionStatus, {
-  name: "InvoicePaymentSubmissionStatus",
-});
-
-export const FxProviderConfigSourcePothosEnum = gqlSchemaBuilder.enumType(FxProviderConfigSource, {
-  name: "FxProviderConfigSource",
 });
 
 export const TeacherProgressFeedEventKindPothosEnum = gqlSchemaBuilder.enumType(TeacherProgressFeedEventKind, {
@@ -326,66 +225,6 @@ export const MeetingIntegrationConnectedAccountStatusPothosEnum = gqlSchemaBuild
 
 export const MeetingIntegrationProviderSlugPothosEnum = gqlSchemaBuilder.enumType(MeetingIntegrationProviderSlug, {
   name: "MeetingIntegrationProviderSlug",
-});
-
-export const WhatsappQualityRatingPothosEnum = gqlSchemaBuilder.enumType(WhatsappQualityRating, {
-  name: "WhatsappQualityRating",
-});
-
-export const WhatsappLimitTierPothosEnum = gqlSchemaBuilder.enumType(WhatsappLimitTier, {
-  name: "WhatsappLimitTier",
-});
-
-export const WhatsappTemplateStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateStatus, {
-  name: "WhatsappTemplateStatus",
-});
-
-export const WhatsappTemplateCategoryPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateCategory, {
-  name: "WhatsappTemplateCategory",
-});
-
-export const WhatsappAccountPurposePothosEnum = gqlSchemaBuilder.enumType(WhatsappAccountPurpose, {
-  name: "WhatsappAccountPurpose",
-});
-
-export const WhatsappTokenTestFailureKindPothosEnum = gqlSchemaBuilder.enumType(WhatsappTokenTestFailureKind, {
-  name: "WhatsappTokenTestFailureKind",
-});
-
-export const WhatsappOnboardingModePothosEnum = gqlSchemaBuilder.enumType(WhatsappOnboardingMode, {
-  name: "WhatsappOnboardingMode",
-});
-
-export const WhatsappSyncStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncStatus, {
-  name: "WhatsappSyncStatus",
-});
-
-export const WhatsappMessageDirectionPothosEnum = gqlSchemaBuilder.enumType(WhatsappMessageDirection, {
-  name: "WhatsappMessageDirection",
-});
-
-export const WhatsappWebhookEventStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappWebhookEventStatus, {
-  name: "WhatsappWebhookEventStatus",
-});
-
-export const WhatsappSyncRequestStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncRequestStatus, {
-  name: "WhatsappSyncRequestStatus",
-});
-
-export const WhatsappSyncTypePothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncType, {
-  name: "WhatsappSyncType",
-});
-
-export const WhatsappTestRecipientStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappTestRecipientStatus, {
-  name: "WhatsappTestRecipientStatus",
-});
-
-export const WhatsappConversationSendModePothosEnum = gqlSchemaBuilder.enumType(WhatsappConversationSendMode, {
-  name: "WhatsappConversationSendMode",
-});
-
-export const WhatsappGroupJoinApprovalModePothosEnum = gqlSchemaBuilder.enumType(WhatsappGroupJoinApprovalMode, {
-  name: "WhatsappGroupJoinApprovalMode",
 });
 
 export const QuotaKindPothosEnum = gqlSchemaBuilder.enumType(QuotaKind, {
@@ -426,11 +265,6 @@ export const OnDemandStatusPothosEnum = gqlSchemaBuilder.enumType(OnDemandStatus
 
 export const EffectiveMeetingSourcePothosEnum = gqlSchemaBuilder.enumType(EffectiveMeetingSource, {
   name: "EffectiveMeetingSource",
-});
-
-export const ExpenseTypePothosEnum = gqlSchemaBuilder.enumType(ExpenseType, {
-  name: "ExpenseType",
-  description: "Expense ledger category: Salaries | Marketing | Logistics | Technology",
 });
 
 export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {

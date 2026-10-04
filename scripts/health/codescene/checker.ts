@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-import fs from "node:fs";
 import os from "node:os";
 import { join, relative } from "node:path";
 import { glob } from "glob";
@@ -9,11 +8,20 @@ import {
   getCachedResult,
   getFileMtime,
   loadCache,
-  removeCachedResult,
   saveCache,
-  saveResult,
-  updateCachedMtime,
 } from "@/scripts/health/codescene/cache";
+import {
+  getTsConfigIgnores,
+  parseCodeSceneIssues,
+  pool,
+  processChangedFile,
+} from "@/scripts/health/codescene/checker.execution";
+import {
+  type CheckResults,
+  printSummary,
+  processCachedFile,
+  updateQualityStateIfOwned,
+} from "@/scripts/health/codescene/checker.results";
 import {
   COLORS,
   logError,
@@ -22,85 +30,6 @@ import {
   PROJECT_ROOT,
   resolveCodesceneBin,
 } from "@/scripts/health/codescene/config";
-
-const STATE_FILE = join(PROJECT_ROOT, ".quality-gate-state.json");
-
-interface QualityState {
-  stage: string;
-  owner: string;
-  lifecycle: string;
-  lastRun: string;
-}
-
-function isQualityState(value: unknown): value is QualityState {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  return (
-    "stage" in value &&
-    typeof value.stage === "string" &&
-    "owner" in value &&
-    typeof value.owner === "string" &&
-    "lifecycle" in value &&
-    typeof value.lifecycle === "string" &&
-    "lastRun" in value &&
-    typeof value.lastRun === "string"
-  );
-}
-
-function updateQualityStateIfOwned(results: CheckResults) {
-  if (results.warningCount === 0 && results.errorCount === 0 && fs.existsSync(STATE_FILE)) {
-    try {
-      const parsed: unknown = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8"));
-      if (!isQualityState(parsed)) {
-        return;
-      }
-      const state = parsed;
-      if (state.owner === "codescene") {
-        state.owner = "quality-gate";
-        state.stage = "CODESCENE";
-        state.lifecycle = "NEED_CONFIRM";
-        state.lastRun = new Date().toISOString();
-        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
-        logSuccess("\n✅ Code health perfected. Ownership transferred back to quality-gate.");
-        globalThis.console.log("ℹ️ Rerun 'bun quality-gate' to confirm perfect health.");
-      }
-    } catch {
-      // Ignore state update errors
-    }
-  }
-}
-
-interface CheckResults {
-  perfectCount: number;
-  warningCount: number;
-  errorCount: number;
-  cachedCount: number;
-  warningFiles: string[];
-  errorFiles: string[];
-}
-
-function getTsConfigIgnores(): string[] {
-  try {
-    const tsConfigPath = join(PROJECT_ROOT, "tsconfig.json");
-    if (fs.existsSync(tsConfigPath)) {
-      const content = fs.readFileSync(tsConfigPath, "utf8");
-      // Extract exclude array using regex to bypass JSON strictness (comments, trailing commas)
-      const regex = /"exclude"\s*:\s*\[(.*?)\]/s;
-      const excludeMatch = regex.exec(content);
-      if (excludeMatch?.[1]) {
-        const excludeItems = excludeMatch[1]
-          .split(",")
-          .map(item => item.replace(/["'\s]/g, ""))
-          .filter(Boolean);
-        return excludeItems.map((e: string) => `**/${e}/**`);
-      }
-    }
-  } catch (error: unknown) {
-    logError(`Failed to parse tsconfig.json: ${error instanceof Error ? error.message : String(error)}`);
-  }
-  return [];
-}
 
 export function checkSingleFile(filePath: string): void {
   const absolutePath =
@@ -144,27 +73,6 @@ export function checkSingleFile(filePath: string): void {
   }
 }
 
-// Concurrency pool handler
-async function pool<T>(items: T[], concurrency: number, fn: (item: T) => Promise<void>): Promise<void> {
-  const workerCount = Math.min(concurrency, items.length);
-  if (workerCount === 0) {
-    return;
-  }
-
-  let nextIndex = 0;
-  const schedule = async (): Promise<void> => {
-    const index = nextIndex;
-    nextIndex += 1;
-    if (index >= items.length) {
-      return;
-    }
-    await fn(items[index]);
-    return schedule();
-  };
-
-  await Promise.all(Array.from({ length: workerCount }, () => schedule()));
-}
-
 export async function runHealthCheck(forceFull = false): Promise<void> {
   loadCache();
   ensureCacheDir();
@@ -189,15 +97,7 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
 
   logInfo(`📊 Found ${files.length} TypeScript files`);
 
-  const filesToCheck = files.filter(file => {
-    if (forceFull) return true;
-    const cachedResult = getCachedResult(file);
-    // Automatically re-scan files that previously failed (error status or missing from cache)
-    if (!cachedResult || cachedResult.status === "error") return true;
-    const currentMtime = getFileMtime(join(PROJECT_ROOT, file));
-    const cachedMtime = getCachedMtime(file);
-    return currentMtime !== cachedMtime;
-  });
+  const filesToCheck = selectFilesToCheck(files, forceFull);
 
   if (filesToCheck.length === 0) {
     logSuccess("✨ All files are up to date (no changes detected)");
@@ -215,9 +115,7 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
     errorFiles: [],
   };
 
-  const envConcurrency = Number.parseInt(process.env.CS_CONCURRENCY ?? "", 10);
-  const maxThreads = Number.isNaN(envConcurrency) ? 4 : envConcurrency;
-  const concurrency = Math.max(1, Math.min(maxThreads, os.cpus().length - 1));
+  const concurrency = resolveConcurrency();
   logInfo(`🚀 Using ${concurrency} threads`);
 
   await pool(files, concurrency, async file => {
@@ -238,91 +136,22 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
   }
 }
 
-function isLicenseOrNetworkError(output: string, errorMsg: string): boolean {
-  const combined = `${output} ${errorMsg}`;
-  return /GOAWAY|License check failed|java\.io\.IOException|socket closed|ECONNRESET|ETIMEDOUT/i.test(combined);
-}
-
-async function runSingleCodeSceneExecution(
-  csBin: string,
-  file: string
-): Promise<{ output: string; exitCode: number; errorMsg: string }> {
-  let output = "";
-  let exitCode: number;
-  let errorMsg = "";
-
-  try {
-    if (typeof Bun === "undefined") {
-      const { spawn } = await import("node:child_process");
-      const proc = spawn(csBin, ["check", file], {
-        cwd: PROJECT_ROOT,
-        env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
-      });
-
-      const stdoutChunks: Buffer[] = [];
-      const stderrChunks: Buffer[] = [];
-
-      proc.stdout.on("data", data => stdoutChunks.push(data));
-      proc.stderr.on("data", data => stderrChunks.push(data));
-
-      exitCode = await new Promise<number>(resolve => {
-        proc.on("close", (code: number) => resolve(code));
-        proc.on("error", (err: Error) => {
-          errorMsg = err.message;
-          resolve(1);
-        });
-      });
-
-      output = Buffer.concat(stdoutChunks).toString() + Buffer.concat(stderrChunks).toString();
-    } else {
-      const proc = Bun.spawn([csBin, "check", file], {
-        cwd: PROJECT_ROOT,
-        stdout: "pipe",
-        stderr: "pipe",
-        env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
-      });
-      output = await new Response(proc.stdout).text();
-      const stderrOutput = await new Response(proc.stderr).text();
-      output += stderrOutput;
-      exitCode = await proc.exited;
-    }
-  } catch (err: unknown) {
-    errorMsg = err instanceof Error ? err.message : String(err);
-    exitCode = 1;
-  }
-
-  return { output, exitCode, errorMsg };
-}
-
-async function executeCodeScene(
-  csBin: string,
-  file: string,
-  maxRetries = 3,
-  attempt = 1
-): Promise<{ output: string; exitCode: number; errorMsg: string }> {
-  const result = await runSingleCodeSceneExecution(csBin, file);
-  if (isLicenseOrNetworkError(result.output, result.errorMsg) && attempt < maxRetries) {
-    await new Promise(res => setTimeout(res, attempt * 400));
-    return executeCodeScene(csBin, file, maxRetries, attempt + 1);
-  }
-  return result;
-}
-
-function parseCodeSceneIssues(output: string): string[] {
-  const lines = output
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
-
-  return lines.filter(line => {
-    const isScoreLine = /info:.*Code health score:/i.test(line);
-    if (isScoreLine) return false;
-    return (
-      /^(warn|error|info|arn|err|nfo):/i.test(line) ||
-      line.includes("License check failed") ||
-      line.includes("unauthorized")
-    );
+/** Files need a re-scan when never scanned, previously failed, or modified since the last run. */
+function selectFilesToCheck(files: string[], forceFull: boolean): string[] {
+  return files.filter(file => {
+    if (forceFull) return true;
+    const cachedResult = getCachedResult(file);
+    if (!cachedResult || cachedResult.status === "error") return true;
+    const currentMtime = getFileMtime(join(PROJECT_ROOT, file));
+    const cachedMtime = getCachedMtime(file);
+    return currentMtime !== cachedMtime;
   });
+}
+
+function resolveConcurrency(): number {
+  const envConcurrency = Number.parseInt(process.env.CS_CONCURRENCY ?? "", 10);
+  const maxThreads = Number.isNaN(envConcurrency) ? 4 : envConcurrency;
+  return Math.max(1, Math.min(maxThreads, os.cpus().length - 1));
 }
 
 /** True when CodeScene CLI output indicates errors or warnings (not just non-zero exit). */
@@ -331,140 +160,4 @@ export function isCodeSceneOutputFailed(output: string, exitCode: number | null)
   const hasError = exitCode !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
   const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
   return hasError || hasWarning;
-}
-
-function handleFileErrorResult(
-  file: string,
-  results: CheckResults,
-  issues: string[],
-  exitCode: number,
-  output: string,
-  _isLicenseError: boolean
-): void {
-  results.errorCount++;
-  results.errorFiles.push(file);
-  globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
-
-  if (issues.length > 0) {
-    issues.forEach(i => {
-      globalThis.console.log(`    ${i}`);
-    });
-  } else if (exitCode !== 0) {
-    globalThis.console.log(`    Command failed with exit code ${exitCode}`);
-    globalThis.console.log(`    Output: ${output.slice(0, 200)}${output.length > 200 ? "..." : ""}`);
-  }
-  removeCachedResult(file);
-}
-
-function handleFileWarningResult(file: string, results: CheckResults, issues: string[]): void {
-  results.warningCount++;
-  results.warningFiles.push(file);
-  globalThis.console.log(`${COLORS.YELLOW}⚠️  ${file}${COLORS.NC}`);
-  issues.forEach(i => {
-    globalThis.console.log(`    ${i}`);
-  });
-  saveResult(file, "warning", issues.join("\n"));
-}
-
-function handleFilePerfectResult(file: string, results: CheckResults): void {
-  results.perfectCount++;
-  globalThis.console.log(`${COLORS.GREEN}✅ ${file}${COLORS.NC}`);
-  saveResult(file, "perfect", "");
-}
-
-async function processChangedFile(file: string, results: CheckResults): Promise<void> {
-  const filePath = join(PROJECT_ROOT, file);
-  const csBin = resolveCodesceneBin();
-
-  const { output, exitCode, errorMsg } = await executeCodeScene(csBin, file);
-
-  if (errorMsg) {
-    results.errorCount++;
-    results.errorFiles.push(file);
-    globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
-    globalThis.console.log(`    Failed to run CodeScene CLI: ${errorMsg}`);
-    saveResult(file, "error", errorMsg);
-    return;
-  }
-
-  const issues = parseCodeSceneIssues(output);
-  const hasError = exitCode !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
-  const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
-  const isLicenseError = isLicenseOrNetworkError(output, errorMsg);
-
-  if (hasError) {
-    handleFileErrorResult(file, results, issues, exitCode, output, isLicenseError);
-  } else if (hasWarning) {
-    handleFileWarningResult(file, results, issues);
-  } else {
-    handleFilePerfectResult(file, results);
-  }
-
-  if (!isLicenseError) {
-    updateCachedMtime(file, getFileMtime(filePath));
-  }
-}
-
-function processCachedFile(file: string, results: CheckResults): void {
-  const cached = getCachedResult(file);
-  if (cached) {
-    if (cached.status === "perfect") {
-      results.perfectCount++;
-    } else if (cached.status === "warning") {
-      results.warningCount++;
-      results.warningFiles.push(file);
-      globalThis.console.log(`${COLORS.YELLOW}⚠️  ${file}${COLORS.NC}`);
-      if (cached.details) globalThis.console.log(cached.details);
-    } else if (cached.status === "error") {
-      results.errorCount++;
-      results.errorFiles.push(file);
-      globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
-      if (cached.details) globalThis.console.log(cached.details);
-    }
-  }
-  results.cachedCount++;
-}
-
-function printSummary(results: CheckResults): void {
-  const {
-    perfectCount: perfect,
-    warningCount: warning,
-    errorCount: error,
-    cachedCount: cached,
-    warningFiles,
-    errorFiles,
-  } = results;
-
-  globalThis.console.log("");
-  globalThis.console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  globalThis.console.log("📈 Code Health Summary");
-  globalThis.console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  globalThis.console.log(`${COLORS.GREEN}✅ Perfect health: ${perfect} files${COLORS.NC}`);
-  globalThis.console.log(`${COLORS.YELLOW}⚠️  With warnings: ${warning} files${COLORS.NC}`);
-  globalThis.console.log(`${COLORS.RED}❌ With errors: ${error} files${COLORS.NC}`);
-  if (cached > 0) {
-    globalThis.console.log(`${COLORS.BLUE}⚡ Cached results: ${cached} files${COLORS.NC}`);
-  }
-  globalThis.console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-  if (warningFiles.length > 0) {
-    globalThis.console.log(`\n${COLORS.YELLOW}Files with warnings:${COLORS.NC}`);
-    warningFiles.forEach(f => {
-      globalThis.console.log(`  - ${f}`);
-    });
-  }
-
-  if (errorFiles.length > 0) {
-    globalThis.console.log(`\n${COLORS.RED}Files with errors:${COLORS.NC}`);
-    errorFiles.forEach(f => {
-      globalThis.console.log(`  - ${f}`);
-    });
-  }
-
-  if (warning > 0 || error > 0) {
-    globalThis.console.log(
-      `\n${COLORS.YELLOW}💡 Run 'bun run codescene --file <file>' for detailed analysis${COLORS.NC}`
-    );
-    globalThis.console.log(`${COLORS.YELLOW}💡 Run 'bun run codescene --scan --full' to force full check${COLORS.NC}`);
-  }
 }

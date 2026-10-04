@@ -1,6 +1,13 @@
-import { and, eq, inArray, type SQL } from "drizzle-orm";
+import { eq, type SQL } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import { db, queryDb } from "@/backend/db";
+import { db } from "@/backend/db";
+import {
+  selectActiveOrdered,
+  selectAllOrdered,
+  selectById,
+  selectByIds,
+  selectBySlug,
+} from "@/backend/db/repo/billing/__shared__/billingRepoFactory.queries";
 import { directionFilter } from "@/backend/db/repo/billing/__shared__/directionFilter";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type { DBTransaction } from "@/backend/types";
@@ -115,71 +122,97 @@ function getDirectionFilter(filters: unknown): PaymentDirection | undefined {
 }
 
 /**
- * Factory that builds the shared billing CRUD method bag for a single
- * "supported-*" table. Each repository calls this once at module scope,
- * spreads the result into its namespace, then appends entity-specific
- * methods like `upsertMany`.
+ * Builds the read-side method bag (`listAll`, `listActive`, `getById`,
+ * `getBySlug`, `listByIds`) for a billing repository.
  *
- * Eliminates the cross-file duplication that existed across
- * `supported-mobile-wallet`, `supported-online-account`, and
- * `supported-payment-link` repositories (8 identical methods per file).
+ * Module-scope so the public factory stays a thin assembler; every method
+ * receives its dependencies through `config` and `mapRow` rather than
+ * capturing them in a long closure.
  */
-export function makeBillingRepo<
+function buildBillingReadMethods<
   TRow extends BillingRow,
   TSelect,
   TInsert,
   TUpdateInput,
-  TFilters extends Record<string, unknown> = Record<string, unknown>,
+  TFilters extends Record<string, unknown>,
 >(
-  config: BillingRepoConfig<TRow, TSelect, TInsert, TUpdateInput, TFilters>
-): BillingRepoMethods<TSelect, TInsert, TUpdateInput, TFilters> {
-  const { shape, tableName, toSelectType, deactivateInput, extraActiveFilters, prepareInsert } = config;
-  const { table, id, slug, isActive, supportedDirections } = shape;
-
-  function isBillingRow(value: unknown): value is TRow {
-    return isRecord(value);
-  }
-
-  function validateRow(row: unknown): TRow {
-    if (isBillingRow(row)) return row;
-    throw new Error("Invalid row shape from database query");
-  }
+  config: BillingRepoConfig<TRow, TSelect, TInsert, TUpdateInput, TFilters>,
+  mapRow: (row: unknown) => TSelect
+): Pick<
+  BillingRepoMethods<TSelect, TInsert, TUpdateInput, TFilters>,
+  "listAll" | "listActive" | "getById" | "getBySlug" | "listByIds"
+> {
+  const { shape, extraActiveFilters } = config;
+  const mapRows = (rows: unknown[]): TSelect[] => rows.map(mapRow);
 
   async function listAll(tx?: DBTransaction): Promise<TSelect[]> {
-    const client = queryDb(tx);
-    return client
-      .select()
-      .from(table)
-      .orderBy(slug)
-      .then((rows: unknown[]) => rows.map(r => toSelectType(validateRow(r))));
+    return mapRows(await selectAllOrdered(shape, tx));
   }
 
   async function listActive(filters?: TFilters, tx?: DBTransaction): Promise<TSelect[]> {
-    const client = queryDb(tx);
-    const directionRaw = getDirectionFilter(filters);
-    const conditions: (SQL | undefined)[] = [eq(isActive, true), directionFilter(supportedDirections, directionRaw)];
+    const conditions: (SQL | undefined)[] = [
+      eq(shape.isActive, true),
+      directionFilter(shape.supportedDirections, getDirectionFilter(filters)),
+    ];
     if (extraActiveFilters && filters) {
       conditions.push(extraActiveFilters(filters));
     }
-
-    return client
-      .select()
-      .from(table)
-      .where(conditions.length > 0 ? and(...conditions.filter(Boolean)) : undefined)
-      .orderBy(slug)
-      .then((rows: unknown[]) => rows.map(r => toSelectType(validateRow(r))));
+    return mapRows(await selectActiveOrdered(shape, conditions, tx));
   }
 
   async function getById(idValue: string, tx?: DBTransaction): Promise<TSelect | null> {
-    const client = queryDb(tx);
-    const [row] = await client.select().from(table).where(eq(id, idValue)).limit(1);
-    return row ? toSelectType(validateRow(row)) : null;
+    const row = await selectById(shape, idValue, tx);
+    return row === undefined ? null : mapRow(row);
   }
 
   async function getBySlug(slugValue: string, tx?: DBTransaction): Promise<TSelect | null> {
-    const client = queryDb(tx);
-    const [row] = await client.select().from(table).where(eq(slug, slugValue)).limit(1);
-    return row ? toSelectType(validateRow(row)) : null;
+    const row = await selectBySlug(shape, slugValue, tx);
+    return row === undefined ? null : mapRow(row);
+  }
+
+  async function listByIds(ids: readonly string[], tx?: DBTransaction): Promise<TSelect[]> {
+    if (ids.length === 0) return [];
+    return mapRows(await selectByIds(shape, ids, tx));
+  }
+
+  return { listAll, listActive, getById, getBySlug, listByIds };
+}
+
+/**
+ * Builds the write-side method bag (`create`, `update`, `deactivate`) for a
+ * billing repository, sharing the guarded update path between `update` and
+ * `deactivate`.
+ */
+function buildBillingWriteMethods<
+  TRow extends BillingRow,
+  TSelect,
+  TInsert,
+  TUpdateInput,
+  TFilters extends Record<string, unknown>,
+>(
+  config: BillingRepoConfig<TRow, TSelect, TInsert, TUpdateInput, TFilters>,
+  mapRow: (row: unknown) => TSelect
+): Pick<BillingRepoMethods<TSelect, TInsert, TUpdateInput, TFilters>, "create" | "update" | "deactivate"> {
+  const { shape, tableName, deactivateInput, prepareInsert } = config;
+  const { table, id } = shape;
+
+  async function applyUpdate(
+    idValue: string,
+    setValues: TUpdateInput,
+    tErrors: ErrorsLabels,
+    tx: DBTransaction | undefined
+  ): Promise<TSelect> {
+    const [updated] = await (tx ?? db)
+      .update(table)
+      .set({ ...setValues, updatedAt: new Date() })
+      .where(eq(id, idValue))
+      .returning();
+
+    if (!updated) {
+      throw new Error(tErrors.file.recordNotFound({ tableName, entityId: idValue }));
+    }
+
+    return mapRow(updated);
   }
 
   async function create(input: Omit<TInsert, "createdAt" | "updatedAt">, tx?: DBTransaction): Promise<TSelect> {
@@ -199,26 +232,7 @@ export function makeBillingRepo<
       throw new Error(`Failed to create ${tableName} row`);
     }
 
-    return toSelectType(validateRow(created));
-  }
-
-  async function applyUpdate(
-    idValue: string,
-    setValues: TUpdateInput,
-    tErrors: ErrorsLabels,
-    tx: DBTransaction | undefined
-  ): Promise<TSelect> {
-    const [updated] = await (tx ?? db)
-      .update(table)
-      .set({ ...setValues, updatedAt: new Date() })
-      .where(eq(id, idValue))
-      .returning();
-
-    if (!updated) {
-      throw new Error(tErrors.file.recordNotFound({ tableName, entityId: idValue }));
-    }
-
-    return toSelectType(validateRow(updated));
+    return mapRow(created);
   }
 
   async function update(
@@ -234,25 +248,38 @@ export function makeBillingRepo<
     return applyUpdate(idValue, deactivateInput, tErrors, tx);
   }
 
-  async function listByIds(ids: readonly string[], tx?: DBTransaction): Promise<TSelect[]> {
-    if (ids.length === 0) return [];
-    const client = queryDb(tx);
-    return client
-      .select()
-      .from(table)
-      .where(inArray(id, [...ids]))
-      .then((rows: unknown[]) => rows.map(r => toSelectType(validateRow(r))));
-  }
+  return { create, update, deactivate };
+}
+
+/**
+ * Factory that builds the shared billing CRUD method bag for a single
+ * "supported-*" table. Each repository calls this once at module scope,
+ * spreads the result into its namespace, then appends entity-specific
+ * methods like `upsertMany`.
+ *
+ * Eliminates the cross-file duplication that existed across
+ * `supported-mobile-wallet`, `supported-online-account`, and
+ * `supported-payment-link` repositories (8 identical methods per file).
+ */
+export function makeBillingRepo<
+  TRow extends BillingRow,
+  TSelect,
+  TInsert,
+  TUpdateInput,
+  TFilters extends Record<string, unknown> = Record<string, unknown>,
+>(
+  config: BillingRepoConfig<TRow, TSelect, TInsert, TUpdateInput, TFilters>
+): BillingRepoMethods<TSelect, TInsert, TUpdateInput, TFilters> {
+  const isBillingRow = (value: unknown): value is TRow => isRecord(value);
+
+  const mapRow = (row: unknown): TSelect => {
+    if (isBillingRow(row)) return config.toSelectType(row);
+    throw new Error("Invalid row shape from database query");
+  };
 
   return {
-    listAll,
-    listActive,
-    getById,
-    getBySlug,
-    create,
-    update,
-    deactivate,
-    listByIds,
+    ...buildBillingReadMethods(config, mapRow),
+    ...buildBillingWriteMethods(config, mapRow),
   };
 }
 

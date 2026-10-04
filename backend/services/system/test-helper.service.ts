@@ -1,18 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { eq, inArray, or, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
-  adminAuditLogs,
   classInstances,
-  classStatusEvents,
   groupClassEnrollments,
   groupClasses,
-  parents,
   permissionGroups,
   staffProfiles,
-  students,
-  teacherAssignments,
-  teachers,
   userPermissionGroups,
   users,
 } from "@/backend/db/schema";
@@ -23,62 +17,22 @@ import { logger } from "@/backend/lib/logger";
 import { assertTestHelperAllowed } from "@/backend/lib/test-helper-gate";
 import { PersonaSeedService, StudentSeedService, UserSeedService } from "@/backend/services/seed";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
-import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
-import type { SeedDemoUserInput } from "@/backend/types";
+import {
+  assignPermissionGroups,
+  cleanupStaffUser,
+  createProfilesAndAssignment,
+  createTestUsers,
+  deleteTestEntitiesInOrder,
+  ensureTestStorageForGraphql,
+  type TestEntitiesResult,
+  type TestEntityIds,
+  toDemoUserInput,
+} from "@/backend/services/system/test-helper.helpers";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { INTERNAL_DEMO_USERS, resolveAdminPassword } from "@/shared/demo-users";
-import { getServerTranslations } from "@/shared/locale";
-
-interface TestEntitiesResult {
-  studentUserEmail: string;
-  studentUserId: string;
-  studentId: string;
-  studentName: string;
-  parentUserEmail: string;
-  parentUserId: string;
-  parentId: string;
-  parentName: string;
-  teacherUserEmail: string;
-  teacherUserId: string;
-  teacherId: string;
-  teacherName: string;
-}
 
 export namespace TestHelperService {
-  type TxType = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-  function toDemoUserInput(spec: (typeof INTERNAL_DEMO_USERS)[number]): SeedDemoUserInput {
-    return {
-      name: spec.name,
-      email: spec.email,
-      plainPassword: spec.plainPassword ?? resolveAdminPassword(),
-      isSuperAdmin: spec.isSuperAdmin,
-      groupSlug: spec.groupSlug,
-    };
-  }
-
-  const TEST_STORAGE_DIRECTORIES = [
-    "public/docs",
-    "public/avatars",
-    "public/avatars/students",
-    "public/avatars/teachers",
-    "public/avatars/parents",
-    "public/invoices",
-    "public/complaints",
-    "public/resources",
-    "private/billing",
-  ] as const;
-
-  async function ensureTestStorageForGraphql(): Promise<void> {
-    const fileSeeder = await createFileSeedingService();
-    await Promise.all(TEST_STORAGE_DIRECTORIES.map(directory => fileSeeder.ensureDirectory(directory, true)));
-    const tErrors = getServerTranslations("en").errorsTranslations;
-    const handbookPdf = Buffer.from("%PDF-1.4\n% test parent handbook\n");
-    await SystemSettingsService.uploadParentHandbook(null, "parent-handbook.pdf", handbookPdf, tErrors);
-  }
-
   /**
    * Idempotently provisions canonical demo login users (and minimal persona rows)
    * so GraphQL integration tests work on a migrated-but-unseeded database.
@@ -140,185 +94,6 @@ export namespace TestHelperService {
     return true;
   }
 
-  async function cleanupStaffUser(userId: string, label: string): Promise<boolean> {
-    try {
-      await db.transaction(async tx => {
-        await tx.execute(sql`SET LOCAL session_replication_role = 'replica';`);
-        await tx
-          .delete(adminAuditLogs)
-          .where(or(eq(adminAuditLogs.actorUserId, userId), eq(adminAuditLogs.targetUserId, userId)));
-        await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
-        await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
-        await tx.delete(users).where(eq(users.id, userId));
-      });
-
-      logger.info(`Test ${label} cleaned up successfully via helper service`, { userId });
-      return true;
-    } catch (error) {
-      logger.error(`Failed to clean up test ${label} via helper service`, { error });
-      return false;
-    }
-  }
-
-  async function createTestUsers(tx: TxType, prefix: string, hashedPassword: string, now: Date) {
-    const studentEmail = `${prefix}-stu-${randomUUID().slice(0, 8)}@example.com`;
-    const parentEmail = `${prefix}-par-${randomUUID().slice(0, 8)}@example.com`;
-    const teacherEmail = `${prefix}-tea-${randomUUID().slice(0, 8)}@example.com`;
-
-    const [studentUserRow] = await tx
-      .insert(users)
-      .values({
-        name: `${prefix} Student User`,
-        email: studentEmail,
-        password: hashedPassword,
-        timezone: IanaTimezone.UTC,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    const [parentUserRow] = await tx
-      .insert(users)
-      .values({
-        name: `${prefix} Parent User`,
-        email: parentEmail,
-        password: hashedPassword,
-        timezone: IanaTimezone.UTC,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    const [teacherUserRow] = await tx
-      .insert(users)
-      .values({
-        name: `${prefix} Teacher User`,
-        email: teacherEmail,
-        password: hashedPassword,
-        timezone: IanaTimezone.UTC,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    return {
-      studentUserRow,
-      studentEmail,
-      parentUserRow,
-      parentEmail,
-      teacherUserRow,
-      teacherEmail,
-    };
-  }
-
-  async function assignPermissionGroups(
-    tx: TxType,
-    studentUserId: string,
-    teacherUserId: string,
-    parentUserId: string,
-    now: Date
-  ) {
-    const [studentGroup] = await tx
-      .select()
-      .from(permissionGroups)
-      .where(eq(permissionGroups.slug, "student_default"))
-      .limit(1);
-    const [teacherGroup] = await tx
-      .select()
-      .from(permissionGroups)
-      .where(eq(permissionGroups.slug, "teacher_default"))
-      .limit(1);
-    const [parentGroup] = await tx
-      .select()
-      .from(permissionGroups)
-      .where(eq(permissionGroups.slug, "parent_default"))
-      .limit(1);
-
-    if (studentGroup) {
-      await tx.insert(userPermissionGroups).values({
-        userId: studentUserId,
-        groupId: studentGroup.id,
-        assignedAt: now,
-      });
-    }
-
-    if (teacherGroup) {
-      await tx.insert(userPermissionGroups).values({
-        userId: teacherUserId,
-        groupId: teacherGroup.id,
-        assignedAt: now,
-      });
-    }
-
-    if (parentGroup) {
-      await tx.insert(userPermissionGroups).values({
-        userId: parentUserId,
-        groupId: parentGroup.id,
-        assignedAt: now,
-      });
-    }
-  }
-
-  async function createProfilesAndAssignment(
-    tx: TxType,
-    parentUserRowId: string,
-    teacherUserRowId: string,
-    studentUserRowId: string,
-    prefix: string,
-    classesRemaining: number,
-    now: Date
-  ) {
-    // Create parent profile
-    const [parentProfile] = await tx
-      .insert(parents)
-      .values({
-        userId: parentUserRowId,
-        status: "REGULAR",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    // Create student profile
-    const [studentProfile] = await tx
-      .insert(students)
-      .values({
-        parentId: parentProfile.id,
-        userId: studentUserRowId,
-        name: `${prefix} Student`,
-        status: "REGULAR",
-        classesRemaining,
-        classesTotal: classesRemaining,
-        idempotencyKey: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    // Create teacher profile
-    const [teacherProfile] = await tx
-      .insert(teachers)
-      .values({
-        userId: teacherUserRowId,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    // Create teacher assignment linking student and teacher
-    await tx.insert(teacherAssignments).values({
-      studentId: studentProfile.id,
-      teacherId: teacherProfile.id,
-      assignedAt: now,
-    });
-
-    return {
-      studentId: studentProfile.id,
-      parentId: parentProfile.id,
-      teacherId: teacherProfile.id,
-    };
-  }
-
   export async function createTestEntities(prefix: string, classesRemaining: number = 10): Promise<TestEntitiesResult> {
     assertTestHelperAllowed();
 
@@ -361,70 +136,18 @@ export namespace TestHelperService {
     });
   }
 
-  export async function cleanupTestEntities(args: {
-    studentUserId: string;
-    teacherUserId: string;
-    parentUserId: string;
-    studentId: string;
-    teacherId: string;
-    parentId: string;
-  }): Promise<boolean> {
+  export async function cleanupTestEntities(args: TestEntityIds): Promise<boolean> {
     assertTestHelperAllowed();
-    const { studentUserId, teacherUserId, parentUserId, studentId, teacherId, parentId } = args;
 
     try {
       await db.transaction(async tx => {
-        await tx.execute(sql`SET LOCAL session_replication_role = 'replica';`);
-
-        // Delete in order to satisfy restrict foreign key constraints
-        // 1. Delete class_status_events referencing class instances
-        const instanceIds = (
-          await tx
-            .select({ id: classInstances.id })
-            .from(classInstances)
-            .where(or(eq(classInstances.studentId, studentId), eq(classInstances.teacherId, teacherId)))
-        ).map(r => r.id);
-        if (instanceIds.length > 0) {
-          await tx.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, instanceIds));
-        }
-
-        // 2. Delete class instances referencing student/teacher
-        await tx
-          .delete(classInstances)
-          .where(or(eq(classInstances.studentId, studentId), eq(classInstances.teacherId, teacherId)));
-
-        // 3. Delete teacher assignments
-        await tx.delete(teacherAssignments).where(eq(teacherAssignments.studentId, studentId));
-
-        // 4. Delete student profile
-        await tx.delete(students).where(eq(students.id, studentId));
-
-        // 5. Delete parent profile
-        await tx.delete(parents).where(eq(parents.id, parentId));
-
-        // 6. Delete teacher profile
-        await tx.delete(teachers).where(eq(teachers.id, teacherId));
-
-        // 7. Delete user permission groups links
-        await tx
-          .delete(userPermissionGroups)
-          .where(inArray(userPermissionGroups.userId, [studentUserId, teacherUserId, parentUserId]));
-
-        // 8. Delete admin audit logs referencing these test users
-        await tx
-          .delete(adminAuditLogs)
-          .where(
-            or(
-              inArray(adminAuditLogs.actorUserId, [studentUserId, teacherUserId, parentUserId]),
-              inArray(adminAuditLogs.targetUserId, [studentUserId, teacherUserId, parentUserId])
-            )
-          );
-
-        // 9. Delete users
-        await tx.delete(users).where(inArray(users.id, [studentUserId, teacherUserId, parentUserId]));
+        await deleteTestEntitiesInOrder(tx, args);
       });
 
-      logger.info("Test entities cleaned up successfully via helper service", { studentUserId, teacherUserId });
+      logger.info("Test entities cleaned up successfully via helper service", {
+        studentUserId: args.studentUserId,
+        teacherUserId: args.teacherUserId,
+      });
       return true;
     } catch (error) {
       logger.error("Failed to clean up test entities via helper service", { error });

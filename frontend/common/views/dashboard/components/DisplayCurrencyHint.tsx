@@ -1,14 +1,14 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import CloseIcon from "@mui/icons-material/CloseOutlined";
-import { Alert, Button, IconButton, Tooltip } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisplayCurrencyHintDismissed";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { Link } from "@/shared/i18n";
+import {
+  SubjectHintAlert,
+  ViewerHintAlert,
+} from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint.parts";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";
@@ -34,72 +34,12 @@ export function DisplayCurrencyHint({
     fetchPolicy: "cache-first",
   });
 
-  const dismissButton = (
-    <Tooltip title={t.dismiss}>
-      <IconButton
-        aria-label={t.dismiss}
-        size="small"
-        onClick={dismiss}
-        sx={theme => ({
-          ml: theme.direction === "rtl" ? 0 : 0.5,
-          mr: theme.direction === "rtl" ? 0.5 : 0,
-          "&:focus-visible": {
-            outline: `2px solid ${theme.palette.primary.main}`,
-            outlineOffset: 2,
-          },
-        })}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </Tooltip>
-  );
-
   if (mode === "viewer") {
     if (viewerDisplayCurrency || dismissed) {
       return null;
     }
 
-    const action = (
-      <>
-        <Link href="/profile/edit" style={{ textDecoration: "none" }}>
-          <Button color="inherit" size="small">
-            {t.cta}
-          </Button>
-        </Link>
-        {dismissButton}
-      </>
-    );
-
-    if (variant === "compact") {
-      return (
-        <Alert severity="info" sx={{ mx: 2, my: 1 }} action={action}>
-          <strong>{t.title}</strong>
-        </Alert>
-      );
-    }
-
-    return (
-      <Alert
-        severity="info"
-        sx={theme => ({
-          mb: 2,
-          borderRadius: "12px",
-          border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
-          backgroundColor: alpha(theme.palette.info.main, 0.08),
-          "& .MuiAlert-icon": {
-            color: theme.palette.info.main,
-          },
-          "& .MuiAlert-action": {
-            alignItems: "center",
-          },
-        })}
-        action={action}
-      >
-        <strong>{t.title}</strong>
-        <br />
-        {t.body}
-      </Alert>
-    );
+    return <ViewerHintAlert variant={variant} labels={t} href="/profile/edit" onDismiss={dismiss} />;
   }
 
   if (!subjectUserId || subjectLoading || dismissed) {
@@ -111,26 +51,12 @@ export function DisplayCurrencyHint({
     return null;
   }
 
-  const editHref = `${profileHrefForUser(subjectUserId)}/edit`;
-
   return (
-    <Alert
-      severity="info"
-      sx={{ mb: 2 }}
-      action={
-        <>
-          <Link href={editHref} style={{ textDecoration: "none" }}>
-            <Button color="inherit" size="small">
-              {t.subject.cta}
-            </Button>
-          </Link>
-          {dismissButton}
-        </>
-      }
-    >
-      <strong>{t.subject.title}</strong>
-      <br />
-      {t.subject.body}
-    </Alert>
+    <SubjectHintAlert
+      labels={t.subject}
+      dismissLabel={t.dismiss}
+      href={`${profileHrefForUser(subjectUserId)}/edit`}
+      onDismiss={dismiss}
+    />
   );
 }

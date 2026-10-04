@@ -1,14 +1,14 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
+import { buildStudentCreditColumns } from "@/frontend/desktop/views/dashboard/student/credits/components/studentCreditsDataGrid.columns";
 import type { AppLocale } from "@/shared/locale";
 
 interface StudentCreditsDataGridProps {
@@ -37,81 +37,7 @@ export function StudentCreditsDataGrid({
   onPageSizeChange,
 }: Readonly<StudentCreditsDataGridProps>) {
   const columns = useMemo<GridColDef<StudentCreditTransactionRow>[]>(
-    () => [
-      {
-        field: "createdAt",
-        headerName: labels.dateColumn,
-        flex: 1,
-        minWidth: 140,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-            {row.createdAt ? formatDate(row.createdAt, locale) : "—"}
-          </Typography>
-        ),
-      },
-      {
-        field: "reason",
-        headerName: labels.typeColumn,
-        flex: 1,
-        minWidth: 120,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {reasonLabel(row.reason)}
-          </Typography>
-        ),
-      },
-      {
-        field: "changeAmount",
-        headerName: labels.amountColumn,
-        width: 120,
-        align: "right",
-        headerAlign: "right",
-        renderCell: ({ row }) => {
-          const positive = row.changeAmount >= 0;
-          const sign = positive ? "+" : "-";
-          // Hours-based rows show "±15.00 h" with a de-emphasized unit;
-          // legacy class-credit rows keep plain integers (visually distinct).
-          return (
-            <Typography
-              variant="bodyMd"
-              sx={theme => ({
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-                color: positive ? theme.palette.success.main : theme.palette.error.main,
-              })}
-            >
-              {sign}
-              {row.isHours ? (
-                <>
-                  {Math.abs(row.changeAmount).toFixed(2)}
-                  <Box component="span" sx={theme => ({ fontSize: "0.75em", color: theme.palette.onSurfaceVariant })}>
-                    {" h"}
-                  </Box>
-                </>
-              ) : (
-                Math.abs(row.changeAmount)
-              )}
-            </Typography>
-          );
-        },
-      },
-      {
-        field: "notes",
-        headerName: labels.notesColumn,
-        flex: 1.2,
-        minWidth: 160,
-        renderCell: ({ row }) => (
-          <Typography
-            variant="bodyMd"
-            noWrap
-            title={row.notes ?? ""}
-            sx={theme => ({ color: theme.palette.onSurfaceVariant })}
-          >
-            {row.notes ?? "—"}
-          </Typography>
-        ),
-      },
-    ],
+    () => buildStudentCreditColumns({ labels, locale, reasonLabel }),
     [labels, locale, reasonLabel]
   );
 

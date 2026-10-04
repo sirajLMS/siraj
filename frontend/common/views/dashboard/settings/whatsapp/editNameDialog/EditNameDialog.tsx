@@ -1,9 +1,10 @@
 "use client";
 
 import { Alert, Dialog, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import type { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import { DialogSaveCancelActions } from "@/frontend/common/views/dashboard/settings/whatsapp/dialogs";
+import { useEditNameForm } from "@/frontend/common/views/dashboard/settings/whatsapp/editNameDialog/EditNameDialog.hooks";
 import { resolvePurposeValue } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappPurposeOptions";
 import { WhatsappPurposeSelect } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappPurposeSelect";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
@@ -21,84 +22,6 @@ export interface EditNameDialogProps {
   readonly onSubmit: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => Promise<void>;
   readonly validateDisplayName: (value: string) => string | null;
   readonly validatePurpose: (value: string) => string | null;
-}
-
-type WhatsappValidationKey =
-  | "validationDisplayNameRequired"
-  | "validationDisplayNameTooLong"
-  | "validationPurposeRequired"
-  | "validationPurposeInvalid";
-
-const VALIDATION_KEYS: ReadonlySet<string> = new Set([
-  "validationDisplayNameRequired",
-  "validationDisplayNameTooLong",
-  "validationPurposeRequired",
-  "validationPurposeInvalid",
-]);
-
-function isValidationKey(value: string): value is WhatsappValidationKey {
-  return VALIDATION_KEYS.has(value);
-}
-
-function resolveValidationError(key: string | null, labels: WhatsappLabels): string | null {
-  if (key === null) {
-    return null;
-  }
-  if (isValidationKey(key)) {
-    return labels[key];
-  }
-  return key;
-}
-
-function useEditNameForm(
-  open: boolean,
-  initialDisplayName: string,
-  initialPurpose: WhatsappAccountPurpose,
-  labels: WhatsappLabels,
-  validateDisplayName: (value: string) => string | null,
-  validatePurpose: (value: string) => string | null
-) {
-  const [displayName, setDisplayName] = useState(initialDisplayName);
-  const [purpose, setPurpose] = useState<string>(initialPurpose);
-  const [displayNameError, setDisplayNameError] = useState<string | null>(null);
-  const [purposeError, setPurposeError] = useState<string | null>(null);
-  const [prevOpen, setPrevOpen] = useState(open);
-
-  if (open !== prevOpen) {
-    setPrevOpen(open);
-    if (open) {
-      setDisplayName(initialDisplayName);
-      setPurpose(initialPurpose);
-      setDisplayNameError(null);
-      setPurposeError(null);
-    }
-  }
-
-  const handleNameChange = useCallback(
-    (value: string) => {
-      setDisplayName(value);
-      setDisplayNameError(resolveValidationError(validateDisplayName(value), labels));
-    },
-    [labels, validateDisplayName]
-  );
-
-  const handlePurposeChange = useCallback(
-    (value: string) => {
-      setPurpose(value);
-      setPurposeError(resolveValidationError(validatePurpose(value), labels));
-    },
-    [labels, validatePurpose]
-  );
-
-  const validate = useCallback((): boolean => {
-    const nameErr = resolveValidationError(validateDisplayName(displayName), labels);
-    setDisplayNameError(nameErr);
-    const purposeErr = resolveValidationError(validatePurpose(purpose), labels);
-    setPurposeError(purposeErr);
-    return nameErr === null && purposeErr === null;
-  }, [displayName, purpose, labels, validateDisplayName, validatePurpose]);
-
-  return { displayName, purpose, displayNameError, purposeError, handleNameChange, handlePurposeChange, validate };
 }
 
 function EditPurposeFields({

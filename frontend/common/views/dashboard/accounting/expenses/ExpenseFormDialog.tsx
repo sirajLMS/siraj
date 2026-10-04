@@ -1,67 +1,30 @@
 "use client";
 
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import {
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormHelperText,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Controller, useWatch } from "react-hook-form";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { Dialog, DialogContent, InputAdornment, Stack } from "@mui/material";
+import { useWatch } from "react-hook-form";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
-import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
-import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
-import { TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect/TeacherAutocomplete";
-import { type CurrencyCode, ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
+import { ExpenseDateFields } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFormDialog.dates";
+import { TypeField, ValueField } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFormDialog.fields";
 import {
-  EXPENSE_NOTE_MAX_LENGTH,
-  EXPENSE_TITLE_MAX_LENGTH,
+  EXPENSE_FORM_GRID_SX,
+  EXPENSE_FORM_ID,
+} from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFormDialog.helpers";
+import {
+  CurrencyField,
+  TeacherField,
+  TitleField,
+} from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFormDialog.identity";
+import {
+  ExpenseDialogFooter,
+  ExpenseDialogHeader,
+  ExpenseSourceBanner,
+  NoteField,
+} from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFormDialog.parts";
+import {
   type ExpenseFormRow,
   useExpenseFormViewModel,
 } from "@/frontend/common/views/dashboard/accounting/expenses/useExpenseFormViewModel";
-
-/** HTML id of the dialog form so the submit button in DialogActions can target it. */
-const FORM_ID = "expense-form";
-
-const FORM_GRID_SX = {
-  display: "grid",
-  gap: 2,
-  pt: 1,
-  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
-} as const;
-
-const FULL_WIDTH_CELL_SX = { gridColumn: "1 / -1" } as const;
-
-/**
- * All selectable expense types; Salaries stays listed but disabled because
- * the create contract rejects it — salaries are written only by the carryover
- * settlement flow, and the disabled row with the hint explains where.
- */
-const EXPENSE_TYPES: readonly ExpenseType[] = Object.values(ExpenseType);
-
-function toCurrencyOption(code: CurrencyCode | null): CurrencyOption | null {
-  if (code === null) return null;
-  return getCurrencyByCode(code) ?? null;
-}
-
-function isExpenseType(value: unknown): value is ExpenseType {
-  return typeof value === "string" && (EXPENSE_TYPES as readonly string[]).includes(value);
-}
 
 export interface ExpenseFormDialogProps {
   /** Whether the dialog is visible; every open starts a fresh form session. */
@@ -98,223 +61,56 @@ export function ExpenseFormDialog({ open, row, onClose, onSaved }: Readonly<Expe
 
   return (
     <Dialog {...DialogPresets.info} open={open} onClose={viewModel.submitting ? undefined : viewModel.onCancel}>
-      <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontWeight: 700 }}>
-        {viewModel.title}
-        <IconButton
-          aria-label={viewModel.commonLabels.ariaClose}
-          onClick={viewModel.onCancel}
-          disabled={viewModel.submitting}
-          size="small"
-        >
-          <CloseOutlinedIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
+      <ExpenseDialogHeader
+        title={viewModel.title}
+        closeLabel={viewModel.commonLabels.ariaClose}
+        submitting={viewModel.submitting}
+        onCancel={viewModel.onCancel}
+      />
       <DialogContent>
         <Stack
-          id={FORM_ID}
+          id={EXPENSE_FORM_ID}
           component="form"
           // Native constraint validation (required/minLength) would swallow the
           // submit event before the Zod resolver runs, so the form opts out and
           // surfaces the same rules as inline field errors instead.
           noValidate
-          sx={FORM_GRID_SX}
+          sx={EXPENSE_FORM_GRID_SX}
           onSubmit={event => {
             event.preventDefault();
             viewModel.onSubmit();
           }}
         >
-          <Controller
-            name="title"
+          <TitleField control={form.control} labels={labels} submitting={viewModel.submitting} />
+          <TypeField
             control={form.control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label={labels.modal.form.title}
-                required
-                fullWidth
-                disabled={viewModel.submitting}
-                error={fieldState.error !== undefined}
-                helperText={fieldState.error?.message}
-                aria-invalid={fieldState.error !== undefined}
-                slotProps={{ htmlInput: { maxLength: EXPENSE_TITLE_MAX_LENGTH } }}
-                sx={FULL_WIDTH_CELL_SX}
-              />
-            )}
+            labels={labels}
+            labelsByType={labelsByType}
+            typeHint={typeHint}
+            submitting={viewModel.submitting}
+            salariesLocked={viewModel.salariesLocked}
           />
-          <Controller
-            name="type"
+          <TeacherField control={form.control} labels={labels} submitting={viewModel.submitting} />
+          <ValueField
             control={form.control}
-            render={({ field, fieldState }) => (
-              <FormControl
-                required
-                fullWidth
-                disabled={viewModel.submitting || viewModel.salariesLocked}
-                error={fieldState.error !== undefined}
-              >
-                <InputLabel id="expense-type-label">{labels.modal.form.type}</InputLabel>
-                <Select
-                  labelId="expense-type-label"
-                  label={labels.modal.form.type}
-                  value={field.value ?? ""}
-                  onBlur={field.onBlur}
-                  onChange={(event: SelectChangeEvent) => {
-                    const next: unknown = event.target.value;
-                    if (next === "" || isExpenseType(next)) field.onChange(next === "" ? null : next);
-                  }}
-                  slotProps={{ input: { "aria-invalid": fieldState.error !== undefined } }}
-                >
-                  {EXPENSE_TYPES.map(type => (
-                    <MenuItem key={type} value={type} disabled={type === ExpenseType.Salaries}>
-                      {labelsByType[type]}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>{fieldState.error?.message ?? typeHint}</FormHelperText>
-              </FormControl>
-            )}
+            labels={labels}
+            valueHint={valueHint}
+            valueEndAdornment={valueEndAdornment}
+            submitting={viewModel.submitting}
+            salariesLocked={viewModel.salariesLocked}
           />
-          <Controller
-            name="teacher"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <TeacherAutocomplete
-                value={field.value}
-                onChange={field.onChange}
-                label={labels.modal.form.teacher}
-                error={fieldState.error !== undefined}
-                helperText={fieldState.error?.message}
-                disabled={viewModel.submitting}
-                fullWidth
-              />
-            )}
-          />
-          <Controller
-            name="expenseValue"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                type="number"
-                label={labels.modal.form.value}
-                required
-                fullWidth
-                disabled={viewModel.submitting || viewModel.salariesLocked}
-                error={fieldState.error !== undefined}
-                helperText={fieldState.error?.message ?? valueHint}
-                aria-invalid={fieldState.error !== undefined}
-                slotProps={{ htmlInput: { min: 0, step: "any" }, input: { endAdornment: valueEndAdornment } }}
-              />
-            )}
-          />
-          <Controller
-            name="expenseCurrency"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <CurrencySelect
-                currency={toCurrencyOption(field.value)}
-                setCurrencyAction={selected => field.onChange(selected.code)}
-                onBlurAction={field.onBlur}
-                label={labels.modal.form.currency}
-                error={fieldState.error !== undefined}
-                helperText={fieldState.error?.message}
-                disabled={viewModel.submitting}
-                required
-                fullWidth
-              />
-            )}
-          />
-          <Controller
-            name="paymentDate"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <AppDatePicker
-                label={labels.modal.form.paymentDate}
-                value={field.value}
-                onChange={field.onChange}
-                disabled={viewModel.submitting}
-                slotProps={{
-                  textField: {
-                    required: true,
-                    fullWidth: true,
-                    error: fieldState.error !== undefined,
-                    helperText: fieldState.error?.message,
-                  },
-                }}
-              />
-            )}
-          />
-          <Controller
-            name="expenseMonth"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <AppDatePicker
-                label={labels.modal.form.expenseDate}
-                value={field.value}
-                onChange={field.onChange}
-                views={["year", "month"]}
-                openTo="month"
-                format="yyyy-MM"
-                disabled={viewModel.submitting}
-                slotProps={{
-                  textField: {
-                    required: true,
-                    fullWidth: true,
-                    error: fieldState.error !== undefined,
-                    helperText: fieldState.error?.message,
-                  },
-                }}
-              />
-            )}
-          />
-          <Stack sx={FULL_WIDTH_CELL_SX}>
-            <Controller
-              name="note"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  multiline
-                  minRows={3}
-                  label={labels.modal.form.note}
-                  fullWidth
-                  disabled={viewModel.submitting}
-                  error={fieldState.error !== undefined}
-                  helperText={fieldState.error?.message}
-                  aria-invalid={fieldState.error !== undefined}
-                  slotProps={{ htmlInput: { maxLength: EXPENSE_NOTE_MAX_LENGTH } }}
-                />
-              )}
-            />
-          </Stack>
-          {!viewModel.isEdit && (
-            <Stack
-              direction="row"
-              sx={theme => ({
-                gridColumn: "1 / -1",
-                gap: 1,
-                alignItems: "center",
-                color: theme.palette.onSurfaceVariant,
-              })}
-            >
-              <InfoOutlinedIcon fontSize="small" aria-hidden />
-              <Typography variant="bodyMd">{labels.modal.form.sourceBanner(labels.source.Manual)}</Typography>
-            </Stack>
-          )}
+          <CurrencyField control={form.control} labels={labels} submitting={viewModel.submitting} />
+          <ExpenseDateFields control={form.control} labels={labels} submitting={viewModel.submitting} />
+          <NoteField control={form.control} labels={labels} submitting={viewModel.submitting} />
+          {!viewModel.isEdit && <ExpenseSourceBanner labels={labels} />}
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <FilterButton onClick={viewModel.onCancel} disabled={viewModel.submitting}>
-          {labels.modal.form.cancel}
-        </FilterButton>
-        <PrimaryPageAction
-          type="submit"
-          form={FORM_ID}
-          disabled={viewModel.submitting || !viewModel.canSubmit}
-          aria-busy={viewModel.submitting}
-        >
-          {viewModel.submitting ? <CircularProgress size={20} color="inherit" /> : labels.modal.form.submit}
-        </PrimaryPageAction>
-      </DialogActions>
+      <ExpenseDialogFooter
+        labels={labels}
+        submitting={viewModel.submitting}
+        canSubmit={viewModel.canSubmit}
+        onCancel={viewModel.onCancel}
+      />
     </Dialog>
   );
 }

@@ -1,23 +1,22 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { LessonReportRepository } from "@/backend/db/repo/classes/lesson-report.repository";
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { classInstances, teachers } from "@/backend/db/schema";
-import { AppPermission, AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
-import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { AppPermission, type AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
 import { CreditService } from "@/backend/services/billing/credit.service";
-import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import {
-  buildLessonReportReviewedPayloads,
-  buildLessonReportSubmittedPayloads,
-} from "@/backend/services/notification/notification-payloads.builders";
+  fetchPaginatedReports,
+  requirePermission,
+  toReturnType,
+  transitionReportStatus,
+  validateLessonReportInput,
+  validateRejectionReason,
+} from "@/backend/services/classes/lesson-report.service.helpers";
+import {
+  getStudentRecentLessonReportsFlow,
+  submitStudentReflectionFlow,
+} from "@/backend/services/classes/lesson-report.service.student";
+import { submitReportFlow } from "@/backend/services/classes/lesson-report.service.submit";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import {
-  type DBTransaction,
   type LessonReportReturnType,
-  type LessonReportSelectType,
   type LessonReportSubmitInput,
   type LessonReviewInput,
   PaginationArgs,
@@ -35,247 +34,12 @@ import { getServerTranslations } from "@/shared/locale";
  *   rejectReport   → PENDING_REVIEW → REJECTED    (side effect: CreditService.refundOnCancel)
  */
 export namespace LessonReportService {
-  function isLessonReportStatus(value: string): value is LessonReportStatus {
-    return (Object.values(LessonReportStatus) as readonly string[]).includes(value);
-  }
-
-  function isAttendanceEvaluation(value: string): value is AttendanceEvaluation {
-    return (Object.values(AttendanceEvaluation) as readonly string[]).includes(value);
-  }
-
-  function assertLessonReportStatus(value: string): LessonReportStatus {
-    if (!isLessonReportStatus(value)) {
-      throw new Error(`Unexpected LessonReportStatus: ${value}`);
-    }
-    return value;
-  }
-
-  function assertAttendanceEvaluation(value: string): AttendanceEvaluation {
-    if (!isAttendanceEvaluation(value)) {
-      throw new Error(`Unexpected AttendanceEvaluation: ${value}`);
-    }
-    return value;
-  }
-
-  function toReturnType(
-    row: LessonReportSelectType & {
-      teacherName?: string | null;
-      studentName?: string | null;
-      subjectName?: string | null;
-      classAvatarUrl?: string | null;
-    }
-  ): LessonReportReturnType {
-    return {
-      ...row,
-      status: assertLessonReportStatus(row.status),
-      attendanceEvaluation: assertAttendanceEvaluation(row.attendanceEvaluation),
-      teacherName: row.teacherName ?? null,
-      studentName: row.studentName ?? null,
-      subjectName: row.subjectName ?? null,
-      classAvatarUrl: row.classAvatarUrl ?? null,
-    };
-  }
-
-  async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
-    const has = await PermissionsService.hasPermission(actorUserId, permission);
-    if (!has) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.unauthorized);
-    }
-  }
-
-  async function requireClassInstanceOwnedByTeacher(
-    classInstanceId: string,
-    teacherId: string,
-    locale?: string
-  ): Promise<void> {
-    const [instance] = await db
-      .select({ id: classInstances.id, teacherId: classInstances.teacherId })
-      .from(classInstances)
-      .where(eq(classInstances.id, classInstanceId))
-      .limit(1);
-    if (!instance) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.scheduling.classInstanceNotFound({ id: classInstanceId }));
-    }
-    if (instance.teacherId !== teacherId) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.lessonReport.notEligibleForReview);
-    }
-  }
-
-  async function resolveTeacherIdForUser(userId: string, locale?: string): Promise<string> {
-    const [teacher] = await db.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, userId)).limit(1);
-    if (!teacher) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.teacher.teacherNotFound(userId));
-    }
-    return teacher.id;
-  }
-
-  async function resolveUserDisplayName(userId: string): Promise<string> {
-    const user = await UserRepository.findById(userId);
-    return user?.name ?? "—";
-  }
-
-  /**
-   * Validates common lesson report input fields.
-   * Throws error with the provided error message if validation fails.
-   */
-  function validateLessonReportInput(
-    completionPercentage: number,
-    durationMinutes: number,
-    invalidInputError: string
-  ): void {
-    if (completionPercentage < 0 || completionPercentage > 100) {
-      throw new Error(invalidInputError);
-    }
-    if (durationMinutes <= 0) {
-      throw new Error(invalidInputError);
-    }
-  }
-
-  /**
-   * Validates rejection reason based on lesson report status.
-   * Throws error if validation fails.
-   */
-  function validateRejectionReason(
-    status: LessonReportStatus,
-    rejectionReason: string | null | undefined,
-    tErrors: {
-      rejectedReportsRequireReason: string;
-      approvedReportsNoRejectionReason: string;
-    }
-  ): void {
-    if (status === LessonReportStatus.REJECTED && (!rejectionReason || rejectionReason.trim().length === 0)) {
-      throw new Error(tErrors.rejectedReportsRequireReason);
-    }
-    if (status === LessonReportStatus.APPROVED && rejectionReason) {
-      throw new Error(tErrors.approvedReportsNoRejectionReason);
-    }
-  }
-
-  /**
-   * Notify users with `LESSON_REPORTS_REVIEW` that a report was submitted.
-   * Fire-and-forget: dispatch failure must not roll back the submit.
-   */
-  async function dispatchLessonReportSubmitted(
-    report: LessonReportSelectType,
-    teacherName: string,
-    locale?: string
-  ): Promise<void> {
-    const reviewerUserIds = await PermissionsService.getUserIdsWithPermission(AppPermission.LESSON_REPORTS_REVIEW);
-    const affectedUserIds = reviewerUserIds.filter(id => id !== report.submittedByUserId);
-    if (affectedUserIds.length === 0) return;
-
-    const payloads = buildLessonReportSubmittedPayloads(report.id, affectedUserIds, locale, {
-      teacherName,
-      classInstanceId: report.classInstanceId,
-    });
-    await dispatchWithPreferences(payloads, affectedUserIds, locale).catch(err => {
-      logger.error("Lesson-report-submitted notification dispatch failed", {
-        reportId: report.id,
-        classInstanceId: report.classInstanceId,
-        err,
-      });
-    });
-  }
-
-  /**
-   * Notify the submitting teacher that their report was approved or rejected.
-   * Fire-and-forget: dispatch failure must not roll back the review.
-   */
-  async function dispatchLessonReportReviewed(
-    report: LessonReportSelectType,
-    decision: "approved" | "rejected",
-    locale?: string
-  ): Promise<void> {
-    const teacherUserId = report.submittedByUserId;
-    if (!teacherUserId) return;
-
-    const teacherName = await resolveUserDisplayName(teacherUserId);
-    const payloads = buildLessonReportReviewedPayloads(report.id, teacherUserId, decision, locale, {
-      teacherName,
-      classInstanceId: report.classInstanceId,
-    });
-    await dispatchWithPreferences(payloads, [teacherUserId], locale).catch(err => {
-      logger.error("Lesson-report-reviewed notification dispatch failed", {
-        reportId: report.id,
-        decision,
-        teacherUserId,
-        err,
-      });
-    });
-  }
-
   export async function submitReport(
     actorUserId: string,
     input: LessonReportSubmitInput,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_SUBMIT, locale);
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    validateLessonReportInput(input.completionPercentage, input.durationMinutes, tErrors.invalidInput);
-
-    const teacherId = await resolveTeacherIdForUser(actorUserId, locale);
-    await requireClassInstanceOwnedByTeacher(input.classInstanceId, teacherId, locale);
-
-    // Validate class instance is in COMPLETED state
-    const [instance] = await db
-      .select({
-        executionState: classInstances.executionState,
-        studentId: classInstances.studentId,
-        scheduledStartAt: classInstances.scheduledStartAt,
-        durationMinutes: classInstances.durationMinutes,
-      })
-      .from(classInstances)
-      .where(eq(classInstances.id, input.classInstanceId))
-      .limit(1);
-    if (!instance) {
-      throw new Error(tErrors.scheduling.classInstanceNotFound({ id: input.classInstanceId }));
-    }
-    if (instance.executionState !== "COMPLETED") {
-      throw new Error(tErrors.lessonReport.notEligibleForReview);
-    }
-
-    // Idempotency: at most one report per class instance
-    const existing = await LessonReportRepository.findByClassInstanceId(input.classInstanceId);
-    if (existing) {
-      throw new Error(tErrors.lessonReport.alreadyExists);
-    }
-
-    const idempotencyKey = `lesson-report:${input.classInstanceId}`;
-    const now = new Date();
-    try {
-      const created = await LessonReportRepository.create({
-        classInstanceId: input.classInstanceId,
-        studentId: instance.studentId,
-        teacherId,
-        lessonDate: instance.scheduledStartAt,
-        durationMinutes: input.durationMinutes,
-        attendanceEvaluation: input.attendanceEvaluation,
-        teacherNotes: input.teacherNotes ?? null,
-        completionPercentage: input.completionPercentage,
-        status: LessonReportStatus.PENDING_REVIEW,
-        submittedByUserId: actorUserId,
-        submittedAt: now,
-        reviewedByUserId: null,
-        reviewedAt: null,
-        rejectionReason: null,
-        idempotencyKey,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      const teacherName = await resolveUserDisplayName(actorUserId);
-      await dispatchLessonReportSubmitted(created, teacherName, locale);
-
-      return toReturnType(created);
-    } catch (error) {
-      logger.error("Failed to submit lesson report", { classInstanceId: input.classInstanceId, error });
-      throw new Error(tErrors.lessonReport.createFailed, { cause: error });
-    }
+    return submitReportFlow(actorUserId, input, locale);
   }
 
   /**
@@ -342,94 +106,6 @@ export namespace LessonReportService {
     });
 
     return toReturnType(created);
-  }
-
-  async function fetchPaginatedReports(
-    actorUserId: string,
-    locale: string | undefined,
-    findFn: (paginationArgs: PaginationArgs) => Promise<LessonReportSelectType[]>,
-    countFn: () => Promise<number>,
-    paginationArgs: PaginationArgs,
-    permission: AppPermission = AppPermission.LESSON_REPORTS_REVIEW
-  ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
-    await requirePermission(actorUserId, permission, locale);
-    const [rows, totalCount] = await Promise.all([findFn(paginationArgs), countFn()]);
-    return { rows: rows.map(toReturnType), totalCount };
-  }
-
-  /**
-   * Generic function to transition a lesson report status (APPROVED/REJECTED).
-   * Handles permission check, validation, transaction, side effects, logging, and notification.
-   */
-  interface TransitionReportStatusOptions {
-    actorUserId: string;
-    reportId: string;
-    newStatus: LessonReportStatus;
-    locale?: string;
-    approvePermission: AppPermission;
-    rejectPermission: AppPermission;
-    sideEffect: (tx: DBTransaction, report: LessonReportSelectType) => Promise<void>;
-    successLogMessage: string;
-    dispatchDecision: "approved" | "rejected";
-    rejectionReason?: string | null;
-  }
-
-  async function transitionReportStatus(options: TransitionReportStatusOptions): Promise<LessonReportReturnType> {
-    const {
-      actorUserId,
-      reportId,
-      newStatus,
-      locale,
-      approvePermission,
-      rejectPermission,
-      sideEffect,
-      successLogMessage,
-      dispatchDecision,
-      rejectionReason,
-    } = options;
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    // Check appropriate permission based on the target status
-    const requiredPermission = newStatus === LessonReportStatus.APPROVED ? approvePermission : rejectPermission;
-    await requirePermission(actorUserId, requiredPermission, locale);
-
-    const report = await LessonReportRepository.findById(reportId);
-    if (!report) {
-      throw new Error(tErrors.lessonReport.notFound);
-    }
-    if (report.status !== "PENDING_REVIEW") {
-      throw new Error(tErrors.lessonReport.alreadyReviewed);
-    }
-
-    // Validate rejection reason using shared helper
-    validateRejectionReason(newStatus, rejectionReason, tErrors);
-
-    // Wrap the status transition + side effect in a single transaction
-    const updated = await db.transaction(async tx => {
-      const statusUpdated = await LessonReportRepository.updateStatus(
-        reportId,
-        newStatus,
-        actorUserId,
-        rejectionReason ?? null,
-        tx
-      );
-
-      await sideEffect(tx, report);
-
-      return statusUpdated;
-    });
-
-    logger.info(successLogMessage, {
-      reportId,
-      classInstanceId: report.classInstanceId,
-      teacherId: report.teacherId,
-      studentId: report.studentId,
-      actorUserId,
-    });
-
-    await dispatchLessonReportReviewed(report, dispatchDecision, locale);
-
-    return toReturnType(updated);
   }
 
   export async function approveReport(
@@ -533,23 +209,7 @@ export namespace LessonReportService {
     paginationArgs: PaginationArgs,
     locale?: string
   ): Promise<{ rows: LessonReportReturnType[]; totalCount: number }> {
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_OWN_DASHBOARD);
-    if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
-    if (!studentId) {
-      throw new Error(tErrors.unauthorizedAction);
-    }
-
-    const [rows, totalCount] = await Promise.all([
-      LessonReportRepository.findForStudent(studentId, paginationArgs),
-      LessonReportRepository.countForStudent(studentId),
-    ]);
-    return { rows: rows.map(toReturnType), totalCount };
+    return getStudentRecentLessonReportsFlow(actorUserId, paginationArgs, locale);
   }
 
   export async function getReportByClassId(
@@ -595,32 +255,6 @@ export namespace LessonReportService {
     studentNotes: string,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_OWN_DASHBOARD);
-    if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    if (!studentNotes || studentNotes.trim().length === 0) {
-      throw new Error(tErrors.invalidInput);
-    }
-
-    const report = await LessonReportRepository.findByClassInstanceId(classInstanceId);
-    if (!report) {
-      throw new Error(tErrors.lessonReport.notFound);
-    }
-
-    const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
-    if (!studentId || studentId !== report.studentId) {
-      throw new Error(tErrors.unauthorizedAction);
-    }
-
-    const updated = await LessonReportRepository.updateStudentNotes(classInstanceId, studentNotes);
-    if (!updated) {
-      throw new Error(tErrors.lessonReport.notFound);
-    }
-
-    return toReturnType(updated);
+    return submitStudentReflectionFlow(actorUserId, classInstanceId, studentNotes, locale);
   }
 }

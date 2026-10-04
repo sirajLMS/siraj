@@ -8,6 +8,7 @@ import type { SxProps, Theme } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { useLocaleSwitchSuccess } from "@/frontend/common/hooks/useLocaleSwitchSuccess";
 import { useNarrowContainer } from "@/frontend/common/hooks/useNarrowContainer";
+import { useSynchronizedLocalizedStringDraft } from "@/frontend/common/hooks/useSynchronizedLocalizedStringDraft";
 import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -262,25 +263,10 @@ export const useLocalizedStringInputState = (props: LocalizedStringInputStatePro
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequiredLocales), [resolvedRequiredLocales]);
 
   const [activeLocale, setActiveLocale] = useState<AppLocale>(() => pickInitialActiveLocale(uiLocale));
-  const [draftState, setDraftState] = useState<{ prevValue: LocalizedString; draft: LocalizedString }>({
-    prevValue: value,
-    draft: value,
-  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { successSwitch, triggerSuccess } = useLocaleSwitchSuccess();
 
-  if (draftState.prevValue !== value) {
-    setDraftState({ prevValue: value, draft: value });
-  }
-  const draft = draftState.draft;
-
-  const emitChange = useCallback(
-    (next: LocalizedString) => {
-      setDraftState(prev => ({ ...prev, draft: next }));
-      onChangeAction(next);
-    },
-    [onChangeAction]
-  );
+  const { draft, emitChange } = useSynchronizedLocalizedStringDraft(value, onChangeAction);
 
   const handlers = useChangeHandlers({
     emitChange,

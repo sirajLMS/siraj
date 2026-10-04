@@ -1,16 +1,8 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { type ReactNode, useEffect, useRef } from "react";
-import { useFxLiveRefresh } from "@/frontend/common/hooks/useFxLiveRefresh";
-import {
-  SidebarShell,
-  type TranslatedNavGroup,
-  type TranslatedNavItem,
-} from "@/frontend/common/views/dashboard/components/client/SidebarShell";
+import { SidebarShell } from "@/frontend/common/views/dashboard/components/client/SidebarShell";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
-import { FxStaleBanner } from "@/frontend/common/views/dashboard/components/FxStaleBanner";
 import {
   CustomizeButton,
   LanguageSwitcher,
@@ -21,71 +13,15 @@ import {
 } from "@/frontend/common/views/dashboard/components/navbar";
 import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import { getActiveNavKey } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
-import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { BottomNavbarMobile } from "@/frontend/mobile/views/dashboard/components/bottomNavbar.mobile";
+import {
+  buildTranslatedNavGroups,
+  buildTranslatedNavItems,
+} from "@/frontend/mobile/views/dashboard/components/dashboardLayout.mobile.helpers";
+import { MobileMainScrollArea } from "@/frontend/mobile/views/dashboard/components/dashboardLayout.mobile.parts";
 import { MobileMenuButton } from "@/frontend/mobile/views/dashboard/components/mobileMenuButton.mobile";
 import { usePathname } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
-
-const StyledMain = styled("main")(({ theme }) => ({
-  flexGrow: 1,
-  minWidth: 0,
-  minHeight: 0,
-  overflowY: "auto",
-  overscrollBehavior: "contain",
-  backgroundColor: theme.palette.background.default,
-}));
-
-function MobileMainScrollArea({
-  children,
-  hideBottomNav,
-}: {
-  readonly children: ReactNode;
-  readonly hideBottomNav: boolean;
-}) {
-  const mainRef = useRef<HTMLElement>(null);
-  useFxLiveRefresh();
-
-  useEffect(() => {
-    mainRef.current?.scrollTo(0, 0);
-  }, []);
-
-  return (
-    <StyledMain
-      ref={mainRef}
-      sx={theme => ({
-        pb: hideBottomNav
-          ? theme.spacing(2)
-          : `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
-      })}
-    >
-      <Box
-        sx={theme => ({
-          px: 0,
-          py: theme.spacing(2),
-        })}
-      >
-        <FxStaleBanner />
-        {children}
-      </Box>
-    </StyledMain>
-  );
-}
-
-function buildTranslatedNavGroups(
-  navGroups: readonly NavGroup[],
-  t: (key: keyof DashboardNavigationLabels) => string
-): TranslatedNavGroup[] {
-  return navGroups.map(group => ({ ...group, label: t(group.labelKey) }));
-}
-
-function buildTranslatedNavItems(
-  navItems: readonly NavItem[],
-  t: (key: keyof DashboardNavigationLabels) => string
-): TranslatedNavItem[] {
-  return navItems.map(item => ({ ...item, label: t(item.labelKey) }));
-}
 
 export function DashboardLayoutMobile({
   children,

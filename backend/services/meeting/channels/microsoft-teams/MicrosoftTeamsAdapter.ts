@@ -2,7 +2,6 @@ import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
   fetchWithTimeout,
-  isRecord,
   isTokenExpired,
   MeetingAdapterBase,
   REQUEST_TIMEOUT_MS,
@@ -11,18 +10,27 @@ import {
 import {
   InsufficientScopesError,
   MicrosoftTeamsApiError,
-  NoAppAccessPolicyError,
   NoOrgCredentialsNoUserTokenError,
   ProviderUnavailableError,
   RateLimitedError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
+import {
+  assertMicrosoftTeamsMeetingResponseOk,
+  isMicrosoftTeamsMeetingResponse,
+  isMicrosoftTeamsTokenResponse,
+  MS_GRAPH_BASE,
+  MS_TEAMS_REQUIRED_SCOPES,
+  MS_TOKEN_URL_TEMPLATE,
+  normalizeScope,
+  parseMicrosoftTeamsErrorBody,
+  postMicrosoftTeamsMeetingRequest,
+  TOKEN_REFRESH_MARGIN_MS,
+} from "@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter.helpers";
 import type {
   CachedToken,
   GenerateMeetingInput,
   GenerateMeetingResult,
-  MicrosoftTeamsErrorResponse,
   MicrosoftTeamsMeetingResponse,
-  MicrosoftTeamsTokenResponse,
 } from "@/backend/types";
 
 export interface MicrosoftTeamsAdapterOptions {
@@ -30,40 +38,6 @@ export interface MicrosoftTeamsAdapterOptions {
   readonly clientId?: string;
   readonly clientSecret?: string;
   readonly organizerUserId?: string;
-}
-
-const MS_TOKEN_URL_TEMPLATE = "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
-const MS_GRAPH_BASE = "https://graph.microsoft.com/v1.0";
-const TOKEN_REFRESH_MARGIN_MS = 120_000;
-
-const MS_TEAMS_REQUIRED_SCOPES = ["OnlineMeetings.ReadWrite.All"] as const;
-
-const MS_GRAPH_SCOPE_PREFIX = "https://graph.microsoft.com/";
-
-function normalizeScope(scope: string): string {
-  return scope.startsWith(MS_GRAPH_SCOPE_PREFIX) ? scope.slice(MS_GRAPH_SCOPE_PREFIX.length) : scope;
-}
-
-function isMicrosoftTeamsTokenResponse(value: unknown): value is MicrosoftTeamsTokenResponse {
-  if (!isRecord(value)) return false;
-  return (
-    typeof value.token_type === "string" &&
-    typeof value.expires_in === "number" &&
-    typeof value.access_token === "string" &&
-    (value.scope === undefined || typeof value.scope === "string")
-  );
-}
-
-function isMicrosoftTeamsMeetingResponse(value: unknown): value is MicrosoftTeamsMeetingResponse {
-  if (!isRecord(value)) return false;
-  return typeof value.id === "string" && typeof value.joinWebUrl === "string";
-}
-
-function isMicrosoftTeamsErrorResponse(value: unknown): value is MicrosoftTeamsErrorResponse {
-  if (!isRecord(value)) return false;
-  if (value.error === undefined) return true;
-  if (!isRecord(value.error)) return false;
-  return typeof value.error.code === "string" && typeof value.error.message === "string";
 }
 
 export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
@@ -122,8 +96,8 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
 
     const meetingBody = this.buildMeetingRequestBody(input);
     const url = this.buildMeetingUrl(organizerUserId);
-    const response = await this.postMeetingRequest(url, accessToken, meetingBody);
-    await this.assertMeetingResponseOk(response);
+    const response = await postMicrosoftTeamsMeetingRequest(url, accessToken, meetingBody);
+    await assertMicrosoftTeamsMeetingResponseOk(response);
     const rawMeeting: unknown = await response.json();
     if (!isMicrosoftTeamsMeetingResponse(rawMeeting)) {
       throw new MicrosoftTeamsApiError(
@@ -150,7 +124,7 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
         signal,
       });
       if (!response.ok && response.status !== 204) {
-        const errorBody = await this.parseErrorBody(response);
+        const errorBody = await parseMicrosoftTeamsErrorBody(response);
         logger.warn("MicrosoftTeamsAdapter: deleteMeeting failed", {
           status: response.status,
           message: errorBody?.error?.message,
@@ -233,7 +207,7 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
     }
 
     if (!response.ok) {
-      const errorBody = await this.parseErrorBody(response);
+      const errorBody = await parseMicrosoftTeamsErrorBody(response);
       throw new MicrosoftTeamsApiError(
         errorBody?.error?.message ?? `Microsoft token request failed (${response.status})`,
         errorBody?.error?.code,
@@ -297,68 +271,6 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
       : `${MS_GRAPH_BASE}/users/${organizerUserId}/onlineMeetings`;
   }
 
-  private async postMeetingRequest(
-    url: string,
-    accessToken: string,
-    meetingBody: { subject: string; startDateTime: string; endDateTime: string }
-  ): Promise<Response> {
-    const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    try {
-      return await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(meetingBody),
-        signal,
-      });
-    } catch (error) {
-      throw new ProviderUnavailableError(
-        "microsoft_teams",
-        undefined,
-        error instanceof Error ? error.message : String(error)
-      );
-    } finally {
-      cancel();
-    }
-  }
-
-  private async assertMeetingResponseOk(response: Response): Promise<void> {
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("microsoft_teams", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
-    }
-
-    if (response.status === 403) {
-      const errorBody = await this.parseErrorBody(response);
-      const message = errorBody?.error?.message ?? "";
-      const errorCode = errorBody?.error?.code;
-      if (errorCode === "ApplicationAccessPolicy" || message.includes("No application access policy")) {
-        throw new NoAppAccessPolicyError(message);
-      }
-      throw new MicrosoftTeamsApiError(
-        message || `Teams meeting creation forbidden (${response.status})`,
-        errorBody?.error?.code,
-        response.status
-      );
-    }
-
-    if (response.status >= 500) {
-      const errorBody = await this.parseErrorBody(response);
-      throw new ProviderUnavailableError("microsoft_teams", response.status, errorBody?.error?.message);
-    }
-
-    if (!response.ok) {
-      const errorBody = await this.parseErrorBody(response);
-      throw new MicrosoftTeamsApiError(
-        errorBody?.error?.message ?? `Teams meeting creation failed (${response.status})`,
-        errorBody?.error?.code,
-        response.status
-      );
-    }
-  }
-
   private mapMeetingResponse(meeting: MicrosoftTeamsMeetingResponse): GenerateMeetingResult {
     return {
       joinUrl: meeting.joinWebUrl,
@@ -370,17 +282,5 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
         subject: meeting.subject,
       },
     };
-  }
-
-  private async parseErrorBody(response: Response): Promise<MicrosoftTeamsErrorResponse | null> {
-    try {
-      const data: unknown = await response.json();
-      if (!isMicrosoftTeamsErrorResponse(data)) {
-        return null;
-      }
-      return data;
-    } catch {
-      return null;
-    }
   }
 }

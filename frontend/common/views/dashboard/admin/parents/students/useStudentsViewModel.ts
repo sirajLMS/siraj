@@ -1,74 +1,21 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useEffect, useMemo } from "react";
-import {
-  AppPermission,
-  type StudentDirectoryQuery,
-  type StudentFilterArgs,
-} from "@/frontend/common/graphql/generated/gql/graphql";
-import { studentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
+import { useEffect } from "react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useStudentDirectoryStore } from "@/frontend/common/stores/studentDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type { StudentDirectoryRowExtended } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { StudentsLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/students/types/studentsDirectory.types";
 import {
-  buildLabelsBySection,
-  buildStatusCounts,
-  buildStudentRows,
-  buildViewMetrics,
-} from "@/frontend/common/views/dashboard/admin/parents/students/utils";
+  createStudentHandlers,
+  useComputedFilterArgs,
+  useDerivedStudentData,
+  useStudentDirectoryData,
+} from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel.hooks";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StudentDirectoryLabels, Translation, useAppTranslation } from "@/shared/locale";
-
-const EMPTY_FILTER_ARGS: StudentFilterArgs = {
-  birthDate: null,
-  birthDateAfter: null,
-  birthDateBefore: null,
-  birthDateFrom: null,
-  birthDateIsEmpty: null,
-  birthDateIsNotEmpty: null,
-  birthDateNot: null,
-  birthDateOnOrAfter: null,
-  birthDateOnOrBefore: null,
-  birthDateTo: null,
-  createdAt: null,
-  createdAtAfter: null,
-  createdAtBefore: null,
-  createdAtFrom: null,
-  createdAtIsEmpty: null,
-  createdAtIsNotEmpty: null,
-  createdAtNot: null,
-  createdAtOnOrAfter: null,
-  createdAtOnOrBefore: null,
-  createdAtTo: null,
-  gender: null,
-  language: null,
-  name: null,
-  nameEndsWith: null,
-  nameEquals: null,
-  nameIsEmpty: null,
-  nameIsNotEmpty: null,
-  nameNotContains: null,
-  nameNotEquals: null,
-  nameStartsWith: null,
-  parentId: null,
-  primaryTeacherId: null,
-  status: null,
-};
-
-const DEFAULT_PAGINATION_ARGS = {
-  first: 10,
-  page: 1,
-  skip: null,
-  after: null,
-  before: null,
-  last: null,
-  maxCount: null,
-};
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface StudentsViewModel {
   readonly labelsBySection: StudentsLabelsBySection;
@@ -86,71 +33,9 @@ export interface StudentsViewModel {
   readonly onAddStudent: () => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
-  // NEW FOR PLAN v5: lifted permission boolean per specs.md §3 N3 + §6.1.
-  // Tier student-directory views no longer import `RequirePermission`; the
-  // ViewModel computes the gate ONCE and the tier view reads the boolean.
+  // Lifted permission gate: the ViewModel computes it once so tier views can read
+  // a plain boolean instead of importing `RequirePermission`.
   readonly canStudentsCreate: boolean;
-}
-
-type StudentDirectoryTranslator = StudentDirectoryLabels;
-
-function useComputedFilterArgs(searchQuery: string, filterArgs: StudentFilterArgs | null): StudentFilterArgs | null {
-  return useMemo<StudentFilterArgs | null>(() => {
-    if (!searchQuery && !filterArgs) return null;
-    return {
-      ...EMPTY_FILTER_ARGS,
-      ...(filterArgs ? { gender: filterArgs.gender, language: filterArgs.language, status: filterArgs.status } : {}),
-      name: (searchQuery || filterArgs?.name) ?? null,
-    };
-  }, [searchQuery, filterArgs]);
-}
-
-function useStudentDirectoryData(computedFilterArgs: StudentFilterArgs | null, page: number, pageSize: number) {
-  return useQuery(studentDirectoryQueryDocument, {
-    variables: {
-      filterArgs: computedFilterArgs,
-      orderBy: null,
-      paginationArgs: {
-        ...DEFAULT_PAGINATION_ARGS,
-        first: pageSize,
-        page: page + 1,
-      },
-    },
-    fetchPolicy: "cache-and-network",
-  });
-}
-
-function useDerivedStudentData(data: StudentDirectoryQuery | undefined, t: StudentDirectoryTranslator) {
-  const rows = useMemo(() => buildStudentRows(data), [data]);
-  const totalStudents = data ? (data.studentDirectory?.totalCount ?? 0) : undefined;
-  const counts = useMemo(() => buildStatusCounts(rows), [rows]);
-  const viewMetrics = useMemo(() => buildViewMetrics(counts, t), [counts, t]);
-  const labelsBySection = useMemo(() => buildLabelsBySection(t), [t]);
-  return { rows, totalStudents, viewMetrics, labelsBySection };
-}
-
-function createStudentHandlers(
-  router: ReturnType<typeof useRouter>,
-  setFilterPanelOpen: (open: boolean) => void,
-  filterPanelOpen: boolean
-) {
-  const handleViewProfile = (id: string) => {
-    router.push(studentHref(id));
-  };
-
-  const handleViewHistory = (id: string) => {
-    router.push(studentProfileTabHref(id, "history"));
-  };
-
-  const handleAddStudent = () => {
-    router.push("/students/onboarding");
-  };
-
-  const handleFilterClick = () => {
-    setFilterPanelOpen(!filterPanelOpen);
-  };
-
-  return { handleViewProfile, handleViewHistory, handleAddStudent, handleFilterClick };
 }
 
 export function useStudentsViewModel(): StudentsViewModel {
@@ -158,9 +43,6 @@ export function useStudentsViewModel(): StudentsViewModel {
   const router = useRouter();
   const notifications = useNotifications();
 
-  // NEW FOR PLAN v5: read the user's permission ONCE and expose it as a boolean.
-  // Tier student-directory views no longer import `RequirePermission` or call
-  // `useUserStore()` (specs.md §3 N3).
   const hasPermission = useUserStore(state => state.hasPermission);
   const canStudentsCreate = hasPermission(AppPermission.StudentsCreate);
 
@@ -208,7 +90,6 @@ export function useStudentsViewModel(): StudentsViewModel {
     onAddStudent: handleAddStudent,
     onViewProfile: handleViewProfile,
     onViewHistory: handleViewHistory,
-    // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view.
     canStudentsCreate,
   };
 }

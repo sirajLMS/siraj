@@ -1,62 +1,26 @@
 "use client";
 
-import { CombinedGraphQLErrors } from "@apollo/client";
-import { useApolloClient, useMutation } from "@apollo/client/react";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useNotifications } from "@toolpad/core/useNotifications";
-import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
-import { formatDateInput } from "@/frontend/common/components/intl/dateFormat";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { Alert, Box, Dialog, DialogContent, DialogTitle, IconButton, Stack, TextField } from "@mui/material";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
-import type {
-  BulkToExpenseInput,
-  CarryoverBalancesQuery_carryoverBalances_rows,
-  CurrencyCode,
-} from "@/frontend/common/graphql/generated/gql/graphql";
-import { bulkCarryoverToExpenseMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { BulkToExpenseActions } from "@/frontend/common/views/dashboard/accounting/carryover/BulkToExpenseModal.actions";
+import {
+  type BulkToExpenseRow,
+  DATE_PAIR_SX,
+  EXPENSE_MONTH_FORMAT,
+  FORM_ID,
+  isValidDate,
+  PAYMENT_DATE_FORMAT,
+  summarizeSelection,
+} from "@/frontend/common/views/dashboard/accounting/carryover/BulkToExpenseModal.helpers";
+import {
+  useBulkToExpenseState,
+  useBulkToExpenseSubmit,
+} from "@/frontend/common/views/dashboard/accounting/carryover/BulkToExpenseModal.hooks";
 import { CARRYOVER_NOTE_MAX_LENGTH } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverFormViewModel";
-import { useAppTranslation } from "@/shared/locale/client";
-import { DashboardAccountingCarryover, Translation } from "@/shared/locale/namespaces";
-
-/** HTML id of the dialog form so the submit button in DialogActions can target it. */
-const FORM_ID = "carryover-bulk-to-expense-form";
-
-/** Root field holding the carryover list page; dropped from the cache after a successful conversion. */
-const CARRYOVER_LIST_FIELD = "carryoverBalances";
-
-/** Terminal domain rejection surfaced as a non-dismissible in-dialog banner. */
-const ALREADY_PAID_ERROR_CODE = "CARRYOVER_ALREADY_PAID";
-
-/** Display + wire format for the payment date field (full calendar date). */
-const PAYMENT_DATE_FORMAT = "yyyy-MM-dd";
-
-/** Display + wire format for the expense month field (year-month only). */
-const EXPENSE_MONTH_FORMAT = "yyyy-MM";
-
-const DATE_PAIR_SX = {
-  display: "grid",
-  gap: 2,
-  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
-} as const;
-
-type BulkToExpenseRow = Pick<CarryoverBalancesQuery_carryoverBalances_rows, "id" | "payable" | "teacherCurrency">;
 
 export interface BulkToExpenseModalProps {
   /** Whether the dialog is visible; every open starts a fresh session. */
@@ -71,124 +35,32 @@ export interface BulkToExpenseModalProps {
   readonly onDone?: () => void;
 }
 
-/** A picker can hand over an invalid Date (unparseable keystrokes); those read as "missing". */
-function isValidDate(value: Date | null): value is Date {
-  return value !== null && !Number.isNaN(value.getTime());
-}
-
-interface BulkSelectionSummary {
-  readonly count: number;
-  readonly totalAmount: string;
-  readonly currency: CurrencyCode | null;
-}
-
-/** Cache of `Intl.NumberFormat` instances keyed by locale tag to avoid CPU and GC overhead in selection summaries. */
-const summaryNumberFormatCache = new Map<string, Intl.NumberFormat>();
-
-function getSummaryNumberFormat(locale: string): Intl.NumberFormat {
-  let formatter = summaryNumberFormatCache.get(locale);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    summaryNumberFormatCache.set(locale, formatter);
-  }
-  return formatter;
-}
-
-/**
- * Count, total, and currency line for the selection. The currency follows the
- * list aggregate convention (most rows win, ties go to the earliest-seen
- * currency) and the total sums every selected payable under the v1
- * single-dominant-currency assumption, formatted in the active locale.
- */
-function summarizeSelection(
-  carryoverIds: readonly string[],
-  rows: readonly BulkToExpenseRow[],
-  locale: string
-): BulkSelectionSummary {
-  const selectedIds = new Set(carryoverIds);
-  const counts = new Map<CurrencyCode, number>();
-  let total = 0;
-  for (const row of rows) {
-    if (row.id === null || !selectedIds.has(row.id)) continue;
-    const payable = Number(row.payable);
-    if (!Number.isNaN(payable)) total += payable;
-    if (row.teacherCurrency !== null) {
-      counts.set(row.teacherCurrency, (counts.get(row.teacherCurrency) ?? 0) + 1);
-    }
-  }
-  let currency: CurrencyCode | null = null;
-  let leadingCount = 0;
-  for (const [code, count] of counts) {
-    if (count > leadingCount) {
-      currency = code;
-      leadingCount = count;
-    }
-  }
-  const totalAmount = getSummaryNumberFormat(locale).format(total);
-  return { count: carryoverIds.length, totalAmount, currency };
-}
-
-function getGraphQLErrorCode(error: unknown): string | undefined {
-  if (!CombinedGraphQLErrors.is(error)) return undefined;
-  const code: unknown = error.errors[0]?.extensions?.code;
-  return typeof code === "string" ? code : undefined;
-}
-
-/** Service-level domain errors arrive already localized; surface them directly when present. */
-function getGraphQLErrorMessage(error: unknown): string | null {
-  if (CombinedGraphQLErrors.is(error)) return error.errors[0]?.message ?? null;
-  if (error instanceof Error && error.message !== "") return error.message;
-  return null;
-}
-
-/** Omitted (null) when blank so an untouched note never reaches the wire. */
-function toOptionalNote(raw: string): string | null {
-  const trimmed = raw.trim();
-  return trimmed === "" ? null : trimmed;
-}
-
 export function BulkToExpenseModal({ open, carryoverIds, rows, onClose, onDone }: Readonly<BulkToExpenseModalProps>) {
-  const labels = useAppTranslation(DashboardAccountingCarryover);
-  const commonLabels = useAppTranslation(Translation.Common);
-  const notifications = useNotifications();
-  const client = useApolloClient();
   const locale = useAppLocale();
-
-  const [paymentDate, setPaymentDate] = useState<Date | null>(null);
-  const [expenseMonth, setExpenseMonth] = useState<Date | null>(null);
-  const [note, setNote] = useState("");
-  const [alreadyPaidRejected, setAlreadyPaidRejected] = useState(false);
-
-  // One idempotency token per dialog session: re-opening the dialog starts a
-  // fresh conversion, while retries inside the same session reuse the token so
-  // the server-side idempotency window absorbs double submissions.
-  const clientRequestIdRef = useRef<string | null>(null);
-  const submittedTokenRef = useRef<string | null>(null);
-
-  const [bulkToExpense, { loading: submitting }] = useMutation(bulkCarryoverToExpenseMutationDocument, {
-    // Domain errors reject with CombinedGraphQLErrors carrying extensions.code.
-    errorPolicy: "none",
+  const state = useBulkToExpenseState(open);
+  const {
+    paymentDate,
+    setPaymentDate,
+    expenseMonth,
+    setExpenseMonth,
+    note,
+    setNote,
+    alreadyPaidRejected,
+    setAlreadyPaidRejected,
+    clientRequestIdRef,
+    submittedTokenRef,
+  } = state;
+  const { labels, commonLabels, submitting, handleSubmit } = useBulkToExpenseSubmit({
+    carryoverIds,
+    paymentDate,
+    expenseMonth,
+    note,
+    clientRequestIdRef,
+    submittedTokenRef,
+    setAlreadyPaidRejected,
+    onClose,
+    onDone,
   });
-
-  // A new open session drops the previous session's fields and rejection
-  // banner during render (render-phase state adjustment) so no cascading
-  // effect fires.
-  const [prevOpen, setPrevOpen] = useState(open);
-  if (prevOpen !== open) {
-    setPrevOpen(open);
-    if (open) {
-      setPaymentDate(null);
-      setExpenseMonth(null);
-      setNote("");
-      setAlreadyPaidRejected(false);
-    }
-  }
-
-  useEffect(() => {
-    if (!open) return;
-    clientRequestIdRef.current = crypto.randomUUID();
-    submittedTokenRef.current = null;
-  }, [open]);
 
   const summary = summarizeSelection(carryoverIds, rows, locale);
   const canSubmit =
@@ -201,50 +73,6 @@ export function BulkToExpenseModal({ open, carryoverIds, rows, onClose, onDone }
     if (isValidDate(value)) {
       setExpenseMonth(current => current ?? value);
     }
-  };
-
-  const applySubmitSuccess = () => {
-    // The list query carries aggregates (totals depend on every row), so the
-    // whole root field is dropped rather than patching rows in place.
-    client.cache.evict({ fieldName: CARRYOVER_LIST_FIELD });
-    client.cache.gc();
-    notifications.show(labels.success.bulkedToExpense(carryoverIds.length), { severity: "success" });
-    onDone?.();
-    onClose();
-  };
-
-  const applySubmitError = (error: unknown) => {
-    if (getGraphQLErrorCode(error) === ALREADY_PAID_ERROR_CODE) {
-      // Non-dismissible in-dialog banner: the operator must close the dialog
-      // and fix the selection (e.g. unpay first) rather than retry as-is.
-      setAlreadyPaidRejected(true);
-      return;
-    }
-    notifications.show(getGraphQLErrorMessage(error) ?? commonLabels.operationFailed, { severity: "error" });
-  };
-
-  const handleSubmit = async (): Promise<void> => {
-    const clientRequestId = clientRequestIdRef.current;
-    if (clientRequestId === null || submittedTokenRef.current === clientRequestId) return;
-    if (!(isValidDate(paymentDate) && isValidDate(expenseMonth)) || carryoverIds.length === 0) return;
-    submittedTokenRef.current = clientRequestId;
-    const input: BulkToExpenseInput = {
-      carryoverIds: [...carryoverIds],
-      paymentDate: formatDateInput(paymentDate),
-      expenseDate: format(expenseMonth, EXPENSE_MONTH_FORMAT),
-      note: toOptionalNote(note),
-      clientRequestId,
-    };
-    try {
-      await bulkToExpense({ variables: { input } });
-    } catch (error) {
-      // Re-arm the guard so the operator can retry in this dialog session; the
-      // reused token keeps the retry idempotent server-side.
-      submittedTokenRef.current = null;
-      applySubmitError(error);
-      return;
-    }
-    applySubmitSuccess();
   };
 
   return (
@@ -308,19 +136,7 @@ export function BulkToExpenseModal({ open, carryoverIds, rows, onClose, onDone }
           <Alert severity="warning">{labels.modal.bulkToExpense.convertConsequenceWarning}</Alert>
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        {!canSubmit && !submitting ? (
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary, me: "auto" })}>
-            {labels.modal.bulkToExpense.convertFillRequiredHint}
-          </Typography>
-        ) : null}
-        <FilterButton onClick={onClose} disabled={submitting}>
-          {labels.modal.bulkToExpense.cancel}
-        </FilterButton>
-        <PrimaryPageAction type="submit" form={FORM_ID} disabled={submitting || !canSubmit} aria-busy={submitting}>
-          {submitting ? <CircularProgress size={20} color="inherit" /> : labels.modal.bulkToExpense.submit}
-        </PrimaryPageAction>
-      </DialogActions>
+      <BulkToExpenseActions canSubmit={canSubmit} submitting={submitting} onClose={onClose} labels={labels} />
     </Dialog>
   );
 }

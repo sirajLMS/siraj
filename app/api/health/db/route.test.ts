@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
 
+const PROBE_URL = "http://localhost:3000/api/health/db";
+
 const mockQueryExecute = mock(async () => [{ "?column?": 1 }]);
 await mock.module("@/backend/db", () => ({
   queryDb: () => ({
@@ -23,6 +25,29 @@ await mock.module("@/backend/lib/ratelimit", () => ({
 
 const { GET } = await import("@/app/api/health/db/route");
 
+function mockRateLimitOutcome(success: boolean, remaining: number) {
+  return mockCheckRateLimit.mockResolvedValueOnce({
+    success,
+    limit: 200,
+    remaining,
+    reset: Date.now() + 60_000,
+  });
+}
+
+function runProbe(): Promise<Response> {
+  return GET(new NextRequest(PROBE_URL));
+}
+
+async function expectProbeResponse(res: Response, expectedStatus: number, expectedBody: object) {
+  expect(res.status).toBe(expectedStatus);
+  expect(await res.json()).toEqual(expectedBody);
+}
+
+function expectSingleProbe(expectedQueryCalls: number) {
+  expect(mockCheckRateLimit).toHaveBeenCalledTimes(1);
+  expect(mockQueryExecute).toHaveBeenCalledTimes(expectedQueryCalls);
+}
+
 describe("GET /api/health/db", () => {
   beforeEach(() => {
     mockQueryExecute.mockClear();
@@ -30,57 +55,30 @@ describe("GET /api/health/db", () => {
   });
 
   test("returns 200 { status: 'ok' } when rate limit passes and DB query succeeds", async () => {
-    mockCheckRateLimit.mockResolvedValueOnce({
-      success: true,
-      limit: 200,
-      remaining: 199,
-      reset: Date.now() + 60_000,
-    });
+    mockRateLimitOutcome(true, 199);
 
-    const req = new NextRequest("http://localhost:3000/api/health/db");
-    const res = await GET(req);
+    const res = await runProbe();
 
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual({ status: "ok" });
-    expect(mockCheckRateLimit).toHaveBeenCalledTimes(1);
-    expect(mockQueryExecute).toHaveBeenCalledTimes(1);
+    await expectProbeResponse(res, 200, { status: "ok" });
+    expectSingleProbe(1);
   });
 
   test("returns 429 { status: 'unavailable' } when rate limit is exceeded", async () => {
-    mockCheckRateLimit.mockResolvedValueOnce({
-      success: false,
-      limit: 200,
-      remaining: 0,
-      reset: Date.now() + 60_000,
-    });
+    mockRateLimitOutcome(false, 0);
 
-    const req = new NextRequest("http://localhost:3000/api/health/db");
-    const res = await GET(req);
+    const res = await runProbe();
 
-    expect(res.status).toBe(429);
-    const body = await res.json();
-    expect(body).toEqual({ status: "unavailable" });
-    expect(mockCheckRateLimit).toHaveBeenCalledTimes(1);
-    expect(mockQueryExecute).toHaveBeenCalledTimes(0);
+    await expectProbeResponse(res, 429, { status: "unavailable" });
+    expectSingleProbe(0);
   });
 
   test("returns 503 { status: 'unavailable' } when DB query fails", async () => {
-    mockCheckRateLimit.mockResolvedValueOnce({
-      success: true,
-      limit: 200,
-      remaining: 199,
-      reset: Date.now() + 60_000,
-    });
+    mockRateLimitOutcome(true, 199);
     mockQueryExecute.mockRejectedValueOnce(new Error("DB connection error"));
 
-    const req = new NextRequest("http://localhost:3000/api/health/db");
-    const res = await GET(req);
+    const res = await runProbe();
 
-    expect(res.status).toBe(503);
-    const body = await res.json();
-    expect(body).toEqual({ status: "unavailable" });
-    expect(mockCheckRateLimit).toHaveBeenCalledTimes(1);
-    expect(mockQueryExecute).toHaveBeenCalledTimes(1);
+    await expectProbeResponse(res, 503, { status: "unavailable" });
+    expectSingleProbe(1);
   });
 });

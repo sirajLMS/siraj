@@ -1,21 +1,16 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import {
-  Box,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useState } from "react";
-import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
+import {
+  buildLabelSx,
+  buildNavButtonSx,
+  buildRootSx,
+  clampPage,
+  resolvePaginationRange,
+} from "@/frontend/common/components/ui/filter/PaginationControlsShared.helpers";
+import { PaginationNavGroup } from "@/frontend/common/components/ui/filter/PaginationControlsShared.parts";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface PaginationControlsSharedProps {
@@ -61,13 +56,6 @@ export interface PaginationControlsSlotProps {
 
 type PaginationControlsScaffoldProps = PaginationControlsSharedProps & PaginationControlsSlotProps;
 
-function clampPage(page: number, pageCount: number): number {
-  if (pageCount <= 0) {
-    return 0;
-  }
-  return Math.min(Math.max(page, 0), pageCount - 1);
-}
-
 export function PaginationControlsScaffold({
   page,
   pageCount,
@@ -92,21 +80,15 @@ export function PaginationControlsScaffold({
   navButtonColor,
 }: Readonly<PaginationControlsScaffoldProps>) {
   const t = useAppTranslation(Translation.Dashboard.Admin);
-  const [pageInputState, setPageInputState] = useState(String(page + 1));
+  const [pageInput, setPageInput] = useState(String(page + 1));
   const [lastPage, setLastPage] = useState(page);
 
   if (page !== lastPage) {
     setLastPage(page);
-    setPageInputState(String(page + 1));
+    setPageInput(String(page + 1));
   }
 
-  const pageInput = pageInputState;
-  const setPageInput = setPageInputState;
-
-  const safePageCount = Math.max(pageCount, rowCount > 0 ? 1 : 0);
-  const isEmpty = rowCount === 0;
-  const from = isEmpty ? 0 : page * pageSize + 1;
-  const to = isEmpty ? 0 : Math.min(rowCount, (page + 1) * pageSize);
+  const { safePageCount, isEmpty, from, to } = resolvePaginationRange(page, pageCount, rowCount, pageSize);
 
   const commitPageInput = () => {
     const parsedPage = Number.parseInt(pageInput, 10);
@@ -124,45 +106,24 @@ export function PaginationControlsScaffold({
   const showPageSizeSelect =
     pageSizeOptions !== undefined && pageSizeOptions.length > 0 && onPageSizeChange !== undefined;
 
-  const handlePageSizeChange = (event: SelectChangeEvent<number>) => {
-    onPageSizeChange?.(event.target.value);
-  };
-
-  const rootSx = (theme: Theme) => {
-    const useTransparent = embedded && embeddedTransparent;
-    return {
-      display: "flex" as const,
-      alignItems: "center" as const,
-      justifyContent: showRangeLabel ? ("space-between" as const) : ("flex-end" as const),
-      flexWrap: "wrap" as const,
-      gap: theme.spacing(rootGap),
-      width: "100%",
-      paddingInline: flush ? 0 : theme.spacing(rootPaddingInline),
-      paddingBlock: theme.spacing(rootPaddingBlock),
-      ...(useTransparent
-        ? {
-            backgroundColor: "transparent",
-            borderTop: "none",
-          }
-        : {
-            borderTop: `1px solid ${borderColor(theme)}`,
-            backgroundColor: backgroundColor(theme),
-          }),
-    };
-  };
-
-  const navButtonSx = (theme: Theme) => ({
-    border: `1px solid ${borderColor(theme)}`,
-    borderRadius: Number(theme.shape.borderRadius),
-    backgroundColor: navButtonBackground(theme),
-    color: navButtonColor(theme),
-    ...(navButtonSize ? { width: navButtonSize, height: navButtonSize } : {}),
-    "&.Mui-disabled": {
-      opacity: 0.5,
-    },
+  const rootSx = buildRootSx({
+    rootGap,
+    rootPaddingInline,
+    rootPaddingBlock,
+    flush,
+    showRangeLabel,
+    embedded,
+    embeddedTransparent,
+    borderColor,
+    backgroundColor,
   });
-
-  const labelSx = (theme: Theme) => ({ color: labelColor(theme) });
+  const navButtonSx = buildNavButtonSx({
+    navButtonSize,
+    borderColor,
+    navButtonBackground,
+    navButtonColor,
+  });
+  const labelSx = buildLabelSx(labelColor);
 
   return (
     <Box sx={rootSx}>
@@ -177,76 +138,28 @@ export function PaginationControlsScaffold({
           {t.noData}
         </Typography>
       ) : (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {showPageSizeSelect ? (
-            <FormControl size="small" sx={{ minWidth: 112 }}>
-              <InputLabel>{t.rowsPerPage}</InputLabel>
-              <Select label={t.rowsPerPage} value={pageSize} onChange={handlePageSizeChange}>
-                {pageSizeOptions.map(option => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          ) : null}
-
-          {/* The span keeps hover working while a nav button is disabled; the
-              accessible name rides on the button itself and the tooltip only
-              describes it, so the roleless wrapper never carries naming ARIA. */}
-          <Tooltip title={t.previousPage} describeChild>
-            <span>
-              <IconButton
-                size="small"
-                aria-label={t.previousPage}
-                disabled={page <= 0 || safePageCount === 0}
-                onClick={() => onPageChange(page - 1)}
-                sx={navButtonSx}
-              >
-                <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
-              </IconButton>
-            </span>
-          </Tooltip>
-
-          <TextField
-            size="small"
-            value={pageInput}
-            disabled={safePageCount === 0}
-            onChange={event => setPageInput(event.target.value)}
-            onBlur={commitPageInput}
-            onKeyDown={event => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                commitPageInput();
-              }
-            }}
-            slotProps={{
-              htmlInput: {
-                "aria-label": t.goToPage,
-                inputMode: "numeric",
-              },
-            }}
-            sx={{ width: inputWidth, "& .MuiInputBase-input": { textAlign: "center", paddingBlock: 1 } }}
-          />
-
-          <Tooltip title={t.nextPage} describeChild>
-            <span>
-              <IconButton
-                size="small"
-                aria-label={t.nextPage}
-                disabled={safePageCount === 0 || page >= safePageCount - 1}
-                onClick={() => onPageChange(page + 1)}
-                sx={navButtonSx}
-              >
-                <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
-              </IconButton>
-            </span>
-          </Tooltip>
-
-          <Typography variant="labelMd" sx={labelSx}>
-            {t.pageOf(page + 1, safePageCount)}
-          </Typography>
-        </Box>
+        <PaginationNavGroup
+          page={page}
+          safePageCount={safePageCount}
+          pageInput={pageInput}
+          onPageInputChange={setPageInput}
+          onCommitPageInput={commitPageInput}
+          onPageChange={onPageChange}
+          inputWidth={inputWidth}
+          navButtonSx={navButtonSx}
+          labelSx={labelSx}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          showPageSizeSelect={showPageSizeSelect}
+          onPageSizeChange={onPageSizeChange}
+          labels={{
+            rowsPerPage: t.rowsPerPage,
+            previousPage: t.previousPage,
+            nextPage: t.nextPage,
+            goToPage: t.goToPage,
+            pageOf: t.pageOf,
+          }}
+        />
       )}
     </Box>
   );

@@ -1,190 +1,20 @@
-import { InfoOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
+import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import { FormProvider } from "react-hook-form";
 import {
-  OnboardingPaymentMethodSection,
-  UserEntityFieldsSection,
-} from "@/frontend/common/components/onboarding/sections";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql";
-import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/FeesContractSection";
-import { ParentExtensionSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentExtensionSection";
-import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
-import { SocialCommsSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/SocialCommsSection";
-import type {
-  MeetingConfigAlertProps,
-  OnboardingFormSectionsProps,
-  SubmitActionSectionProps,
-} from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+  MeetingConfigAlertShared,
+  StatusBadgeShared,
+} from "@/frontend/common/views/dashboard/admin/parents/onboarding/__shared__/parentOnboardingShared.parts";
+import {
+  MeetingConfigSectionShared,
+  OnboardingFormSectionsShared,
+  SubmitActionSectionShared,
+} from "@/frontend/common/views/dashboard/admin/parents/onboarding/__shared__/parentOnboardingShared.sections";
+import type { ParentOnboardingSharedOptions } from "@/frontend/common/views/dashboard/admin/parents/onboarding/__shared__/parentOnboardingShared.types";
 import type { ParentOnboardingViewModel } from "@/frontend/common/views/dashboard/admin/parents/onboarding/useParentOnboardingViewModel";
 import { useRouter } from "@/shared/i18n/navigation";
-import { Translation, useAppTranslation } from "@/shared/locale";
-import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents/onboarding";
 
-export interface ParentOnboardingSharedOptions {
-  readonly formGap: number;
-  readonly formSx: Record<string, unknown>;
-  readonly alertSx: SxProps<Theme>;
-  readonly statusBadgeSx: SxProps<Theme>;
-  readonly statusBadgeIconSize: number;
-  readonly statusBadgeTypographyVariant: "labelMd" | "labelSm";
-  readonly submitBoxSx: SxProps<Theme>;
-  readonly submitButtonSx: SxProps<Theme>;
-  readonly renderPageContainer: (children: ReactNode) => ReactNode;
-  readonly renderPageHeader: (title: string, subtitle: string, actions: ReactNode) => ReactNode;
-  readonly renderSectionPanel: (title: string, children: ReactNode) => ReactNode;
-  readonly renderSubmitButton: (props: {
-    readonly isSubmitting: boolean;
-    readonly processingLabel: string;
-    readonly signupLabel: string;
-  }) => ReactNode;
-  readonly renderSuccessSnackbar: (open: boolean, message: string, onClose: () => void) => ReactNode;
-  readonly renderFormSections: (sections: ReactNode, meetingConfigSection: ReactNode) => ReactNode;
-}
-
-function MeetingConfigAlertShared({
-  meetingConfigWarning,
-  meetingSetupHref,
-  failureMessage,
-  setupLinkLabel,
-  onClearWarning,
-  onVisitSetup,
-  alertSx,
-}: Readonly<MeetingConfigAlertProps> & { readonly alertSx: SxProps<Theme> }): ReactNode {
-  if (!meetingConfigWarning) return null;
-
-  return (
-    <Alert
-      severity="warning"
-      onClose={onClearWarning}
-      action={
-        meetingSetupHref ? (
-          <Button color="inherit" size="small" onClick={onVisitSetup}>
-            {setupLinkLabel}
-          </Button>
-        ) : undefined
-      }
-      sx={alertSx}
-    >
-      {failureMessage}
-    </Alert>
-  );
-}
-
-function StatusBadgeShared({
-  bannerText,
-  options,
-}: {
-  readonly bannerText: string;
-  readonly options: ParentOnboardingSharedOptions;
-}): ReactNode {
-  return (
-    <Stack sx={options.statusBadgeSx}>
-      <InfoOutlined sx={{ fontSize: options.statusBadgeIconSize }} />
-      <Typography variant={options.statusBadgeTypographyVariant}>{bannerText}</Typography>
-    </Stack>
-  );
-}
-
-function OnboardingFormSectionsShared({
-  register,
-  control,
-  errors,
-  onUploadAvatar,
-  t,
-  options,
-}: Readonly<Omit<OnboardingFormSectionsProps, "meetingConfigLabels">> & {
-  readonly t: ParentOnboardingLabels;
-  readonly options: ParentOnboardingSharedOptions;
-}): ReactNode {
-  const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
-
-  return (
-    <>
-      {options.renderSectionPanel(
-        userEntityLabels.sectionTitle,
-        <UserEntityFieldsSection
-          control={control}
-          errors={errors}
-          labels={userEntityLabels}
-          onUploadAvatar={onUploadAvatar}
-        />
-      )}
-      {options.renderSectionPanel(
-        t.sections.parentInfo,
-        <ParentExtensionSection register={register} control={control} errors={errors} labels={t} />
-      )}
-      <SocialCommsSection register={register} control={control} />
-      <FeesContractSection register={register} control={control} errors={errors} />
-      {options.renderSectionPanel(
-        t.fields.paymentMethod,
-        <OnboardingPaymentMethodSection
-          control={control}
-          errors={errors}
-          direction={PaymentDirection.Payin}
-          methodFieldName="payinMethod"
-          addPaymentMethodLabel={t.sections.addPaymentMethod}
-        />
-      )}
-    </>
-  );
-}
-
-function MeetingConfigSectionShared({
-  register,
-  control,
-  errors,
-  t,
-  options,
-}: {
-  readonly register: ParentOnboardingViewModel["register"];
-  readonly control: ParentOnboardingViewModel["control"];
-  readonly errors: ParentOnboardingViewModel["errors"];
-  readonly t: ParentOnboardingLabels;
-  readonly options: ParentOnboardingSharedOptions;
-}): ReactNode {
-  return options.renderSectionPanel(
-    t.sections.meetingConfig,
-    <ParentMeetingConfigOnboardingSection
-      register={register}
-      control={control}
-      errors={errors}
-      labels={{
-        sectionTitle: t.sections.meetingConfig,
-        optionalHint: t.optionalHint,
-        fields: {
-          meetingProvider: t.fields.meetingProvider,
-          meetingUrl: t.fields.meetingUrl,
-          meetingLabel: t.fields.meetingLabel,
-        },
-        placeholders: {
-          meetingUrl: t.placeholders.meetingUrl,
-          meetingLabel: t.placeholders.meetingLabel,
-        },
-      }}
-    />
-  );
-}
-
-function SubmitActionSectionShared({
-  isSubmitting,
-  processingLabel,
-  signupLabel,
-  privacyNote,
-  options,
-}: Readonly<SubmitActionSectionProps> & {
-  readonly options: ParentOnboardingSharedOptions;
-}): ReactNode {
-  return (
-    <Box sx={options.submitBoxSx}>
-      {options.renderSubmitButton({ isSubmitting, processingLabel, signupLabel })}
-      <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
-        {privacyNote}
-      </Typography>
-    </Box>
-  );
-}
+export type { ParentOnboardingSharedOptions } from "@/frontend/common/views/dashboard/admin/parents/onboarding/__shared__/parentOnboardingShared.types";
 
 export function ParentOnboardingShared({
   form,

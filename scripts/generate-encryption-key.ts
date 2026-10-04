@@ -17,39 +17,17 @@
  */
 
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { updateEnvFile } from "@/scripts/__shared__";
 
-const PROJECT_ROOT = process.cwd();
+// Canonical key-material validation shared with backend/lib/field-encryption.ts.
+// Re-exported for the script's test suite and consumers.
+export {
+  decodeEncryptionKeyMaterial,
+  isProductionEncryptionKeyAccepted,
+  KNOWN_DEV_KEY_CONSTANT,
+} from "@/backend/lib/encryption-key-material";
 
-/** Committed dev key constant that must never be accepted in production. */
-export const KNOWN_DEV_KEY_CONSTANT = "development-database-encryption-key-must-be-changed-in-production";
-
-/**
- * Validates that the raw key string decodes to exactly 32 bytes.
- * Matches backend/lib/field-encryption.ts decodeEncryptionKeyMaterial.
- */
-export function decodeEncryptionKeyMaterial(raw: string): Buffer | null {
-  const trimmed = raw.trim();
-  if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
-    return Buffer.from(trimmed, "hex");
-  }
-  if (trimmed.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(trimmed)) {
-    const decoded = Buffer.from(trimmed, "base64");
-    if (decoded.length === 32) {
-      return decoded;
-    }
-  }
-  return null;
-}
-
-/**
- * Validates whether the key passes the production strength gate.
- * Matches backend/lib/field-encryption.ts isProductionEncryptionKeyAccepted.
- */
-export function isProductionEncryptionKeyAccepted(raw: string): boolean {
-  return raw.trim() !== KNOWN_DEV_KEY_CONSTANT && decodeEncryptionKeyMaterial(raw) !== null;
-}
+import { decodeEncryptionKeyMaterial, isProductionEncryptionKeyAccepted } from "@/backend/lib/encryption-key-material";
 
 /**
  * Generates a cryptographically secure 32-byte database encryption key.
@@ -77,30 +55,6 @@ export function generateJwtSecret(format: "hex" | "base64" = "hex"): string {
 export function generateCronSecret(format: "hex" | "base64" = "hex"): string {
   const bytes = randomBytes(32);
   return format === "hex" ? bytes.toString("hex") : bytes.toString("base64");
-}
-
-/**
- * Updates or appends a key=value pair in an environment file.
- */
-export function updateEnvFile(filePath: string, secretKey: string, secretValue: string): boolean {
-  const absPath = resolve(PROJECT_ROOT, filePath);
-  if (!existsSync(absPath)) {
-    return false;
-  }
-
-  const content = readFileSync(absPath, "utf8");
-  const regex = new RegExp(`^${secretKey}=.*$`, "m");
-
-  let updatedContent: string;
-  if (regex.test(content)) {
-    updatedContent = content.replace(regex, `${secretKey}=${secretValue}`);
-  } else {
-    const trailingNewline = content.endsWith("\n") ? "" : "\n";
-    updatedContent = `${content}${trailingNewline}${secretKey}=${secretValue}\n`;
-  }
-
-  writeFileSync(absPath, updatedContent, "utf8");
-  return true;
 }
 
 export interface CliOptions {
@@ -136,8 +90,8 @@ Options:
 `);
 }
 
-export function parseArgs(args: string[]): CliOptions {
-  const options: CliOptions = {
+function createDefaultOptions(): CliOptions {
+  return {
     format: "hex",
     raw: false,
     writeEnv: false,
@@ -146,64 +100,73 @@ export function parseArgs(args: string[]): CliOptions {
     cronOnly: false,
     targetEnvFiles: [],
   };
+}
+
+function applyEnvFileValue(options: CliOptions, file: string | undefined): boolean {
+  if (!file) {
+    return false;
+  }
+  options.writeEnv = true;
+  options.targetEnvFiles.push(file);
+  return true;
+}
+
+function resolveEnvFileValue(arg: string): string | undefined {
+  return arg.startsWith("--env-file=") ? arg.slice("--env-file=".length) : undefined;
+}
+
+/**
+ * Handles a single CLI argument, returning the number of argv slots consumed
+ * (1 for a standalone flag, 2 for `--env-file <path>` with a following value).
+ */
+function handleArgument(options: CliOptions, arg: string, nextArg: string | undefined): number {
+  switch (arg) {
+    case "--hex":
+      options.format = "hex";
+      return 1;
+    case "--base64":
+      options.format = "base64";
+      return 1;
+    case "-r":
+    case "--raw":
+      options.raw = true;
+      return 1;
+    case "-w":
+    case "--write":
+      options.writeEnv = true;
+      return 1;
+    case "--dry-run":
+    case "--print-only":
+      options.writeEnv = false;
+      return 1;
+    case "--all":
+      options.allKeys = true;
+      return 1;
+    case "--jwt":
+      options.jwtOnly = true;
+      return 1;
+    case "--cron":
+      options.cronOnly = true;
+      return 1;
+    case "--env-file":
+      return applyEnvFileValue(options, nextArg) ? 2 : 1;
+    case "-h":
+    case "--help":
+      printHelp();
+      process.exit(0);
+      return 1;
+    default:
+      applyEnvFileValue(options, resolveEnvFileValue(arg));
+      return 1;
+  }
+}
+
+export function parseArgs(args: string[]): CliOptions {
+  const options = createDefaultOptions();
 
   let i = 0;
   while (i < args.length) {
-    const arg = args[i];
-    switch (arg) {
-      case "--hex":
-        options.format = "hex";
-        break;
-      case "--base64":
-        options.format = "base64";
-        break;
-      case "-r":
-      case "--raw":
-        options.raw = true;
-        break;
-      case "-w":
-      case "--write":
-        options.writeEnv = true;
-        break;
-      case "--dry-run":
-      case "--print-only":
-        options.writeEnv = false;
-        break;
-      case "--all":
-        options.allKeys = true;
-        break;
-      case "--jwt":
-        options.jwtOnly = true;
-        break;
-      case "--cron":
-        options.cronOnly = true;
-        break;
-      case "--env-file": {
-        const file = args[i + 1];
-        if (file) {
-          options.writeEnv = true;
-          options.targetEnvFiles.push(file);
-          i++;
-        }
-        break;
-      }
-      case "-h":
-      case "--help":
-        printHelp();
-        process.exit(0);
-        break;
-      default: {
-        if (arg.startsWith("--env-file=")) {
-          const file = arg.slice("--env-file=".length);
-          if (file) {
-            options.writeEnv = true;
-            options.targetEnvFiles.push(file);
-          }
-        }
-        break;
-      }
-    }
-    i++;
+    i += handleArgument(options, args[i], args[i + 1]);
   }
 
   return options;

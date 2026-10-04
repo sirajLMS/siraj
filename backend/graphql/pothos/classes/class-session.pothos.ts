@@ -1,13 +1,13 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
-  CalculationStatusPothosEnum,
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   ClassTypePothosObject,
   CurrencyCodePothosObject,
   RateSourcePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { payrollSnapshotFields } from "@/backend/graphql/pothos/shared/payroll-snapshot.fields";
 import {
   SupportContactPothosObject,
   TeacherImportantNotePothosObject,
@@ -119,13 +119,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     isRateOverridden: t.exposeBoolean("isRateOverridden"),
     rateSource: t.expose("rateSource", { type: RateSourcePothosEnum, nullable: true }),
     // Payroll calculation snapshot (written when a session reaches a terminal state).
-    calculatedDuration: t.exposeInt("calculatedDuration", { nullable: true }),
-    teacherPaidAmount: t.exposeString("teacherPaidAmount", { nullable: true }),
-    teacherPaidCurrency: t.expose("teacherPaidCurrency", { type: CurrencyCodePothosObject, nullable: true }),
-    calculationStatus: t.expose("calculationStatus", { type: CalculationStatusPothosEnum, nullable: true }),
-    isPartialPercentage: t.exposeInt("isPartialPercentage", { nullable: true }),
-    payrollNote: t.exposeString("payrollNote", { nullable: true }),
-    payrollCalculatedAt: t.expose("payrollCalculatedAt", { type: "DateTime", nullable: true }),
+    ...payrollSnapshotFields(t),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     subjectId: t.exposeString("subjectId"),
     subjectName: t.exposeString("subjectName"),

@@ -1,10 +1,7 @@
-import type {
-  MeetingProviderFieldsFragment,
-  MeetingProviderFieldsFragment_fieldSchema,
-} from "@/frontend/common/graphql/generated/gql/graphql";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 type MeetingProviderFieldVisibility = {
-  readonly fieldSchema: MeetingProviderFieldsFragment_fieldSchema | MeetingProviderFieldsFragment["fieldSchema"];
+  readonly fieldSchema: MeetingProviderFieldsFragment["fieldSchema"];
 };
 
 export function getVisibleMeetingConfigFields(provider: MeetingProviderFieldVisibility): {

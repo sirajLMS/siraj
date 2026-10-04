@@ -1,98 +1,24 @@
 "use client";
 
-import { Alert, Box, Button } from "@mui/material";
 import { AppSnackbar } from "@/frontend/common/components/ui/state/AppSnackbar";
 import { ExchangeRatesSyncPanelShared } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/__shared__/exchangeRatesSyncShared";
-import type {
-  buildExchangeRateColumns,
-  ExchangeRateRow,
-} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import type { ExchangeRatesViewModel } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/useExchangeRatesViewModel";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import {
-  DesktopAppDataGrid,
-  DesktopFilterButton,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
   DesktopSectionPanel,
   DesktopStatusBadge,
-  desktopSectionContentInsetSx,
 } from "@/frontend/desktop/components/ui";
 import { ExchangeRateHistorySectionDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/exchange-rates/components/exchangeRateHistorySection.desktop";
-
-function RatesErrorAlert({
-  error,
-  onRetry,
-  loadFailed,
-}: Readonly<{ error: Error | null | undefined; onRetry: () => void; loadFailed: string }>) {
-  if (!error) return null;
-  return (
-    <Alert
-      severity="warning"
-      sx={{ mb: 2 }}
-      action={
-        <Button color="inherit" size="small" onClick={onRetry}>
-          {loadFailed}
-        </Button>
-      }
-    >
-      {loadFailed}
-    </Alert>
-  );
-}
-
-function StaleWarningAlert({ show, message }: Readonly<{ show: boolean; message: string }>) {
-  if (!show) return null;
-  return (
-    <Alert severity="warning" sx={{ mb: 2 }}>
-      {message}
-    </Alert>
-  );
-}
-
-function RateTableContent({
-  canOverride,
-  billingActionsDisabled,
-  manualOverrideTitle,
-  onOpenManualOverride,
-  rates,
-  ratesColumns,
-  ratesLoading,
-  noRatesMessage,
-}: Readonly<{
-  canOverride: boolean;
-  billingActionsDisabled: boolean;
-  manualOverrideTitle: string;
-  onOpenManualOverride: () => void;
-  rates: readonly ExchangeRateRow[];
-  ratesColumns: ReturnType<typeof buildExchangeRateColumns>;
-  ratesLoading: boolean;
-  noRatesMessage: string;
-}>) {
-  return (
-    <>
-      <Box sx={{ ...desktopSectionContentInsetSx, display: "flex", justifyContent: "flex-end", pb: 0 }}>
-        {canOverride ? (
-          <DesktopFilterButton onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
-            {manualOverrideTitle}
-          </DesktopFilterButton>
-        ) : null}
-      </Box>
-      <DesktopAppDataGrid
-        rows={rates}
-        columns={ratesColumns}
-        loading={ratesLoading}
-        emptyMessage={noRatesMessage}
-        autoHeight
-        disableColumnMenu
-        paginationOptions={{ mode: "client" }}
-      />
-    </>
-  );
-}
+import {
+  RatesErrorAlert,
+  RateTableContent,
+  StaleWarningAlert,
+} from "@/frontend/desktop/views/dashboard/admin/billing/exchange-rates/exchangeRates.desktop.parts";
 
 export function ExchangeRatesDesktopView({
   labels,

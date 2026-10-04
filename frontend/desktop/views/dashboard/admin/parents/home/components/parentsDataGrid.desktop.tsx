@@ -1,31 +1,18 @@
 "use client";
 
-import { TuneOutlined as LifecycleIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
-import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
+import type { GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
-import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
-import {
-  buildDirectoryEmailColumn,
-  buildDirectoryIndexColumn,
-  buildDirectoryNameColumn,
-} from "@/frontend/desktop/views/dashboard/admin/parents/home/components/directoryDataGridShared";
-import { Link } from "@/shared/i18n";
+import { buildParentDirectoryColumns } from "@/frontend/desktop/views/dashboard/admin/parents/home/components/parentsDataGrid.columns";
 
-// VARIANT JUSTIFICATION: Class C card-list vs data-grid sibling per specs §4.3 — `ParentsDataGridDesktopProps` renders a desktop data grid (taking the type-specific `ParentsDataGridLabels`). The mobile twin is the `ParentCardListMobile` rendering single-row mobile cards with a different label contract. The shared row shape (`ParentDirectoryRow`) already lives once in `directory.ts`.
-//
-// NEW FOR PLAN v5: added the `canParentManageStatus` boolean (lifted from the
-// previously-inline `<RequirePermission permissions={[AppPermission.ParentManageStatus]}>`
-// wrapper per specs.md §3 N3 + §6.1).
+// The desktop variant renders a data grid over `ParentDirectoryRow`; the mobile
+// twin is `ParentCardListMobile` with a different label contract. The row shape
+// lives once in `directory.ts`.
 interface ParentsDataGridDesktopProps {
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentsDataGridLabels;
@@ -47,126 +34,12 @@ export function ParentsDataGridDesktop({
   totalCount,
   onPageChange,
   loading = false,
-  // NEW FOR PLAN v5: replaces the inline `<RequirePermission>` wrapper that
-  // used to enclose the lifecycle-management IconButton. The gate is computed
-  // once by the ViewModel (`useParentsViewModel`) and handed down as a prop.
+  // Pre-computed by the ViewModel (`useParentsViewModel`); gates the lifecycle
+  // management IconButton that was previously wrapped in `<RequirePermission>`.
   canParentManageStatus,
 }: Readonly<ParentsDataGridDesktopProps>) {
-  const columns = useMemo<GridColDef<ParentDirectoryRow>[]>(
-    () => [
-      buildDirectoryIndexColumn<ParentDirectoryRow>(labels.index),
-      buildDirectoryNameColumn<ParentDirectoryRow>(
-        labels.name,
-        row => profileHrefForParent({ userId: row.userId, parentId: row.id }),
-        1.5
-      ),
-      buildDirectoryEmailColumn<ParentDirectoryRow>(labels.email),
-      {
-        field: "time",
-        headerName: labels.time,
-        width: 120,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.time}
-          </Typography>
-        ),
-      },
-      {
-        field: "lifecycleStatus",
-        headerName: labels.status,
-        width: 130,
-        renderCell: ({ row }) => (
-          <DesktopStatusBadge
-            category="studentAccount"
-            status={row.lifecycleStatus}
-            label={labels.statusLabels[row.lifecycleStatus]}
-          />
-        ),
-      },
-      {
-        field: "accountStatus",
-        headerName: labels.accountStatus,
-        width: 120,
-        renderCell: ({ row }) => (
-          <DesktopStatusBadge
-            category="staffAccount"
-            status={row.accountStatus}
-            label={labels.accountStatusLabels[row.accountStatus]}
-          />
-        ),
-      },
-      {
-        field: "unpaidInvoices",
-        headerName: labels.unpaidInvoices,
-        width: 160,
-        renderCell: ({ row }) => {
-          const hasUnpaid = row.unpaidInvoices > 0;
-          return (
-            <DesktopStatusBadge
-              category="invoice"
-              status={hasUnpaid ? "OVERDUE" : "PAID"}
-              label={hasUnpaid ? labels.unpaidCount(row.unpaidInvoices) : labels.invoicesCleared}
-            />
-          );
-        },
-      },
-      {
-        field: "actions",
-        headerName: labels.options,
-        width: 220,
-        sortable: false,
-        align: "center",
-        headerAlign: "center",
-        renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center", gap: 1 }}>
-            {row.userId ? (
-              <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
-            ) : null}
-            {canParentManageStatus ? (
-              <Tooltip title={labels.manageLifecycle}>
-                <Link href={`/parents/${row.id}/lifecycle`} style={{ textDecoration: "none" }}>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                    }}
-                    sx={theme => ({
-                      backgroundColor: alpha(theme.palette.secondary.main, 0.08),
-                      color: theme.palette.secondary.main,
-                      borderRadius: 1.5,
-                      "&:hover": {
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.onSecondary,
-                      },
-                    })}
-                  >
-                    <LifecycleIcon fontSize="small" />
-                  </IconButton>
-                </Link>
-              </Tooltip>
-            ) : null}
-            <IconButton
-              size="small"
-              onClick={e => {
-                e.stopPropagation();
-                onOpenSettings(row.id);
-              }}
-              sx={theme => ({
-                backgroundColor: alpha(theme.palette.info.main, 0.08),
-                color: theme.palette.info.main,
-                borderRadius: 1.5,
-                "&:hover": {
-                  backgroundColor: theme.palette.info.main,
-                  color: theme.palette.onInfo,
-                },
-              })}
-            >
-              <SettingsIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ],
+  const columns = useMemo(
+    () => buildParentDirectoryColumns({ labels, onOpenSettings, canParentManageStatus }),
     [labels, onOpenSettings, canParentManageStatus]
   );
 

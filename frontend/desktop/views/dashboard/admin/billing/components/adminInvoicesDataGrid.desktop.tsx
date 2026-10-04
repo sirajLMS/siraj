@@ -1,42 +1,18 @@
 "use client";
 
-import { CheckCircleOutlined, DeleteOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import type { GridColDef } from "@mui/x-data-grid";
-import { type ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   AdminInvoiceRow,
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
-import { formatInvoiceDisplayId } from "@/frontend/common/views/dashboard/billing/utils/formatInvoiceDisplayId";
-import {
-  isDeletableInvoiceStatus,
-  isPayableUnpaidStatus,
-  shouldShowViewRejection,
-} from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
-import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-import type { AdminInvoiceStatus } from "@/shared/types";
-
-interface AdminInvoicesDataGridLabels {
-  readonly invoiceId: string;
-  readonly studentName: string;
-  readonly dateIssued: string;
-  readonly amount: string;
-  readonly status: string;
-  readonly actions: string;
-  readonly markAsPaid: string;
-  readonly quickPay: string;
-  readonly reviewSubmission: string;
-  readonly viewRejection: string;
-  readonly viewDetails: string;
-  readonly deleteInvoice: string;
-  readonly noEntries: string;
-  readonly statusLabels: Record<AdminInvoiceStatus, string>;
-}
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
+import { buildAdminInvoicesColumns } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop.columns";
+import type {
+  AdminInvoicesDataGridLabels,
+  RenderInvoiceActionConfig,
+} from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop.types";
 
 interface AdminInvoicesDataGridProps {
   readonly rows: readonly AdminInvoiceRow[];
@@ -52,154 +28,6 @@ interface AdminInvoicesDataGridProps {
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
   readonly loading?: boolean;
-}
-
-const StyledInvoiceIdTypography = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
-
-const StyledDateTypography = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
-
-const StyledPaidCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
-  color: theme.palette.outlineVariant,
-}));
-
-function RenderDeleteInvoiceButton(
-  row: AdminInvoiceRow,
-  labels: AdminInvoicesDataGridLabels,
-  canDelete: boolean,
-  billingActionsDisabled: boolean,
-  onDeleteInvoice?: (invoiceId: string) => void
-) {
-  if (!canDelete || billingActionsDisabled || !onDeleteInvoice || !isDeletableInvoiceStatus(row.status)) {
-    return null;
-  }
-
-  return (
-    <Tooltip title={labels.deleteInvoice}>
-      <IconButton size="small" aria-label={labels.deleteInvoice} onClick={() => onDeleteInvoice(row.id)}>
-        <DeleteOutlined fontSize="small" />
-      </IconButton>
-    </Tooltip>
-  );
-}
-
-function WrapInvoiceActions(primary: ReactNode, deleteButton: ReactNode) {
-  if (!primary && !deleteButton) {
-    return null;
-  }
-
-  return (
-    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5, alignItems: "center" }}>
-      {primary}
-      {deleteButton}
-    </Box>
-  );
-}
-
-interface RenderInvoiceActionConfig {
-  readonly row: AdminInvoiceRow;
-  readonly labels: AdminInvoicesDataGridLabels;
-  readonly canManage: boolean;
-  readonly canDelete: boolean;
-  readonly billingActionsDisabled: boolean;
-}
-
-function RenderInvoiceAction(
-  config: RenderInvoiceActionConfig,
-  onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void,
-  onViewPaymentDetails?: (target: PaymentDetailsTarget) => void,
-  onDeleteInvoice?: (invoiceId: string) => void
-) {
-  const { row, labels, canManage, canDelete, billingActionsDisabled } = config;
-  const deleteButton = RenderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
-
-  if (row.status === "PAID") {
-    const primary = onViewPaymentDetails ? (
-      <Tooltip title={labels.viewDetails}>
-        <IconButton
-          size="small"
-          aria-label={labels.viewDetails}
-          onClick={() => {
-            onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
-          }}
-        >
-          <VisibilityOutlined fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    ) : (
-      <StyledPaidCheckIcon />
-    );
-
-    return WrapInvoiceActions(primary, deleteButton);
-  }
-
-  if (row.status === "PAYMENT_PENDING" && canManage && !billingActionsDisabled) {
-    return WrapInvoiceActions(
-      <Button
-        variant="text"
-        onClick={() => {
-          onViewPaymentDetails?.({ invoiceId: row.id, parentUserId: row.parentUserId });
-        }}
-        sx={{ fontWeight: 700, textTransform: "uppercase" }}
-      >
-        {labels.reviewSubmission}
-      </Button>,
-      deleteButton
-    );
-  }
-
-  if (!canManage || billingActionsDisabled) {
-    return WrapInvoiceActions(null, deleteButton);
-  }
-
-  const markAsPaidButton = (
-    <Button
-      variant="text"
-      onClick={() => {
-        onMarkAsPaid({
-          id: row.id,
-          parentUserId: row.parentUserId,
-          amount: row.amount,
-          studentName: row.studentName,
-          dueDate: row.dueDate,
-          invoiceNumber: formatInvoiceDisplayId(row.id),
-        });
-      }}
-      sx={{ fontWeight: 700, textTransform: "uppercase" }}
-    >
-      {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
-    </Button>
-  );
-
-  const showViewRejection = shouldShowViewRejection(row.status, row.hasRejectedSubmission) && onViewPaymentDetails;
-
-  if (showViewRejection) {
-    return WrapInvoiceActions(
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-        <Button
-          variant="text"
-          onClick={() => {
-            onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
-          }}
-          sx={{ fontWeight: 700, textTransform: "uppercase" }}
-        >
-          {labels.viewRejection}
-        </Button>
-        {markAsPaidButton}
-      </Box>,
-      deleteButton
-    );
-  }
-
-  if (isPayableUnpaidStatus(row.status)) {
-    return WrapInvoiceActions(markAsPaidButton, deleteButton);
-  }
-
-  return WrapInvoiceActions(null, deleteButton);
 }
 
 export function AdminInvoicesDataGridDesktop({
@@ -227,73 +55,9 @@ export function AdminInvoicesDataGridDesktop({
     [canManage, canDelete, billingActionsDisabled, labels]
   );
 
-  const columns = useMemo<GridColDef<AdminInvoiceRow>[]>(
-    () => [
-      {
-        field: "id",
-        headerName: labels.invoiceId,
-        flex: 0.8,
-        minWidth: 120,
-        renderCell: ({ row }) => (
-          <StyledInvoiceIdTypography variant="bodyMd" title={row.id}>
-            {formatInvoiceDisplayId(row.id)}
-          </StyledInvoiceIdTypography>
-        ),
-      },
-      {
-        field: "studentName",
-        headerName: labels.studentName,
-        flex: 1.2,
-        minWidth: 200,
-        renderCell: ({ row }) => (
-          <DesktopPersonProfileLinkCell
-            name={row.studentName}
-            href={row.studentId ? studentHref(row.studentId) : undefined}
-            fallbackInitial={row.studentInitials}
-            avatarSize={32}
-          />
-        ),
-      },
-      {
-        field: "dateIssued",
-        headerName: labels.dateIssued,
-        flex: 0.9,
-        minWidth: 130,
-        renderCell: ({ row }) => <StyledDateTypography variant="bodyMd">{row.dateIssued}</StyledDateTypography>,
-      },
-      {
-        field: "amount",
-        headerName: labels.amount,
-        flex: 0.7,
-        minWidth: 100,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-            {row.amount}
-          </Typography>
-        ),
-      },
-      {
-        field: "status",
-        headerName: labels.status,
-        flex: 0.8,
-        minWidth: 120,
-        renderCell: ({ row }) => (
-          <DesktopStatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
-        ),
-      },
-      {
-        field: "actions",
-        headerName: labels.actions,
-        flex: 0.9,
-        minWidth: 140,
-        sortable: false,
-        align: "right",
-        headerAlign: "right",
-        renderCell: ({ row }) =>
-          RenderInvoiceAction({ ...config, row }, onMarkAsPaid, onViewPaymentDetails, onDeleteInvoice),
-      },
-    ],
-    [labels, onDeleteInvoice, onMarkAsPaid, onViewPaymentDetails, config]
+  const columns = useMemo(
+    () => buildAdminInvoicesColumns(labels, config, { onMarkAsPaid, onViewPaymentDetails, onDeleteInvoice }),
+    [labels, config, onMarkAsPaid, onViewPaymentDetails, onDeleteInvoice]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

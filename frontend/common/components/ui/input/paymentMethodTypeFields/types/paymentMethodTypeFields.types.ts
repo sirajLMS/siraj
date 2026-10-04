@@ -8,22 +8,13 @@ import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import type { CountryType } from "@/frontend/common/lib/locale";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import type { PaymentMethodTypeSelectorLabels } from "@/shared/locale/types/ui";
+import type { PaymentMethodDetailsShape } from "@/shared/types";
 
-export type PaymentMethodDetailsFormValue = {
-  readonly walletId?: string;
-  readonly phone?: string;
-  readonly paymentLinkId?: string;
-  readonly url?: string;
-  readonly onlineAccountId?: string;
-  readonly identifier?: string;
-  readonly iban?: string;
-  readonly bankName?: string;
-  readonly beneficiaryName?: string;
-  readonly swiftBic?: string;
-  readonly accountNumber?: string;
-  readonly routingNumber?: string;
-  readonly note?: string;
-};
+/**
+ * Form-value shape for payment-method detail fields. Field keys come from the
+ * canonical cross-layer `PaymentMethodDetailsShape` in `shared/types`.
+ */
+export type PaymentMethodDetailsFormValue = PaymentMethodDetailsShape;
 
 export type PaymentMethodCatalogFormValue = {
   readonly name?: Record<string, string>;

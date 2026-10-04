@@ -4,7 +4,7 @@ import {
   PayrollReportFilterPothosInput,
   PayrollReportPagePothosObject,
 } from "@/backend/graphql/pothos/teachers/payroll.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { reportPageWindow, reportPaginationArgs, reportResolverContext } from "@/backend/graphql/query/__shared__";
 import { PayrollCalculationService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("payrollReport", t =>
@@ -15,23 +15,11 @@ gqlSchemaBuilder.queryField("payrollReport", t =>
     authScopes: { permission: AppPermission.ACCOUNTING_PAYROLL_VIEW },
     args: {
       filter: t.arg({ type: PayrollReportFilterPothosInput, required: false }),
-      limit: t.arg.int({
-        required: false,
-        defaultValue: 50,
-        description: "Max rows per page (max 200)",
-        directives: { constraint: { min: 1, max: 200 } },
-      }),
-      offset: t.arg.int({ required: false, defaultValue: 0 }),
+      ...reportPaginationArgs(t),
     },
     resolve: async (_root, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return PayrollCalculationService.getReport(
-        actorUserId,
-        args.filter ?? {},
-        { limit: args.limit ?? 50, offset: args.offset ?? 0 },
-        tErrors
-      );
+      const { actorUserId, tErrors } = await reportResolverContext(ctx);
+      return PayrollCalculationService.getReport(actorUserId, args.filter ?? {}, reportPageWindow(args), tErrors);
     },
   })
 );

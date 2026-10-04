@@ -25,6 +25,24 @@ async function authenticatedSuggestionMutation(
   return SuggestionService.mapSuggestionReturnType(await serviceCall(userId));
 }
 
+/**
+ * Rate-limited prelude shared by the public-facing suggestion mutations:
+ * throttles by IP before delegating to the auth+mapping prelude.
+ */
+async function rateLimitedSuggestionMutation(
+  ctx: BaseContext,
+  serviceCall: (userId: string) => Promise<SuggestionSelectType>
+): Promise<SuggestionReturnType> {
+  const tErrors = ctx.t().errorsTranslations;
+  const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
+  if (!rateLimitResult.success) {
+    throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+      extensions: { code: "TOO_MANY_ATTEMPTS" },
+    });
+  }
+  return authenticatedSuggestionMutation(ctx, serviceCall);
+}
+
 gqlSchemaBuilder.mutationField("submitSuggestion", t =>
   t.field({
     type: SuggestionPothosObject,
@@ -33,22 +51,14 @@ gqlSchemaBuilder.mutationField("submitSuggestion", t =>
     args: {
       input: t.arg({ type: SubmitSuggestionInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
-      if (!rateLimitResult.success) {
-        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
-          extensions: { code: "TOO_MANY_ATTEMPTS" },
-        });
-      }
-      return authenticatedSuggestionMutation(ctx, userId =>
+    resolve: async (_root, args, ctx) =>
+      rateLimitedSuggestionMutation(ctx, userId =>
         SuggestionService.submitSuggestion(
           userId,
           { submitterName: args.input.submitterName, body: args.input.body },
           ctx.locale
         )
-      );
-    },
+      ),
   })
 );
 
@@ -75,18 +85,10 @@ gqlSchemaBuilder.mutationField("respondToSuggestion", t =>
     args: {
       input: t.arg({ type: RespondToSuggestionInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
-      if (!rateLimitResult.success) {
-        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
-          extensions: { code: "TOO_MANY_ATTEMPTS" },
-        });
-      }
-      return authenticatedSuggestionMutation(ctx, userId =>
+    resolve: async (_root, args, ctx) =>
+      rateLimitedSuggestionMutation(ctx, userId =>
         SuggestionService.respondToSuggestion(userId, args.input.suggestionId, args.input.adminResponse, ctx.locale)
-      );
-    },
+      ),
   })
 );
 

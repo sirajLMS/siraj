@@ -1,61 +1,15 @@
-import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as Pothos from "@/backend/graphql/pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { sanitizeStoragePath, validateStoragePath } from "@/backend/lib/path-validator";
+import { authorizeStoragePath } from "@/backend/graphql/query/storage/storage.query.helpers";
 import { StorageService } from "@/backend/services/storage";
 import { getStorageService } from "@/backend/storage/storage.service";
-import type { ErrorsLabels } from "@/shared/locale";
 
-// IMPORTANT: Every resolver that accepts a user-supplied storage path MUST
-// (1) authenticate the caller, (2) sanitize the path, (3) validate the path
-// against traversal attacks, and (4) enforce per-user ownership / storage-manage
-// scope before delegating to the storage service. The previous implementation
-// trusted the raw client-supplied path and relied on a vague "service layer is
-// responsible" comment — that allowed any logged-in user to list/fileInfo any
-// storage path (BOLA / IDOR).
+// Every resolver that accepts a user-supplied storage path delegates its
+// authentication, sanitization, traversal validation, and scope enforcement to
+// `authorizeStoragePath` before it reaches the storage service.
 
-type StorageAuthMode = "owner" | "admin";
-
-/**
- * Authenticate the caller, sanitize + validate the storage path, and enforce
- * the requested scope.
- *
- * - `"owner"` (user-browsing resolvers): when a path is supplied, the caller
- *   must either hold `STORAGE_MANAGE` or be the file's owner (via file usages).
- *   When the path is empty/omitted (root browse), the caller must hold
- *   `STORAGE_MANAGE` (broad bucket-wide access).
- * - `"admin"` (`storageStats`): the caller must always hold `STORAGE_MANAGE`,
- *   regardless of whether a path was supplied.
- *
- * @returns The sanitized path (empty string when none was supplied) and the
- * localized error labels for downstream use.
- */
-async function authorizeStoragePath(
-  ctx: BaseContext,
-  rawPath: string | undefined | null,
-  mode: StorageAuthMode
-): Promise<{ sanitizedPath: string; tErrors: ErrorsLabels }> {
-  const userId = await requireAuth(ctx);
-  const tErrors = ctx.t().errorsTranslations;
-  const sanitizedPath = rawPath ? sanitizeStoragePath(rawPath) : "";
-  const hasPath = Boolean(rawPath);
-  if (hasPath) {
-    validateStoragePath(sanitizedPath);
-  }
-  if (mode === "admin" || !hasPath) {
-    // Admin mode always requires STORAGE_MANAGE; owner mode with no path
-    // (root/bucket-wide browse) also falls back to STORAGE_MANAGE since there
-    // is no specific file to attribute ownership to.
-    await StorageService.requireStorageManage(userId, tErrors);
-  } else {
-    await StorageService.requireStorageManageOrOwner(userId, sanitizedPath, tErrors);
-  }
-  return { sanitizedPath, tErrors };
-}
-
-gqlSchemaBuilder.queryFields(t => ({
-  listFiles: t.field({
+gqlSchemaBuilder.queryField("listFiles", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: Pothos.StorageObjectListPothosObject,
     args: {
@@ -69,9 +23,11 @@ gqlSchemaBuilder.queryFields(t => ({
       const storageService = await getStorageService();
       return await storageService.listFiles({ ...input, path: sanitizedPath });
     },
-  }),
+  })
+);
 
-  fileInfo: t.field({
+gqlSchemaBuilder.queryField("fileInfo", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: Pothos.FileInfoPothosObject,
     args: {
@@ -83,9 +39,11 @@ gqlSchemaBuilder.queryFields(t => ({
       const storageService = await getStorageService();
       return await storageService.fileInfoByPath(sanitizedPath);
     },
-  }),
+  })
+);
 
-  folderInfo: t.field({
+gqlSchemaBuilder.queryField("folderInfo", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: Pothos.DirectoryInfoPothosObject,
     args: {
@@ -96,9 +54,11 @@ gqlSchemaBuilder.queryFields(t => ({
       const storageService = await getStorageService();
       return await storageService.directoryInfoByPath(sanitizedPath);
     },
-  }),
+  })
+);
 
-  searchFiles: t.field({
+gqlSchemaBuilder.queryField("searchFiles", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: Pothos.StorageObjectListPothosObject,
     args: {
@@ -131,9 +91,11 @@ gqlSchemaBuilder.queryFields(t => ({
       };
       return await storageService.listFiles(input);
     },
-  }),
+  })
+);
 
-  storageStats: t.field({
+gqlSchemaBuilder.queryField("storageStats", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: Pothos.StorageStatsPothosObject,
     args: {
@@ -148,9 +110,11 @@ gqlSchemaBuilder.queryFields(t => ({
       const storageService = await getStorageService();
       return await storageService.storageStatistics(sanitizedPath);
     },
-  }),
+  })
+);
 
-  directoryChildren: t.field({
+gqlSchemaBuilder.queryField("directoryChildren", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: [Pothos.DirectoryInfoPothosObject],
     args: {
@@ -165,9 +129,11 @@ gqlSchemaBuilder.queryFields(t => ({
       const storageService = await getStorageService();
       return await storageService.fetchDirectoryChildren(sanitizedPath);
     },
-  }),
+  })
+);
 
-  fileUsage: t.field({
+gqlSchemaBuilder.queryField("fileUsage", t =>
+  t.field({
     authScopes: { loggedIn: true },
     type: Pothos.FileUsageResultPothosObject,
     args: {
@@ -180,5 +146,5 @@ gqlSchemaBuilder.queryFields(t => ({
       const { sanitizedPath } = await authorizeStoragePath(ctx, input.path, "owner");
       return await StorageService.checkFileUsage({ ...input, path: sanitizedPath });
     },
-  }),
-}));
+  })
+);

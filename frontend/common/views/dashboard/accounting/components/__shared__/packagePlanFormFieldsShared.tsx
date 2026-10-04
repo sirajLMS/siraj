@@ -1,36 +1,21 @@
 "use client";
 
-import { Box, Chip, FormControlLabel, Stack, Switch, type SxProps, TextField, type Theme } from "@mui/material";
-import { type Control, Controller, type FieldErrors } from "react-hook-form";
+import { Box, FormControlLabel, Switch, type SxProps, TextField, type Theme } from "@mui/material";
+import { Controller } from "react-hook-form";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import {
-  PACKAGE_PLAN_CURRENCY_OPTIONS,
-  PACKAGE_PLAN_VALIDITY_CHOICES,
-} from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.options";
-import type {
-  PackagePlanFormData,
-  PackagePlanFormInput,
-} from "@/frontend/common/views/dashboard/accounting/schemas/packagePlanFormSchema";
-import type { PackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans";
-
-type PackagePlanFormLabels = PackagePlansLabels["form"];
-
-interface PackagePlanFieldCoreProps {
-  readonly control: Control<PackagePlanFormInput, undefined, PackagePlanFormData>;
-  readonly labels: PackagePlanFormLabels;
-}
-
-interface PackagePlanValidatedFieldProps extends PackagePlanFieldCoreProps {
-  readonly errors: FieldErrors<PackagePlanFormInput>;
-}
-
-interface PackagePlanSizedFieldProps extends PackagePlanFieldCoreProps {
-  readonly sx?: SxProps<Theme>;
-}
-
-interface PackagePlanSizedValidatedFieldProps extends PackagePlanValidatedFieldProps {
-  readonly sx?: SxProps<Theme>;
-}
+  CREDIT_HOURS_CONFIG,
+  PRICE_AMOUNT_CONFIG,
+  SORT_ORDER_CONFIG,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.constants";
+import { PACKAGE_PLAN_CURRENCY_OPTIONS } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.options";
+import {
+  type PackagePlanFieldCoreProps,
+  PackagePlanNumberField,
+  type PackagePlanSizedFieldProps,
+  type PackagePlanSizedValidatedFieldProps,
+  PackagePlanValidityMonthsInput,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.parts";
 
 export function PackagePlanCodenameField({
   control,
@@ -106,60 +91,6 @@ export function PackagePlanDescriptionField({ control, labels, sx }: Readonly<Pa
   );
 }
 
-interface PackagePlanNumberFieldProps extends PackagePlanSizedValidatedFieldProps {
-  readonly config: {
-    readonly name: "creditHours" | "priceAmount" | "sortOrder";
-    readonly labelKey: "creditHours" | "priceAmount" | "sortOrder";
-    readonly step?: number;
-    readonly min?: number;
-    readonly inputMode?: "decimal" | "numeric";
-  };
-}
-
-const CREDIT_HOURS_CONFIG = {
-  name: "creditHours" as const,
-  labelKey: "creditHours" as const,
-  step: 0.5,
-  min: 0.5,
-  inputMode: "decimal" as const,
-};
-
-const PRICE_AMOUNT_CONFIG = {
-  name: "priceAmount" as const,
-  labelKey: "priceAmount" as const,
-  step: 0.01,
-  min: 0,
-  inputMode: "decimal" as const,
-};
-
-const SORT_ORDER_CONFIG = {
-  name: "sortOrder" as const,
-  labelKey: "sortOrder" as const,
-  step: 1,
-  min: 0,
-};
-
-function PackagePlanNumberField({ config, control, errors, labels, sx }: Readonly<PackagePlanNumberFieldProps>) {
-  return (
-    <Controller
-      name={config.name}
-      control={control}
-      render={({ field }) => (
-        <TextField
-          {...field}
-          size="small"
-          type="number"
-          label={labels[config.labelKey]}
-          error={Boolean(errors[config.name])}
-          helperText={errors[config.name]?.message}
-          slotProps={{ htmlInput: { step: config.step, min: config.min, inputMode: config.inputMode } }}
-          sx={sx}
-        />
-      )}
-    />
-  );
-}
-
 export function PackagePlanCreditHoursField(props: Readonly<PackagePlanSizedValidatedFieldProps>) {
   return <PackagePlanNumberField {...props} config={CREDIT_HOURS_CONFIG} />;
 }
@@ -196,47 +127,7 @@ export function PackagePlanValidityMonthsField({
     <Controller
       name="validityMonths"
       control={control}
-      render={({ field }) => (
-        <Stack spacing={1} sx={sx}>
-          <TextField
-            value={field.value ?? ""}
-            onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
-            size="small"
-            type="number"
-            label={labels.validityMonths}
-            error={Boolean(errors.validityMonths)}
-            helperText={errors.validityMonths?.message}
-            slotProps={{
-              htmlInput: { step: 1, min: 1, max: 120 },
-              inputLabel: { shrink: true },
-            }}
-            sx={{ width: "100%" }}
-          />
-          <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-            {PACKAGE_PLAN_VALIDITY_CHOICES.map(months => (
-              <Chip
-                key={months}
-                size="small"
-                clickable
-                label={String(months)}
-                aria-pressed={field.value === months}
-                color={field.value === months ? "primary" : "default"}
-                variant={field.value === months ? "filled" : "outlined"}
-                onClick={() => field.onChange(months)}
-              />
-            ))}
-            <Chip
-              size="small"
-              clickable
-              label={labels.validityUnlimited}
-              aria-pressed={field.value == null}
-              color={field.value == null ? "primary" : "default"}
-              variant={field.value == null ? "filled" : "outlined"}
-              onClick={() => field.onChange(null)}
-            />
-          </Stack>
-        </Stack>
-      )}
+      render={({ field }) => <PackagePlanValidityMonthsInput field={field} errors={errors} labels={labels} sx={sx} />}
     />
   );
 }

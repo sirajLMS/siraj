@@ -11,6 +11,7 @@ import type {
   SessionAuditStatus,
 } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
+import { isCalendarDate } from "@/shared/lib/datetime/calendar-date";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const DEFAULT_REPORT_SORT: SessionAuditReportSort = { field: "scheduledStartAt", direction: "desc" };
@@ -95,21 +96,6 @@ function buildPageAggregates(rows: readonly SessionAuditReportRow[]): SessionAud
     totalPaidAmount: fromMinorHundredths(totalHundredths),
     totalPaidCurrency: dominantCurrency(currencyTallies),
   };
-}
-
-/** Strict `YYYY-MM-DD` check that also rejects impossible calendar days (JS `Date` rolls them over). */
-function isCalendarDate(value: string): boolean {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (match === null) {
-    return false;
-  }
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const constructed = new Date(Date.UTC(year, month - 1, day));
-  return (
-    constructed.getUTCFullYear() === year && constructed.getUTCMonth() === month - 1 && constructed.getUTCDate() === day
-  );
 }
 
 /** Formats a UTC instant as its `YYYY-MM-DD` calendar date. */
