@@ -1,7 +1,8 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { NextRequest } from "next/server";
-import { GET as setLocaleGET } from "@/app/api/set-locale/route";
+import { GET as setLocaleGET, POST as setLocalePOST } from "@/app/api/set-locale/route";
 import { GET as logoutGET } from "@/app/logout/route";
+import * as ratelimitModule from "@/backend/lib/ratelimit";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -29,6 +30,7 @@ describe("Host Header Injection Defense in Redirects", () => {
 
     test("accepts valid host matching request.nextUrl.host", async () => {
       const res = await setLocaleGET(setLocaleRequest({ origin: BASE_URL, host: "localhost:3000" }));
+      expect(res.status).toBe(307);
       assertRedirect(res, `${BASE_URL}/dashboard`);
     });
 
@@ -36,6 +38,7 @@ describe("Host Header Injection Defense in Redirects", () => {
       const res = await setLocaleGET(
         setLocaleRequest({ origin: BASE_URL, host: "localhost:3000", "x-forwarded-proto": "https" })
       );
+      expect(res.status).toBe(307);
       assertRedirect(res, `https://localhost:3000/dashboard`);
     });
 
@@ -44,6 +47,7 @@ describe("Host Header Injection Defense in Redirects", () => {
         setLocaleRequest({ origin: BASE_URL, "x-forwarded-host": "invalid host with spaces.com" })
       );
       const location = res.headers.get("location");
+      expect(res.status).toBe(307);
       assertRedirect(res, `${BASE_URL}/dashboard`);
       expect(location).not.toContain("invalid host");
     });
@@ -52,6 +56,7 @@ describe("Host Header Injection Defense in Redirects", () => {
       const res = await setLocaleGET(
         setLocaleRequest({ origin: BASE_URL, host: "localhost:3000", "x-forwarded-proto": "javascript" })
       );
+      expect(res.status).toBe(307);
       assertRedirect(res, `${BASE_URL}/dashboard`);
     });
   });
@@ -62,6 +67,46 @@ describe("Host Header Injection Defense in Redirects", () => {
       const location = res.headers.get("location");
       assertRedirect(res, `${BASE_URL}/login`);
       expect(location).not.toContain("evil-attacker.com");
+    });
+  });
+
+  describe("Rate Limiting in /api/set-locale", () => {
+    test("GET /api/set-locale returns 429 when rate limit is exceeded", async () => {
+      const spy = spyOn(ratelimitModule, "checkRateLimit").mockResolvedValueOnce({
+        success: false,
+        limit: 200,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      });
+
+      const res = await setLocaleGET(setLocaleRequest({ origin: BASE_URL }));
+      expect(res.status).toBe(429);
+      const body = (await res.json()) as { error: string };
+      expect(body.error).toBeTruthy();
+
+      spy.mockRestore();
+    });
+
+    test("POST /api/set-locale returns 429 when rate limit is exceeded", async () => {
+      const spy = spyOn(ratelimitModule, "checkRateLimit").mockResolvedValueOnce({
+        success: false,
+        limit: 200,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      });
+
+      const req = new NextRequest(`${BASE_URL}/api/set-locale`, {
+        method: "POST",
+        headers: { origin: BASE_URL, "content-type": "application/json" },
+        body: JSON.stringify({ locale: "en" }),
+      });
+
+      const res = await setLocalePOST(req);
+      expect(res.status).toBe(429);
+      const body = (await res.json()) as { error: string };
+      expect(body.error).toBeTruthy();
+
+      spy.mockRestore();
     });
   });
 });
