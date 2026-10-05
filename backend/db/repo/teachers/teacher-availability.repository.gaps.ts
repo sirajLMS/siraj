@@ -112,6 +112,16 @@ export function buildTeacherSearchResults(
   const { minAvailableDays, minTotalGaps } = minResultCriteria;
   const result: Types.AvailabilitySearchTeacher[] = [];
 
+  // Pre-calculate date metadata and apply day-of-week filtering once for all teachers (~100x reduction in Date conversions)
+  const dateInfos: { calendarDate: string; day: DayOfWeek }[] = [];
+  for (let i = 0; i < calendarDates.length; i++) {
+    const calendarDate = calendarDates[i];
+    const day = getDayOfWeekFromDateString(calendarDate);
+    if (!allowedDays || allowedDays.has(day)) {
+      dateInfos.push({ calendarDate, day });
+    }
+  }
+
   for (let tIdx = 0; tIdx < allTeachers.length; tIdx++) {
     const teacher = allTeachers[tIdx];
     const windowsByDay = groupByDayOfWeek(windowsByTeacher.get(teacher.teacherId) ?? []);
@@ -120,12 +130,8 @@ export function buildTeacherSearchResults(
     const vacations = vacationsByTeacher.get(teacher.teacherId) ?? [];
     const gaps: Types.TeacherAvailabilityGap[] = [];
 
-    for (let d = 0; d < calendarDates.length; d++) {
-      const calendarDate = calendarDates[d];
-      const day = getDayOfWeekFromDateString(calendarDate);
-      if (allowedDays && !allowedDays.has(day)) {
-        continue;
-      }
+    for (let d = 0; d < dateInfos.length; d++) {
+      const { calendarDate, day } = dateInfos[d];
 
       const dayGaps = computeTeacherGapsForDate(
         teacher,
