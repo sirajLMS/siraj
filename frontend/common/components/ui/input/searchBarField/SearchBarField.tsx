@@ -40,6 +40,12 @@ export function SearchBarField({
       onChange={event => {
         onChange(event.target.value);
       }}
+      onKeyDown={event => {
+        if (event.key === "Escape" && value) {
+          event.stopPropagation();
+          onChange("");
+        }
+      }}
       placeholder={placeholder}
       helperText={isSearching ? searchingLabel : undefined}
       sx={sx}
