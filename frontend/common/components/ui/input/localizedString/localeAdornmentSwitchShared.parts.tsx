@@ -23,6 +23,10 @@ const BaseLanguageOption = styled(Box, {
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
+  "&:focus-visible": {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: "-2px",
+  },
 }));
 
 export type LocaleListProps = {
@@ -45,17 +49,26 @@ export function LocaleList({
   optionSx,
 }: Readonly<LocaleListProps>) {
   return (
-    <Stack component="ul" aria-label={ariaLabel ?? selectLocaleLabel}>
+    <Stack component="ul" role="listbox" aria-label={ariaLabel ?? selectLocaleLabel}>
       {languages.map((language, index, array) => {
         const isSelected = (language.code as string) === activeLocale;
         const isLastItem = index === array.length - 1;
         return (
           <BaseLanguageOption
             key={language.code}
+            component="li"
+            role="option"
+            tabIndex={0}
             aria-selected={isSelected}
             isSelected={isSelected}
             isLastItem={isLastItem}
             onClick={() => onPick(language.code)}
+            onKeyDown={event => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onPick(language.code);
+              }
+            }}
             sx={optionSx}
           >
             <LocaleEmoji emoji={language.emoji} />
