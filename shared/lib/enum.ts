@@ -281,11 +281,13 @@ export const parseGroupClassAttendanceStatus: (
 ) => GroupClassAttendanceStatus = (value, fallback = GroupClassAttendanceStatus.PENDING) =>
   withFallback(GroupClassAttendanceStatus, fallback)(value);
 
+const APP_LOCALES_SET = new Set<string>(locales);
+
 /**
  * Type guard for AppLocale.
  */
 export function isAppLocale(value: string): value is AppLocale {
-  return (locales as readonly string[]).includes(value);
+  return APP_LOCALES_SET.has(value);
 }
 
 /**

@@ -9,18 +9,30 @@ import {
 import { WhatsappMessageDirection, WhatsappWebhookEventStatus } from "@/backend/enum/whatsapp/whatsapp-inbox.enum";
 import type { WhatsappAccountReturnType, WhatsappAccountSelectType } from "@/backend/types";
 
+// Module-level Set caches avoid repeated Object.values(Enum) array allocations
+// and linear O(N) array scans during high-frequency enum validation/coercion.
+const QUALITY_RATING_SET = new Set<string>(Object.values(WhatsappQualityRating));
+const LIMIT_TIER_SET = new Set<string>(Object.values(WhatsappLimitTier));
+const ACCOUNT_PURPOSE_SET = new Set<string>(Object.values(WhatsappAccountPurpose));
+const ONBOARDING_MODE_SET = new Set<string>(Object.values(WhatsappOnboardingMode));
+const SYNC_STATUS_SET = new Set<string>(Object.values(WhatsappSyncStatus));
+const MESSAGE_DIRECTION_SET = new Set<string>(Object.values(WhatsappMessageDirection));
+const WEBHOOK_EVENT_STATUS_SET = new Set<string>(Object.values(WhatsappWebhookEventStatus));
+const SYNC_REQUEST_STATUS_SET = new Set<string>(Object.values(WhatsappSyncRequestStatus));
+const SYNC_TYPE_SET = new Set<string>(Object.values(WhatsappSyncType));
+
 /**
  * Type guard: does `value` match a known `WhatsappQualityRating` member?
  */
 export function isValidQualityRating(value: string): value is WhatsappQualityRating {
-  return (Object.values(WhatsappQualityRating) as string[]).includes(value);
+  return QUALITY_RATING_SET.has(value);
 }
 
 /**
  * Type guard: does `value` match a known `WhatsappLimitTier` member?
  */
 export function isValidLimitTier(value: string): value is WhatsappLimitTier {
-  return (Object.values(WhatsappLimitTier) as string[]).includes(value);
+  return LIMIT_TIER_SET.has(value);
 }
 
 /**
@@ -47,21 +59,21 @@ export function coerceLimitTier(raw: string | null): WhatsappLimitTier | null {
  * Type guard: does `value` match a known `WhatsappAccountPurpose` member?
  */
 export function isValidAccountPurpose(value: string): value is WhatsappAccountPurpose {
-  return (Object.values(WhatsappAccountPurpose) as string[]).includes(value);
+  return ACCOUNT_PURPOSE_SET.has(value);
 }
 
 /**
  * Type guard: does `value` match a known `WhatsappOnboardingMode` member?
  */
 function isValidOnboardingMode(value: string): value is WhatsappOnboardingMode {
-  return (Object.values(WhatsappOnboardingMode) as string[]).includes(value);
+  return ONBOARDING_MODE_SET.has(value);
 }
 
 /**
  * Type guard: does `value` match a known `WhatsappSyncStatus` member?
  */
 export function isValidSyncStatus(value: string): value is WhatsappSyncStatus {
-  return (Object.values(WhatsappSyncStatus) as string[]).includes(value);
+  return SYNC_STATUS_SET.has(value);
 }
 
 /**
@@ -92,7 +104,7 @@ function coerceSyncStatus(raw: string): WhatsappSyncStatus {
  * Type guard: does `value` match a known `WhatsappMessageDirection` member?
  */
 function isValidMessageDirection(value: string): value is WhatsappMessageDirection {
-  return (Object.values(WhatsappMessageDirection) as string[]).includes(value);
+  return MESSAGE_DIRECTION_SET.has(value);
 }
 
 /**
@@ -108,7 +120,7 @@ export function coerceMessageDirection(raw: string): WhatsappMessageDirection {
  * Type guard: does `value` match a known `WhatsappWebhookEventStatus` member?
  */
 function isValidWebhookEventStatus(value: string): value is WhatsappWebhookEventStatus {
-  return (Object.values(WhatsappWebhookEventStatus) as string[]).includes(value);
+  return WEBHOOK_EVENT_STATUS_SET.has(value);
 }
 
 /**
@@ -125,7 +137,7 @@ export function coerceWebhookEventStatus(raw: string): WhatsappWebhookEventStatu
  * Type guard: does `value` match a known `WhatsappSyncRequestStatus` member?
  */
 function isValidSyncRequestStatus(value: string): value is WhatsappSyncRequestStatus {
-  return (Object.values(WhatsappSyncRequestStatus) as string[]).includes(value);
+  return SYNC_REQUEST_STATUS_SET.has(value);
 }
 
 /**
@@ -141,7 +153,7 @@ export function coerceSyncRequestStatus(raw: string): WhatsappSyncRequestStatus 
  * Type guard: does `value` match a known `WhatsappSyncType` member?
  */
 function isValidSyncType(value: string): value is WhatsappSyncType {
-  return (Object.values(WhatsappSyncType) as string[]).includes(value);
+  return SYNC_TYPE_SET.has(value);
 }
 
 /**
@@ -198,14 +210,11 @@ export function buildReturnType(
 /**
  * Narrow an `unknown` jsonb payload (message `content`, webhook-event
  * `payload`) to a plain record; non-object values yield `{}`.
+ * Shallow-clones the object directly without Object.entries() tuple allocations.
  */
 export function coerceJsonRecord(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return {};
   }
-  const record: Record<string, unknown> = {};
-  for (const [key, nested] of Object.entries(value)) {
-    record[key] = nested;
-  }
-  return record;
+  return { ...(value as Record<string, unknown>) };
 }
