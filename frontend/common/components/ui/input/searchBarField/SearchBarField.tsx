@@ -3,6 +3,7 @@
 import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import type { KeyboardEvent } from "react";
 
 export interface SearchBarFieldProps {
   readonly value: string;
@@ -32,6 +33,14 @@ export function SearchBarField({
   clearLabel = "Clear search",
   maxLength,
 }: Readonly<SearchBarFieldProps>) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape" && value) {
+      event.preventDefault();
+      event.stopPropagation();
+      onChange("");
+    }
+  };
+
   return (
     <TextField
       fullWidth
@@ -40,6 +49,7 @@ export function SearchBarField({
       onChange={event => {
         onChange(event.target.value);
       }}
+      onKeyDown={handleKeyDown}
       placeholder={placeholder}
       helperText={isSearching ? searchingLabel : undefined}
       sx={sx}
