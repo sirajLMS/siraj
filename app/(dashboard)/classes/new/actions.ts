@@ -25,14 +25,6 @@ export async function createRecurringClass(
 
   try {
     const input = mapFormDataToServiceInput(data);
-
-    if (input.days.length === 0) {
-      return {
-        success: false,
-        message: translations.dashboardTranslations.createRecurringClass.validation.daysRequired,
-      };
-    }
-
     const tErrors = translations.errorsTranslations;
     const result = await RecurringClassService.createRecurringClass(
       userId,
