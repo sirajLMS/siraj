@@ -23,6 +23,8 @@ export interface ExpiredSlippageData {
   readonly cumulativeRedeemed: number;
 }
 
+// Uses shallow object spread instead of heavy structuredClone V8 calls during accumulator initialization,
+// and sorts entries in-place to prevent intermediate array copies.
 export function groupQuotasByMonth<T>(
   quotas: QuotaItem[],
   getDate: (q: QuotaItem) => string | null,
@@ -36,9 +38,11 @@ export function groupQuotasByMonth<T>(
     if (!dateStr) continue;
     const d = new Date(dateStr);
     const key = `${monthFormatter.format(d)} ${d.getFullYear()}`;
-    const existing = monthMap.get(key) ?? structuredClone(init);
+    const existing = monthMap.get(key) ?? { ...init };
     accum(existing, q);
     monthMap.set(key, existing);
   }
-  return Array.from(monthMap.entries()).toSorted((a, b) => a[0].localeCompare(b[0]));
+  const entries = Array.from(monthMap.entries());
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+  return entries;
 }

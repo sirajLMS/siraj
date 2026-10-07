@@ -36,47 +36,38 @@ export interface QuotaInsightsMetricsData {
   readonly pendingBacklogCount: number;
 }
 
-function filterByDateRange(quotas: QuotaItem[], dateRange: InsightsDateRange): QuotaItem[] {
-  if (dateRange === "all") return quotas;
-  const now = new Date();
-  const cutoff = new Date(now);
-  switch (dateRange) {
-    case "month":
-      cutoff.setMonth(now.getMonth() - 1);
-      break;
-    case "quarter":
-      cutoff.setMonth(now.getMonth() - 3);
-      break;
-    case "year":
-      cutoff.setFullYear(now.getFullYear() - 1);
-      break;
-  }
-  return quotas.filter(q => {
-    const d = q.createdAt ? new Date(q.createdAt) : null;
-    return d !== null && d >= cutoff;
-  });
-}
-
-function filterByKind(quotas: QuotaItem[], kind: QuotaKind | null): QuotaItem[] {
-  if (!kind) return quotas;
-  return quotas.filter(q => q.kind === kind);
-}
-
-function filterByStatus(quotas: QuotaItem[], status: QuotaStatus | null): QuotaItem[] {
-  if (!status) return quotas;
-  return quotas.filter(q => q.status === status);
-}
-
-function filterByStudentId(quotas: QuotaItem[], studentId: string | null): QuotaItem[] {
-  if (!studentId) return quotas;
-  return quotas.filter(q => q.studentId === studentId);
-}
-
+// Single-pass filter evaluates all filter conditions concurrently with epoch timestamp comparisons,
+// avoiding up to 4 chained filter function allocations and multi-pass array scanning.
 export function applyInsightsFilters(quotas: QuotaItem[], filters: QuotaInsightsFilters): QuotaItem[] {
-  return filterByStudentId(
-    filterByStatus(filterByKind(filterByDateRange(quotas, filters.dateRange), filters.kind), filters.status),
-    filters.studentId
-  );
+  const { dateRange, kind, status, studentId } = filters;
+  if (dateRange === "all" && !kind && !status && !studentId) {
+    return quotas;
+  }
+
+  let cutoffMs = 0;
+  if (dateRange !== "all") {
+    const cutoffDate = new Date();
+    if (dateRange === "month") {
+      cutoffDate.setMonth(cutoffDate.getMonth() - 1);
+    } else if (dateRange === "quarter") {
+      cutoffDate.setMonth(cutoffDate.getMonth() - 3);
+    } else if (dateRange === "year") {
+      cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
+    }
+    cutoffMs = cutoffDate.getTime();
+  }
+
+  return quotas.filter(q => {
+    if (kind && q.kind !== kind) return false;
+    if (status && q.status !== status) return false;
+    if (studentId && q.studentId !== studentId) return false;
+    if (cutoffMs > 0) {
+      if (!q.createdAt) return false;
+      const createdMs = Date.parse(q.createdAt);
+      if (Number.isNaN(createdMs) || createdMs < cutoffMs) return false;
+    }
+    return true;
+  });
 }
 
 export function buildChartData(

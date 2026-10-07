@@ -43,10 +43,19 @@ export function buildRedemptionByType(quotas: QuotaItem[], labels: QuotaLabels):
   ].filter(d => d.value > 0);
 }
 
+// Single-pass loop eliminates redundant array allocations and multiple filter iterations over package quotas
 export function buildDeliveryRate(quotas: QuotaItem[], labels: QuotaLabels): DeliveryRateData[] {
-  const pkgQuotas = quotas.filter(q => q.kind === QuotaKind.Package);
-  const committed = pkgQuotas.filter(q => q.status === QuotaStatus.Active).length;
-  const cancelled = pkgQuotas.filter(q => q.status !== QuotaStatus.Active).length;
+  let committed = 0;
+  let cancelled = 0;
+  for (const q of quotas) {
+    if (q.kind === QuotaKind.Package) {
+      if (q.status === QuotaStatus.Active) {
+        committed += 1;
+      } else {
+        cancelled += 1;
+      }
+    }
+  }
   return [
     { name: labels.charts.committed, count: committed },
     { name: labels.charts.cancelled, count: cancelled },
@@ -76,39 +85,46 @@ export function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.D
     cumRed += monthData.redeemed;
     result.push({ month: monthKey, cumulativeExpired: cumExp, cumulativeRedeemed: cumRed });
   }
-  const seen = new Set<string>();
-  return result.filter(r => {
-    if (seen.has(r.month)) return false;
-    seen.add(r.month);
-    return true;
-  });
+  return result;
 }
 
 /**
  * Computes aggregate metrics from quota data.
  *
- * `pendingBacklogCount` counts active quotas with remaining classes that
- * are past their validUntil date (i.e. overdue unredeemed credits) — NOT
- * simply aliased to `activeCount` as in the original implementation.
+ * Single O(N) pass computes all metric fields concurrently, avoiding 5 separate
+ * array iterations (`filter` and `reduce`), 3 temporary array allocations, and
+ * repeated `new Date()` object instantiation inside loops.
  */
 export function computeInsightsMetrics(quotas: QuotaItem[]): QuotaInsightsMetrics {
-  const activeCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
-  const totalRemaining = quotas.reduce((sum, q) => sum + (q.remaining ?? 0), 0);
-  const totalReserved = quotas.reduce((sum, q) => sum + (q.reservedClasses ?? 0), 0);
-  const now = new Date();
-  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const expiringCount = quotas.filter(q => {
-    if (!q.validUntil) return false;
-    const d = new Date(q.validUntil);
-    return d >= now && d <= nextWeek;
-  }).length;
-  const pendingBacklogCount = quotas.filter(q => {
-    if (q.status !== QuotaStatus.Active) return false;
-    if ((q.remaining ?? 0) <= 0) return false;
-    if (!q.validUntil) return false;
-    const d = new Date(q.validUntil);
-    return d < now;
-  }).length;
+  const nowMs = Date.now();
+  const nextWeekMs = nowMs + 7 * 24 * 60 * 60 * 1000;
+
+  let activeCount = 0;
+  let totalRemaining = 0;
+  let totalReserved = 0;
+  let expiringCount = 0;
+  let pendingBacklogCount = 0;
+
+  for (const q of quotas) {
+    if (q.status === QuotaStatus.Active) {
+      activeCount += 1;
+    }
+    totalRemaining += q.remaining ?? 0;
+    totalReserved += q.reservedClasses ?? 0;
+
+    if (q.validUntil) {
+      const validUntilMs = Date.parse(q.validUntil);
+      if (!Number.isNaN(validUntilMs)) {
+        if (validUntilMs >= nowMs && validUntilMs <= nextWeekMs) {
+          expiringCount += 1;
+        }
+        if (q.status === QuotaStatus.Active && (q.remaining ?? 0) > 0 && validUntilMs < nowMs) {
+          pendingBacklogCount += 1;
+        }
+      }
+    }
+  }
+
   return { activeCount, totalRemaining, totalReserved, expiringCount, pendingBacklogCount };
 }
 
