@@ -2,6 +2,7 @@
 
 import { HistoryOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import { useMemo } from "react";
 import { formatAccountingDate } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 
 type HistoryEvent = {
@@ -31,6 +32,15 @@ const toMillis = (value: string | Date | null): number =>
 
 /** Vertical timeline of derived payment events (newest first). */
 export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: Readonly<PaymentHistoryTimelineProps>) {
+  // Memoize event ordering and pre-map timestamps unconditionally to comply with React Rules of Hooks.
+  const ordered = useMemo(() => {
+    if (events.length <= 1) return events;
+    return events
+      .map(event => ({ event, time: toMillis(event.occurredAt) }))
+      .sort((a, b) => b.time - a.time)
+      .map(item => item.event);
+  }, [events]);
+
   if (events.length === 0) {
     return (
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -38,8 +48,6 @@ export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: R
       </Typography>
     );
   }
-
-  const ordered = [...events].toSorted((a, b) => toMillis(b.occurredAt) - toMillis(a.occurredAt));
 
   return (
     <Stack component="ol" sx={{ m: 0, p: 0, listStyle: "none" }} spacing={0}>

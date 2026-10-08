@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-10 - Memoization and Timestamp Mapping in Payment History Timeline
+
+**Learning:** `PaymentHistoryTimeline` previously called `[...events].toSorted((a, b) => toMillis(b.occurredAt) - toMillis(a.occurredAt))` directly in render, re-parsing dates on every render and calculating `toMillis` O(N log N) times inside comparator callbacks.
+**Action:** Unconditionally memoize event sorting with `useMemo` at the top of the component (before early returns) and map timestamps once per item (Schwartzian transform) to avoid repeated `Date` parsing during sorting.
