@@ -101,7 +101,7 @@ export const FormFields = ({
                 endAdornment: (
                   <InputAdornment position="end">
                     <Tooltip title={showPassword ? labels.hidePassword : labels.showPassword}>
-                      <span>
+                      <span aria-disabled={disabled ? true : undefined}>
                         <IconButton
                           onClick={() => {
                             setShowPassword(!showPassword);
@@ -109,6 +109,7 @@ export const FormFields = ({
                           edge="end"
                           disabled={disabled}
                           aria-label={showPassword ? labels.hidePassword : labels.showPassword}
+                          aria-pressed={showPassword}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
