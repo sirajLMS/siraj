@@ -1,7 +1,21 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
-import { GET as setLocaleGET } from "@/app/api/set-locale/route";
-import { GET as logoutGET } from "@/app/logout/route";
+
+const mockCheckRateLimit = mock(async () => ({
+  success: true,
+  limit: 200,
+  remaining: 199,
+  reset: Date.now() + 60_000,
+}));
+
+await mock.module("@/backend/lib/ratelimit", () => ({
+  apiRateLimiter: {},
+  checkRateLimit: mockCheckRateLimit,
+  getClientIdentifier: () => "127.0.0.1",
+}));
+
+const { GET: setLocaleGET, POST: setLocalePOST } = await import("@/app/api/set-locale/route");
+const { GET: logoutGET } = await import("@/app/logout/route");
 
 const BASE_URL = "http://localhost:3000";
 
@@ -19,6 +33,58 @@ const assertRedirect = (res: Response, expectedLocation: string) => {
 };
 
 describe("Host Header Injection Defense in Redirects", () => {
+  describe("Rate Limiting Defense", () => {
+    test("POST /api/set-locale validates request format", async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        success: true,
+        limit: 200,
+        remaining: 199,
+        reset: Date.now() + 60_000,
+      });
+      const req = new NextRequest(`${BASE_URL}/api/set-locale`, {
+        method: "POST",
+        headers: { origin: BASE_URL },
+        body: JSON.stringify({ locale: "en" }),
+      });
+      const res = await setLocalePOST(req);
+      expect(res.status).toBe(200);
+      const data = (await res.json()) as { success: boolean; locale: string };
+      expect(data.success).toBe(true);
+      expect(data.locale).toBe("en");
+    });
+
+    test("GET /api/set-locale returns 429 when rate limit is exceeded", async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        success: false,
+        limit: 200,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      });
+      const res = await setLocaleGET(setLocaleRequest({ origin: BASE_URL }));
+      expect(res.status).toBe(429);
+      const data = (await res.json()) as { error: string };
+      expect(data.error).toBeDefined();
+    });
+
+    test("POST /api/set-locale returns 429 when rate limit is exceeded", async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        success: false,
+        limit: 200,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      });
+      const req = new NextRequest(`${BASE_URL}/api/set-locale`, {
+        method: "POST",
+        headers: { origin: BASE_URL },
+        body: JSON.stringify({ locale: "en" }),
+      });
+      const res = await setLocalePOST(req);
+      expect(res.status).toBe(429);
+      const data = (await res.json()) as { error: string };
+      expect(data.error).toBeDefined();
+    });
+  });
+
   describe("GET /api/set-locale", () => {
     test("rejects spoofed X-Forwarded-Host header and falls back to safe request.nextUrl.origin", async () => {
       const res = await setLocaleGET(setLocaleRequest({ origin: BASE_URL, "x-forwarded-host": "evil-attacker.com" }));
