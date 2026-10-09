@@ -75,13 +75,14 @@ function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
   let hour = 0;
   let minute = 0;
   let second = 0;
-  for (const part of parts) {
-    if (part.type === "year") year = Number(part.value);
-    else if (part.type === "month") month = Number(part.value) - 1;
-    else if (part.type === "day") day = Number(part.value);
-    else if (part.type === "hour") hour = Number(part.value) === 24 ? 0 : Number(part.value);
-    else if (part.type === "minute") minute = Number(part.value);
-    else if (part.type === "second") second = Number(part.value);
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part.type === "year") year = +part.value;
+    else if (part.type === "month") month = +part.value - 1;
+    else if (part.type === "day") day = +part.value;
+    else if (part.type === "hour") hour = +part.value === 24 ? 0 : +part.value;
+    else if (part.type === "minute") minute = +part.value;
+    else if (part.type === "second") second = +part.value;
   }
   return Date.UTC(year, month, day, hour, minute, second);
 }
@@ -93,7 +94,8 @@ function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
  */
 function getTimezoneOffsetMs(timeZone: string, date: Date): number {
   const parts = getTimezonePartsFormatter(timeZone).formatToParts(date);
-  return partsToEpochMs(parts) - date.getTime();
+  const utcMs = date.getTime() - date.getUTCMilliseconds();
+  return partsToEpochMs(parts) - utcMs;
 }
 
 function normalizeIanaTimezoneId(value: string): string {
@@ -131,17 +133,19 @@ export function getTimezonePathLabel(ianaTimezone: string, locale?: string): str
   return IANA_TIMEZONE_LABELS_MAP[normalizedTimezone]?.[localeKey] ?? normalizedTimezone;
 }
 
-function getTimezoneTerritoryCode(ianaTimezone: string): string | null {
-  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
-  return resolveUiCountryCode(IANA_TIMEZONE_TERRITORY_CODES_MAP[normalizedTimezone] ?? null);
-}
+/** Cache timezone emojis to avoid repeating territory and country lookup per timezone. */
+const timezoneEmojiCache = new Map<string, string>();
 
 export function getTimezoneEmoji(ianaTimezone: string): string {
-  const territoryCode = getTimezoneTerritoryCode(ianaTimezone);
-  if (!territoryCode) {
-    return GLOBE_EMOJI;
+  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
+  let emoji = timezoneEmojiCache.get(normalizedTimezone);
+  if (emoji !== undefined) {
+    return emoji;
   }
-  return getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI;
+  const territoryCode = resolveUiCountryCode(IANA_TIMEZONE_TERRITORY_CODES_MAP[normalizedTimezone] ?? null);
+  emoji = territoryCode ? getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI : GLOBE_EMOJI;
+  timezoneEmojiCache.set(normalizedTimezone, emoji);
+  return emoji;
 }
 
 export function formatOffsetFromMinutes(offsetMinutes: number): string {
@@ -174,13 +178,31 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
   return formatOffsetFromMinutes(getTimezoneOffsetMinutes(ianaTimezone, date));
 }
 
+/**
+ * Cache computed timezone offset minutes per timezone and epoch minute.
+ * Timezone UTC offsets are constant within any given minute, so caching avoids
+ * repeated `formatToParts` calls across components, options generation, and re-renders.
+ */
+const offsetMinutesCache = new Map<string, number>();
+
 function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
-  try {
-    return Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
-  } catch {
-    return 0;
+  const epochMinute = Math.floor(date.getTime() / 60000);
+  const cacheKey = `${normalizedTimezone}:${epochMinute}`;
+  let minutes = offsetMinutesCache.get(cacheKey);
+  if (minutes !== undefined) {
+    return minutes;
   }
+  try {
+    minutes = Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
+  } catch {
+    minutes = 0;
+  }
+  if (offsetMinutesCache.size > 2000) {
+    offsetMinutesCache.clear();
+  }
+  offsetMinutesCache.set(cacheKey, minutes);
+  return minutes;
 }
 
 export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, date = new Date()): string {
@@ -198,12 +220,13 @@ const arCollator = new Intl.Collator("ar");
 
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
   const collator = locale === "ar" ? arCollator : enCollator;
+  const localeKey = resolveLocaleKey(locale);
   return IANA_TIMEZONE_IDS_STRINGS.map(id => {
-    const pathLabel = getTimezonePathLabel(id, locale);
-    // Compute the offset once per timezone and derive the label from it
+    // IANA_TIMEZONE_IDS_STRINGS are pre-normalized canonical IANA timezone IDs
+    const pathLabel = IANA_TIMEZONE_LABELS_MAP[id]?.[localeKey] ?? id;
     const offsetMinutes = getTimezoneOffsetMinutes(id, date);
     const offsetLabel = formatOffsetFromMinutes(offsetMinutes);
-    const timezoneId = toIanaTimezone(id);
+    const timezoneId = id as IanaTimezone;
     return {
       id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
