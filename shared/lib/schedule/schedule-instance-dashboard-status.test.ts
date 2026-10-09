@@ -154,4 +154,27 @@ describe("schedule-instance-dashboard-status", () => {
     expect(metrics.pending).toBe(0);
     expect(metrics.absent).toBe(1);
   });
+
+  test("computeDailyScheduleMetricsFromRows handles numeric timestamps and large batches", () => {
+    const scheduledEndAtMs = Date.parse("2028-01-01T10:00:00Z");
+    const rows = Array.from({ length: 1000 }, (_, i) => ({
+      outcome: i % 2 === 0 ? ClassOutcome.PENDING : ClassOutcome.TAKEN,
+      executionState: i % 2 === 0 ? ClassExecutionState.NOT_ACTIVATED : ClassExecutionState.COMPLETED,
+      scheduledEndAt: scheduledEndAtMs as unknown as Date,
+      classType: i % 3 === 0 ? "REGULAR" : i % 3 === 1 ? "TRIAL" : "ADVANCE",
+      isRescheduled: i % 5 === 0,
+      isFrozen: i % 7 === 0,
+    }));
+
+    const metrics = computeDailyScheduleMetricsFromRows(rows);
+
+    expect(metrics.total).toBe(1000);
+    expect(metrics.pending).toBe(500);
+    expect(metrics.taken).toBe(500);
+    expect(metrics.regular).toBe(334);
+    expect(metrics.trial).toBe(333);
+    expect(metrics.advance).toBe(333);
+    expect(metrics.rescheduled).toBe(200);
+    expect(metrics.suspended).toBe(143);
+  });
 });

@@ -83,11 +83,22 @@ function isDailyScheduleMetricFilterKey(value: string): value is DailyScheduleMe
   return METRIC_FILTER_KEY_VALUES.has(value);
 }
 
-function toDate(value: DateLike | undefined): Date | null {
+/**
+ * Converts a `DateLike` timestamp to epoch milliseconds without instantiating
+ * `Date` objects when given string ISO dates, numbers, or timestamps, avoiding GC allocations.
+ */
+function toEpochMs(value: DateLike | number | undefined): number | null {
   if (!value) {
     return null;
   }
-  return value instanceof Date ? value : new Date(value);
+  if (typeof value === "number") {
+    return Number.isNaN(value) ? null : value;
+  }
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+  const ms = Date.parse(value);
+  return Number.isNaN(ms) ? null : ms;
 }
 
 export function isClassInstancePastMissedGrace(
@@ -101,16 +112,16 @@ export function isClassInstancePastMissedGrace(
     return false;
   }
 
-  const endAt = toDate(row.scheduledEndAt);
-  if (!endAt) {
+  const endAtMs = toEpochMs(row.scheduledEndAt);
+  if (endAtMs === null) {
     return false;
   }
 
   const graceMinutes = options?.missedGraceMinutes ?? DEFAULT_MISSED_GRACE_MINUTES;
-  const now = options?.now ?? new Date();
-  const missedDeadline = endAt.getTime() + graceMinutes * 60_000;
+  const nowMs = options?.now ? options.now.getTime() : Date.now();
+  const missedDeadline = endAtMs + graceMinutes * 60_000;
 
-  return now.getTime() > missedDeadline;
+  return nowMs > missedDeadline;
 }
 
 export function resolveClassInstanceDashboardStatus(
@@ -132,9 +143,9 @@ export function resolveClassInstanceDashboardStatus(
   }
 
   if (normalizedExecutionState === "ACTIVATED") {
-    const startAt = toDate(actualStartAt);
-    const endAt = toDate(actualEndAt);
-    if (startAt && !endAt) {
+    const startAtMs = toEpochMs(actualStartAt);
+    const endAtMs = toEpochMs(actualEndAt);
+    if (startAtMs !== null && endAtMs === null) {
       return "RUNNING";
     }
     return "ACTIVATED";
@@ -158,7 +169,8 @@ function resolveClassInstanceDashboardStatusFromRow(
 ): ClassInstanceDashboardStatus {
   return resolveClassInstanceDashboardStatus(row.outcome, row.executionState, row.actualStartAt, row.actualEndAt, {
     scheduledEndAt: row.scheduledEndAt,
-    ...options,
+    missedGraceMinutes: options?.missedGraceMinutes,
+    now: options?.now,
   });
 }
 
@@ -250,6 +262,12 @@ const METRIC_KEYS: readonly DailyScheduleMetricFilterKey[] = [
   "leave",
 ];
 
+/**
+ * Single-pass O(N) daily schedule metrics computation.
+ *
+ * Resolves each row's dashboard status once per row and checks class type and flags directly,
+ * avoiding quadratic metric filter checks and repeated status resolution allocations.
+ */
 export function computeDailyScheduleMetricsFromRows(
   rows: readonly ClassInstanceMetricRow[],
   options?: ClassInstanceStatusResolveOptions
@@ -269,14 +287,36 @@ export function computeDailyScheduleMetricsFromRows(
     leave: 0,
   };
 
-  for (const row of rows) {
-    for (const key of METRIC_KEYS) {
-      if (key === "total") {
-        continue;
-      }
-      if (matchesDashboardMetricFilter(row, key, options)) {
-        counts[key] += 1;
-      }
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i]!;
+
+    if (row.classType === "REGULAR") counts.regular++;
+    else if (row.classType === "TRIAL") counts.trial++;
+    else if (row.classType === "ADVANCE") counts.advance++;
+
+    if (row.isRescheduled === true) counts.rescheduled++;
+    if (row.isFrozen === true) counts.suspended++;
+
+    const status = resolveClassInstanceDashboardStatusFromRow(row, options);
+    switch (status) {
+      case "TAKEN":
+        counts.taken++;
+        break;
+      case "PENDING":
+        counts.pending++;
+        break;
+      case "ABSENT":
+        counts.absent++;
+        break;
+      case "LEAVE":
+        counts.leave++;
+        break;
+      case "ACTIVATED":
+        counts.activated++;
+        break;
+      case "RUNNING":
+        counts.running++;
+        break;
     }
   }
 
