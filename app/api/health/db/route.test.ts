@@ -10,6 +10,16 @@ await mock.module("@/backend/db", () => ({
   }),
 }));
 
+const mockLoggerWarn = mock(() => {});
+await mock.module("@/backend/lib/logger", () => ({
+  logger: {
+    warn: mockLoggerWarn,
+    debug: () => {},
+    error: () => {},
+    info: () => {},
+  },
+}));
+
 const mockCheckRateLimit = mock(async () => ({
   success: true,
   limit: 200,
@@ -21,6 +31,7 @@ await mock.module("@/backend/lib/ratelimit", () => ({
   apiRateLimiter: {},
   checkRateLimit: mockCheckRateLimit,
   getClientIdentifier: () => "127.0.0.1",
+  rateLimitLogId: (id: string) => `hashed:${id}`,
 }));
 
 const { GET } = await import("@/app/api/health/db/route");
@@ -52,6 +63,7 @@ describe("GET /api/health/db", () => {
   beforeEach(() => {
     mockQueryExecute.mockClear();
     mockCheckRateLimit.mockClear();
+    mockLoggerWarn.mockClear();
   });
 
   test("returns 200 { status: 'ok' } when rate limit passes and DB query succeeds", async () => {
@@ -70,6 +82,9 @@ describe("GET /api/health/db", () => {
 
     await expectProbeResponse(res, 429, { status: "unavailable" });
     expectSingleProbe(0);
+    expect(mockLoggerWarn).toHaveBeenCalledWith("DB health probe rate limit exceeded", {
+      rateLimitLogId: "hashed:health-db:127.0.0.1",
+    });
   });
 
   test("returns 503 { status: 'unavailable' } when DB query fails", async () => {
