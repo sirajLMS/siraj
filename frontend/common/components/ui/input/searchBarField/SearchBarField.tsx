@@ -3,6 +3,7 @@
 import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import type { KeyboardEvent } from "react";
 
 export interface SearchBarFieldProps {
   readonly value: string;
@@ -10,6 +11,7 @@ export interface SearchBarFieldProps {
   readonly searchingLabel?: string;
   readonly isSearching?: boolean;
   readonly onChange: (value: string) => void;
+  readonly onKeyDown?: (event: KeyboardEvent<HTMLInputElement | HTMLDivElement>) => void;
   readonly sx?: SxProps<Theme>;
   readonly clearLabel?: string;
   /** Cap mirrored onto the native input's maxLength when the consumer enforces one. */
@@ -18,7 +20,8 @@ export interface SearchBarFieldProps {
 
 /**
  * Shared search bar field: TextField with search icon adornment, optional
- * clear button when input is non-empty, and optional searching helper text.
+ * clear button when input is non-empty, optional searching helper text,
+ * and Escape key handling to clear non-empty search queries without bubbling.
  * Both common and mobile search bar wrappers delegate here, supplying their
  * own outer layout/Box.
  */
@@ -28,6 +31,7 @@ export function SearchBarField({
   searchingLabel,
   isSearching = false,
   onChange,
+  onKeyDown,
   sx,
   clearLabel = "Clear search",
   maxLength,
@@ -39,6 +43,13 @@ export function SearchBarField({
       value={value}
       onChange={event => {
         onChange(event.target.value);
+      }}
+      onKeyDown={event => {
+        if (event.key === "Escape" && value) {
+          event.stopPropagation();
+          onChange("");
+        }
+        onKeyDown?.(event);
       }}
       placeholder={placeholder}
       helperText={isSearching ? searchingLabel : undefined}
