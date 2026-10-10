@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-10 - Minute-timestamp offset caching and emoji caching for Timezone Options
+
+**Learning:** Even with cached `Intl.DateTimeFormat` instances, calling `.formatToParts()` across 420 timezones during `getTimezoneOptions` or component re-renders executed ~420 heavy ICU formatting operations repeatedly. Furthermore, repeated normalization calls (`normalizeIanaTimezoneId`) and country flag emoji lookups inside the loop incurred redundant string regex operations and territory map lookups.
+**Action:** Cache timezone offset minutes per minute timestamp (`offsetMinutesCache`) and flag emojis per IANA ID (`timezoneEmojiCache`), use ternary branch string padding in `formatOffsetFromMinutes`, sort in-place with `.sort()`, and bypass redundant normalization for canonical IANA keys.
