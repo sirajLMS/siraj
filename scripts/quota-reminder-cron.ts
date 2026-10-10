@@ -19,6 +19,18 @@ const WINDOW_HOURS = 12;
 /** Maximum number of reminder candidates to fetch per window (unbounded SELECT guard). */
 const MAX_REMINDER_CANDIDATES_PER_WINDOW = 500;
 
+/**
+ * Module-level cache for `Intl.DateTimeFormat` instance.
+ * Instantiating `Intl.DateTimeFormat` inside loop bodies or functions called per-window
+ * generates unnecessary CPU and GC overhead.
+ */
+const utcDateDtf = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "UTC",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 interface ReminderCandidate {
   instanceId: string;
   studentId: string;
@@ -192,12 +204,7 @@ async function fetchReminderCandidates(
   // V3-007: Use DST-safe calendar-day construction via Intl.DateTimeFormat so
   // the date string is resolved in UTC (not server-local time), avoiding
   // DST boundaries that could shift the calendar day.
-  const dateStr = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
+  const dateStr = utcDateDtf
     .format(windowStart)
     .replace(/\//g, "-");
 

@@ -113,13 +113,29 @@ async function buildTeacherNameMap(teacherIds: string[]): Promise<Map<string, st
   return new Map(teacherUsers.map(u => [u.id, u.name]));
 }
 
+/**
+ * Module-level cache for `Intl.DateTimeFormat` instances keyed by IANA timezone ID.
+ * Instantiating `Intl.DateTimeFormat` inside loop bodies or per-teacher callbacks
+ * is up to 100x-200x slower and creates heavy GC pressure.
+ */
+const hourDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getHourDtf(timezone: string): Intl.DateTimeFormat {
+  let dtf = hourDtfCache.get(timezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: timezone,
+    });
+    hourDtfCache.set(timezone, dtf);
+  }
+  return dtf;
+}
+
 /** Resolves the current local hour in the teacher's timezone. */
 function resolveLocalHour(nowUtc: Date, timezone: string): number {
-  const localHourStr = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    hour12: false,
-    timeZone: timezone,
-  }).format(nowUtc);
+  const localHourStr = getHourDtf(timezone).format(nowUtc);
   return Number.parseInt(localHourStr, 10) % 24;
 }
 

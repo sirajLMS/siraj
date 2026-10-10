@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-10 - Caching Intl.DateTimeFormat in cron execution loops
+
+**Learning:** `resolveLocalHour` in `ondemand-teacher-digest-cron.ts` and candidate formatting in `quota-reminder-cron.ts` instantiated `new Intl.DateTimeFormat(...)` inside per-teacher and per-window callbacks. Creating `Intl.DateTimeFormat` objects initializes heavy C++/ICU locale structures in V8/Bun, taking ~100x-200x longer than formatting with a cached instance.
+**Action:** Cache `Intl.DateTimeFormat` instances in a module-level `Map` or static variables for all background cron scripts that process dates across timezones.
