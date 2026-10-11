@@ -14,6 +14,12 @@ let exactCallingCodeMap: Map<string, CallingCodeEntry[]> | null = null;
 let prefixCallingCodeMap: Map<string, CallingCodeEntry[]> | null = null;
 let maxCallingCodeLength = 0;
 
+/** Cache region -> calling code string to eliminate repeated google-libphonenumber lookups and string coercions. */
+const regionCallingCodeCache = new Map<string, string>();
+
+/** Cache callingCode (numeric) -> default region to avoid repeated libphonenumber country-code-to-region conversions. */
+const countryCodeDefaultRegionCache = new Map<number, string | null>();
+
 function ensureCallingCodeIndex(): void {
   if (callingCodeIndex) {
     return;
@@ -22,10 +28,14 @@ function ensureCallingCodeIndex(): void {
   const entries: CallingCodeEntry[] = util
     .getSupportedRegions()
     .filter(region => !isExcludedUiCountryCode(region))
-    .map(region => ({
-      region,
-      callingCode: String(util.getCountryCodeForRegion(region)),
-    }));
+    .map(region => {
+      const callingCode = String(util.getCountryCodeForRegion(region));
+      regionCallingCodeCache.set(region, callingCode);
+      return {
+        region,
+        callingCode,
+      };
+    });
 
   entries.sort((left, right) => right.callingCode.length - left.callingCode.length);
 
@@ -75,7 +85,12 @@ function getPrefixCallingCodeMatches(digits: string): readonly CallingCodeEntry[
 
 /** ISO region → calling code digits (no plus). */
 export function getCallingCodeForRegion(region: string): string {
-  return String(util.getCountryCodeForRegion(region));
+  let callingCode = regionCallingCodeCache.get(region);
+  if (callingCode === undefined) {
+    callingCode = String(util.getCountryCodeForRegion(region));
+    regionCallingCodeCache.set(region, callingCode);
+  }
+  return callingCode;
 }
 
 function pickPreferredRegionMatch(
@@ -103,7 +118,11 @@ function pickDigitsDefaultMatch(
   if (Number.isNaN(callingCode)) {
     return undefined;
   }
-  const defaultRegion = resolveUiCountryCode(util.getRegionCodeForCountryCode(callingCode) ?? undefined);
+  let defaultRegion = countryCodeDefaultRegionCache.get(callingCode);
+  if (defaultRegion === undefined) {
+    defaultRegion = resolveUiCountryCode(util.getRegionCodeForCountryCode(callingCode) ?? undefined) ?? null;
+    countryCodeDefaultRegionCache.set(callingCode, defaultRegion);
+  }
   if (!defaultRegion) {
     return undefined;
   }
