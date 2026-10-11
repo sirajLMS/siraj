@@ -11,6 +11,21 @@ await mock.module("@/backend/lib/logger", () => ({
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
 
+// --- Mock ratelimit ---
+
+const mockCheckRateLimit = mock(async () => ({
+  success: true,
+  limit: 200,
+  remaining: 199,
+  reset: Date.now() + 60_000,
+}));
+
+await mock.module("@/backend/lib/ratelimit", () => ({
+  apiRateLimiter: {},
+  checkRateLimit: mockCheckRateLimit,
+  getClientIdentifier: () => "127.0.0.1",
+}));
+
 // --- Mock cron-auth ---
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";
@@ -92,6 +107,28 @@ async function expectErrorResponse(response: Response, status: number): Promise<
 describe("GET /api/cron/execute", () => {
   beforeEach(() => {
     mockDispatchById.mockClear();
+    mockCheckRateLimit.mockClear();
+    mockCheckRateLimit.mockResolvedValue({
+      success: true,
+      limit: 200,
+      remaining: 199,
+      reset: Date.now() + 60_000,
+    });
+  });
+
+  test("returns 429 when rate limit is exceeded", async () => {
+    mockCheckRateLimit.mockResolvedValueOnce({
+      success: false,
+      limit: 200,
+      remaining: 0,
+      reset: Date.now() + 60_000,
+    });
+
+    const response = await GET(makeAuthedRequest(VALID_UUID));
+    expect(response.status).toBe(429);
+    const body = await parseJson(response);
+    expect(body).toEqual({ error: "Rate limit exceeded" });
+    expect(mockDispatchById).toHaveBeenCalledTimes(0);
   });
 
   test("returns 401 without valid auth", async () => {

@@ -3,6 +3,7 @@ import { CronTriggerSource } from "@/backend/enum/cron/cron.enums";
 import { withCronAuth } from "@/backend/lib/cron-auth";
 import { DomainError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
+import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
 import { CronService, extractLocale, formatError, getCronErrorT } from "@/backend/services";
 
 /**
@@ -19,6 +20,13 @@ import { CronService, extractLocale, formatError, getCronErrorT } from "@/backen
 export const maxDuration = 300;
 
 export const GET = withCronAuth(async (request: NextRequest) => {
+  const ip = getClientIdentifier(request);
+  const rateLimit = await checkRateLimit(`cron-execute:${ip}`, apiRateLimiter, { failOpen: false });
+  if (!rateLimit.success) {
+    logger.warn("cron.execute.rate_limited", { ip });
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   const scheduleId = request.nextUrl.searchParams.get("scheduleId");
 
   const locale = extractLocale(request);
