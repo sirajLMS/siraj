@@ -7,12 +7,47 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
  * (and any future shared components) can reuse them.
  */
 
+/** Module-level cached Intl.NumberFormat instance for money formatting to avoid ICU re-instantiation. */
+const accountingMoneyFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** Module-level Intl.DateTimeFormat caches keyed by resolved locale tag. */
+const accountingDateDtfCache = new Map<string, Intl.DateTimeFormat>();
+const accountingMonthDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getAccountingDateDtf(localeTag: string): Intl.DateTimeFormat {
+  let dtf = accountingDateDtfCache.get(localeTag);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(localeTag, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    accountingDateDtfCache.set(localeTag, dtf);
+  }
+  return dtf;
+}
+
+function getAccountingMonthDtf(localeTag: string): Intl.DateTimeFormat {
+  let dtf = accountingMonthDtfCache.get(localeTag);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(localeTag, {
+      month: "short",
+      year: "numeric",
+    });
+    accountingMonthDtfCache.set(localeTag, dtf);
+  }
+  return dtf;
+}
+
 /** "25000.00" → "25,000.00" (grouped, no currency symbol — currency renders beside). */
 export function formatAccountingMoney(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const numeric = typeof value === "string" ? Number(value) : value;
   if (Number.isNaN(numeric)) return String(value);
-  return numeric.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return accountingMoneyFormatter.format(numeric);
 }
 
 /** ISO DateTime / date → localized short date (locale-safe for AR via Intl). */
@@ -63,11 +98,7 @@ export function formatAccountingDate(value: string | null | undefined, locale: s
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(resolveAccountingDateLocale(locale), {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return getAccountingDateDtf(resolveAccountingDateLocale(locale)).format(date);
 }
 
 /**
@@ -80,7 +111,7 @@ export function formatAccountingMonth(value: string | null | undefined, locale: 
   const match = /^(\d{4})-(\d{2})$/.exec(value);
   const date = match === null ? null : new Date(Number(match[1]), Number(match[2]) - 1, 1);
   if (date === null || Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(resolveAccountingDateLocale(locale), { month: "short", year: "numeric" });
+  return getAccountingMonthDtf(resolveAccountingDateLocale(locale)).format(date);
 }
 
 /**
