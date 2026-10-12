@@ -1,7 +1,7 @@
 "use client";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Box, Grid, IconButton, InputAdornment, TextField } from "@mui/material";
+import { Box, Grid, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { type Control, Controller, type FieldErrors, type Path, useWatch } from "react-hook-form";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
@@ -246,15 +246,17 @@ export function OnboardingPasswordField<T extends OnboardingFields>({
                 input: {
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => {
-                          setShowPassword(!showPassword);
-                        }}
-                        edge="end"
-                        aria-label={showPassword ? labels.validation.hidePassword : labels.validation.showPassword}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
+                      <Tooltip title={showPassword ? labels.validation.hidePassword : labels.validation.showPassword}>
+                        <IconButton
+                          onClick={() => {
+                            setShowPassword(!showPassword);
+                          }}
+                          edge="end"
+                          aria-label={showPassword ? labels.validation.hidePassword : labels.validation.showPassword}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </Tooltip>
                     </InputAdornment>
                   ),
                 },
