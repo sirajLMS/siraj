@@ -72,7 +72,9 @@ function WeekDayColumn({ dayClasses, locale, defaultSubject }: DayColumnProps) {
       ))}
       {dayClasses.map(cls => {
         const startDate = new Date(cls.scheduledStartAt);
-        const hourIndex = HOURS.indexOf(startDate.getHours());
+        const startHour = startDate.getHours();
+        // O(1) hour grid index lookup instead of O(N) linear array scan on HOURS [7..22]
+        const hourIndex = startHour >= 7 && startHour <= 22 ? startHour - 7 : -1;
         if (hourIndex === -1) return null;
         return (
           <Box key={cls.id} sx={{ position: "absolute", top: hourIndex * 60 + 2, left: 2, right: 2, zIndex: 1 }}>

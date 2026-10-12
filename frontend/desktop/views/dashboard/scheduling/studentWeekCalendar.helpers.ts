@@ -14,8 +14,22 @@ const WEEKDAY_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { weekday: "short" };
 // to light/dark themes.
 export const gridLineColor = (theme: Theme) => alpha(theme.palette.text.primary, 0.08);
 
+/**
+ * Cache of formatted hour strings keyed by `${latnLocaleTag}:${hour}`.
+ * Instantiating `new Date` and formatting hour strings on every grid render
+ * creates unnecessary GC pressure and CPU overhead.
+ */
+const hourFormatCache = new Map<string, string>();
+
 export function formatHour(hour: number, locale: string): string {
-  return getDateTimeFormatter(getLatnLocaleTag(locale), HOUR_NUMERIC_OPTIONS).format(new Date(0, 0, 0, hour));
+  const latnTag = getLatnLocaleTag(locale);
+  const cacheKey = `${latnTag}:${hour}`;
+  let formatted = hourFormatCache.get(cacheKey);
+  if (!formatted) {
+    formatted = getDateTimeFormatter(latnTag, HOUR_NUMERIC_OPTIONS).format(new Date(0, 0, 0, hour));
+    hourFormatCache.set(cacheKey, formatted);
+  }
+  return formatted;
 }
 
 export function createWeekdayFormatter(locale: string): Intl.DateTimeFormat {
