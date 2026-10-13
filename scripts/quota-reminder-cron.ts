@@ -19,6 +19,14 @@ const WINDOW_HOURS = 12;
 /** Maximum number of reminder candidates to fetch per window (unbounded SELECT guard). */
 const MAX_REMINDER_CANDIDATES_PER_WINDOW = 500;
 
+/** Module-level cached `Intl.DateTimeFormat` for UTC YYYY-MM-DD formatting to avoid CPU/GC overhead. */
+const utcDateDtf = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "UTC",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 interface ReminderCandidate {
   instanceId: string;
   studentId: string;
@@ -191,15 +199,8 @@ async function fetchReminderCandidates(
   // 3. Build candidates with idempotency keys keyed by tier + date + instance.
   // V3-007: Use DST-safe calendar-day construction via Intl.DateTimeFormat so
   // the date string is resolved in UTC (not server-local time), avoiding
-  // DST boundaries that could shift the calendar day.
-  const dateStr = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
-    .format(windowStart)
-    .replace(/\//g, "-");
+  // DST boundaries that could shift the calendar day. Reuses cached utcDateDtf instance.
+  const dateStr = utcDateDtf.format(windowStart).replace(/\//g, "-");
 
   // Key format: odr_{tier}_{date}_{instanceId} — stays well under 100 chars.
   const reminderKeyPrefix = `odr_${tier}_${dateStr}`;
