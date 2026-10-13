@@ -10,6 +10,7 @@ export interface SearchBarFieldProps {
   readonly searchingLabel?: string;
   readonly isSearching?: boolean;
   readonly onChange: (value: string) => void;
+  readonly onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
   readonly sx?: SxProps<Theme>;
   readonly clearLabel?: string;
   /** Cap mirrored onto the native input's maxLength when the consumer enforces one. */
@@ -28,6 +29,7 @@ export function SearchBarField({
   searchingLabel,
   isSearching = false,
   onChange,
+  onKeyDown,
   sx,
   clearLabel = "Clear search",
   maxLength,
@@ -39,6 +41,13 @@ export function SearchBarField({
       value={value}
       onChange={event => {
         onChange(event.target.value);
+      }}
+      onKeyDown={event => {
+        if (event.key === "Escape" && value) {
+          event.stopPropagation();
+          onChange("");
+        }
+        onKeyDown?.(event);
       }}
       placeholder={placeholder}
       helperText={isSearching ? searchingLabel : undefined}
