@@ -14,10 +14,13 @@ import type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/st
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { StudentHistoryLabels } from "@/shared/locale";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 interface HistoryHeaderProps {
   readonly studentName: string;
@@ -104,7 +107,8 @@ export function StudentHistoryDesktopView({
 }: Readonly<StudentHistoryViewModel>) {
   const t = labels;
   const { canView } = useStudentFieldAccess();
-  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
+  // Cache Intl.DateTimeFormat via getDateTimeFormatter to avoid expensive ICU / DateTimeFormat instantiation on every render
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(currentMonth);
   const yearStr = currentMonth.getFullYear();
 
   const canGoPrev = !enrollmentMonth || currentMonth > enrollmentMonth;

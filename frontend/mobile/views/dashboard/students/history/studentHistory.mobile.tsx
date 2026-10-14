@@ -13,8 +13,11 @@ import { HistoryMobileMetricsGrid } from "@/frontend/mobile/views/dashboard/stud
 import { HistoryMobileActions } from "@/frontend/mobile/views/dashboard/students/history/components/historyMonthActions.mobile";
 import { MobileWeeklyScroller } from "@/frontend/mobile/views/dashboard/students/history/components/mobileWeeklyScroller.mobile";
 import { PerformanceStreakMobile } from "@/frontend/mobile/views/dashboard/students/history/components/performanceStreak.mobile";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { deriveStreakDays } from "@/frontend/mobile/views/dashboard/students/history/studentHistory.helpers";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 export function StudentHistoryMobileView({
   studentName,
@@ -35,7 +38,8 @@ export function StudentHistoryMobileView({
   labels,
 }: Readonly<StudentHistoryViewModel>) {
   const { canView } = useStudentFieldAccess();
-  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
+  // Cache Intl.DateTimeFormat via getDateTimeFormatter to avoid expensive ICU / DateTimeFormat instantiation on every render
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(currentMonth);
 
   const selectedDaySessions: ClassSession[] = useMemo(() => {
     if (selectedDay === null) return [];

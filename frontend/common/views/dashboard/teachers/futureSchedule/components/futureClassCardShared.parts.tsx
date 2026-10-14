@@ -8,9 +8,13 @@ import type {
   FutureClassCardSlots,
   FutureClassCardStyleProps,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types/futureClassCardShared.types";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
+
+const MONTH_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { month: "short" };
 
 interface DateSquareProps {
   readonly date: string;
@@ -21,7 +25,8 @@ export function DateSquare({ date, isRescheduled }: Readonly<DateSquareProps>) {
   const locale = useAppLocale();
   const dateObj = new Date(date);
   const dayNum = dateObj.getDate();
-  const monthStr = dateObj.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { month: "short" });
+  // Cache Intl.DateTimeFormat via getDateTimeFormatter to avoid expensive ICU / DateTimeFormat instantiation on every render
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_SHORT_OPTIONS).format(dateObj);
 
   return (
     <Box

@@ -11,8 +11,12 @@ import {
   useViewingMonth,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/hooks/useMiniCalendar.hooks";
 import type { MiniCalendarProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppLocale } from "@/shared/locale";
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 export type MiniCalendarCardComponent = ComponentType<{
   readonly sx?: object;
@@ -44,7 +48,10 @@ export function MiniCalendarShared({
   const locale = useAppLocale();
   const [{ year, month }, shiftMonth] = useViewingMonth(selectedDate);
   const dates = getCalendarGrid(year, month, classDates, selectedDate);
-  const monthName = new Date(year, month).toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { month: "long" });
+  // Cache Intl.DateTimeFormat via getDateTimeFormatter to avoid expensive ICU / DateTimeFormat instantiation on every render
+  const monthName = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(
+    new Date(year, month)
+  );
   const weekdayLabels = buildWeekdayLabels(labels);
 
   const handleDateClick = (num: number, muted?: boolean) => {

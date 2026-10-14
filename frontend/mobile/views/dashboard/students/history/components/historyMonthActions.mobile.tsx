@@ -7,8 +7,11 @@ import {
   type MonthNavigatorMonthDisplayProps,
   MonthNavigatorShared,
 } from "@/frontend/common/views/dashboard/students/history/components/__shared__";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 function MobileMonthDisplay({ monthStr, yearStr }: Readonly<MonthNavigatorMonthDisplayProps>) {
   return (
@@ -47,7 +50,8 @@ export function HistoryMobileActions({
 }>) {
   const t = useStudentHistoryLabels();
   const locale = useAppLocale();
-  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
+  // Cache Intl.DateTimeFormat via getDateTimeFormatter to avoid expensive ICU / DateTimeFormat instantiation on every render
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(currentMonth).toUpperCase();
   const yearStr = currentMonth.getFullYear();
 
   return (

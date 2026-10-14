@@ -5,9 +5,13 @@ import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { TeacherAvailabilityMonthDrawerSlotProps } from "@/frontend/common/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawerShared.types";
 import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboard/search-schedule/types";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { shiftMonth } from "@/frontend/common/views/dashboard/search-schedule/utils";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppLocale } from "@/shared/locale";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 function getFlipSx(theme: Theme) {
   return {
@@ -58,7 +62,8 @@ export function MonthNavigator({
   readonly onMonthChange: (next: Date) => void;
 }) {
   const locale = useAppLocale();
-  const monthStr = currentMonth.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { month: "long" });
+  // Cache Intl.DateTimeFormat via getDateTimeFormatter to avoid expensive ICU / DateTimeFormat instantiation on every render
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(currentMonth);
   const yearStr = currentMonth.getFullYear();
 
   return (
