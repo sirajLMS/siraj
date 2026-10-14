@@ -32,6 +32,14 @@ export function SearchBarField({
   clearLabel = "Clear search",
   maxLength,
 }: Readonly<SearchBarFieldProps>) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape" && value) {
+      event.preventDefault();
+      event.stopPropagation();
+      onChange("");
+    }
+  };
+
   return (
     <TextField
       fullWidth
@@ -63,6 +71,7 @@ export function SearchBarField({
         htmlInput: {
           "aria-label": placeholder,
           autoComplete: "off",
+          onKeyDown: handleKeyDown,
           ...(maxLength === undefined ? null : { maxLength }),
         },
       }}
