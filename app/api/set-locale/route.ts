@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ALLOWED_ORIGINS, resolveTrustedOrigin } from "@/backend/lib";
 import { getEnvironmentConfig } from "@/backend/lib/env";
+import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
 import { getServerTranslations } from "@/shared/locale";
 import { isRelativeSafePath } from "@/shared/lib/safe-path";
 import { locales } from "@/shared/locale/AppLocale";
@@ -59,6 +60,12 @@ export async function GET(request: NextRequest) {
   const locale = resolveLocaleFromRequest(request);
   const tErrors = getServerTranslations(locale).errorsTranslations;
 
+  const ip = getClientIdentifier(request);
+  const rateLimit = await checkRateLimit(`set-locale:${ip}`, apiRateLimiter);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: tErrors.auth.tooManyLoginAttempts }, { status: 429 });
+  }
+
   // Same origin guard as POST — the full-navigation redirect must not be
   // triggerable from a hostile origin.
   if (!isAllowedOrigin(request)) {
@@ -80,6 +87,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const locale = resolveLocaleFromRequest(request);
   const tErrors = getServerTranslations(locale).errorsTranslations;
+
+  const ip = getClientIdentifier(request);
+  const rateLimit = await checkRateLimit(`set-locale:${ip}`, apiRateLimiter);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: tErrors.auth.tooManyLoginAttempts }, { status: 429 });
+  }
 
   try {
     if (!isAllowedOrigin(request)) {

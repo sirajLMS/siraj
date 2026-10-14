@@ -1,6 +1,20 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
-import { GET as setLocaleGET } from "@/app/api/set-locale/route";
+
+const mockCheckRateLimit = mock(async () => ({
+  success: true,
+  limit: 100,
+  remaining: 99,
+  reset: Date.now() + 60_000,
+}));
+
+mock.module("@/backend/lib/ratelimit", () => ({
+  apiRateLimiter: {},
+  checkRateLimit: mockCheckRateLimit,
+  getClientIdentifier: () => "127.0.0.1",
+}));
+
+import { GET as setLocaleGET, POST as setLocalePOST } from "@/app/api/set-locale/route";
 import { GET as logoutGET } from "@/app/logout/route";
 
 const BASE_URL = "http://localhost:3000";
@@ -53,6 +67,39 @@ describe("Host Header Injection Defense in Redirects", () => {
         setLocaleRequest({ origin: BASE_URL, host: "localhost:3000", "x-forwarded-proto": "javascript" })
       );
       assertRedirect(res, `${BASE_URL}/dashboard`);
+    });
+
+    test("returns 429 when rate limit is exceeded for GET", async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        success: false,
+        limit: 100,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      });
+      const res = await setLocaleGET(setLocaleRequest({ origin: BASE_URL }));
+      expect(res.status).toBe(429);
+      const data = await res.json();
+      expect(data.error).toBeDefined();
+    });
+  });
+
+  describe("POST /api/set-locale", () => {
+    test("returns 429 when rate limit is exceeded for POST", async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        success: false,
+        limit: 100,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      });
+      const req = new NextRequest(`${BASE_URL}/api/set-locale`, {
+        method: "POST",
+        headers: { origin: BASE_URL, "content-type": "application/json" },
+        body: JSON.stringify({ locale: "en" }),
+      });
+      const res = await setLocalePOST(req);
+      expect(res.status).toBe(429);
+      const data = await res.json();
+      expect(data.error).toBeDefined();
     });
   });
 
