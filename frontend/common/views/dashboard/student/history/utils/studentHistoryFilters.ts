@@ -34,10 +34,34 @@ export function filterHistorySessions(
   });
 }
 
+/**
+ * PERF OPTIMIZATION: Single-pass Set population replaces chained `.map()`, `.filter(Boolean)`,
+ * spread `[...]`, and `.toSorted()`. This eliminates 3 intermediate array allocations and
+ * redundant array passes per call during filter dropdown option computation.
+ */
 export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.title).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
+  const subjects = new Set<string>();
+  for (let i = 0; i < sessions.length; i++) {
+    const title = sessions[i].title;
+    if (title) {
+      subjects.add(title);
+    }
+  }
+  return Array.from(subjects).sort((a, b) => a.localeCompare(b));
 }
 
+/**
+ * PERF OPTIMIZATION: Single-pass Set population replaces chained `.map()`, `.filter(Boolean)`,
+ * spread `[...]`, and `.toSorted()`. This eliminates 3 intermediate array allocations and
+ * redundant array passes per call during filter dropdown option computation.
+ */
 export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.status).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
+  const statuses = new Set<string>();
+  for (let i = 0; i < sessions.length; i++) {
+    const status = sessions[i].status;
+    if (status) {
+      statuses.add(status);
+    }
+  }
+  return Array.from(statuses).sort((a, b) => a.localeCompare(b));
 }
