@@ -40,6 +40,13 @@ export function SearchBarField({
       onChange={event => {
         onChange(event.target.value);
       }}
+      onKeyDown={event => {
+        if (event.key === "Escape" && value) {
+          event.preventDefault();
+          event.stopPropagation();
+          onChange("");
+        }
+      }}
       placeholder={placeholder}
       helperText={isSearching ? searchingLabel : undefined}
       sx={sx}
@@ -53,7 +60,15 @@ export function SearchBarField({
           endAdornment: value ? (
             <InputAdornment position="end">
               <Tooltip title={clearLabel}>
-                <IconButton size="small" aria-label={clearLabel} onClick={() => onChange("")} edge="end">
+                <IconButton
+                  size="small"
+                  aria-label={clearLabel}
+                  onClick={event => {
+                    event.stopPropagation();
+                    onChange("");
+                  }}
+                  edge="end"
+                >
                   <ClearOutlined fontSize="small" />
                 </IconButton>
               </Tooltip>
