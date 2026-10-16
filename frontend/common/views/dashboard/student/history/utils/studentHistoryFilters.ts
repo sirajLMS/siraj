@@ -34,10 +34,36 @@ export function filterHistorySessions(
   });
 }
 
+/**
+ * Returns sorted unique non-empty subject titles for session filter dropdowns.
+ *
+ * Performance optimization: Single-pass loop populates a `Set` directly to eliminate
+ * intermediate array allocations from `.map()`, `.filter()`, and array spread before sorting.
+ */
 export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.title).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
+  const set = new Set<string>();
+  for (let i = 0; i < sessions.length; i++) {
+    const title = sessions[i].title;
+    if (title) {
+      set.add(title);
+    }
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
+/**
+ * Returns sorted unique non-empty session statuses for filter dropdowns.
+ *
+ * Performance optimization: Single-pass loop populates a `Set` directly to eliminate
+ * intermediate array allocations from `.map()`, `.filter()`, and array spread before sorting.
+ */
 export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.status).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
+  const set = new Set<string>();
+  for (let i = 0; i < sessions.length; i++) {
+    const status = sessions[i].status;
+    if (status) {
+      set.add(status);
+    }
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
