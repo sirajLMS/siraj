@@ -243,4 +243,10 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     expect(src).toContain("getClientIdentifier");
     expect(src).toContain("sanitizeIpAddress");
   });
+
+  test("oauth callback handler validates state parameter format with compact JWT regex", async () => {
+    const src = await readSrc("app/api/oauth/shared/oauth-callback-handler.ts");
+    expect(src).toContain("OAUTH_STATE_JWT_REGEX");
+    expect(src).toContain("OAUTH_STATE_JWT_REGEX.test(state)");
+  });
 });

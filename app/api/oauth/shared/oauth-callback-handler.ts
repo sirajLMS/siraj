@@ -21,14 +21,16 @@ import { logger } from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, oauthCallbackRateLimiter } from "@/backend/lib/ratelimit";
 import { buildCallbackRedirectUri, MeetingOAuthService, verifyAndConsumeOAuthState } from "@/backend/services";
 import type { OAuthCallbackConfig } from "@/backend/types";
-
-import { getServerTranslations } from "@/shared/locale";
 import { isRelativeSafePath } from "@/shared/lib/safe-path";
+import { getServerTranslations } from "@/shared/locale";
 
 // Re-export the config type so the three route files that import it from this
 // module continue to work without changing their import paths.
 
 ensureEnvironmentValidated();
+
+/** Compact JWT format regex (header.payload.signature) for fast-failing malformed state inputs. */
+const OAUTH_STATE_JWT_REGEX = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/;
 
 /**
  * Runs the full OAuth callback GET flow for a single provider and returns the
@@ -66,6 +68,10 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
 
   if (!code || !state) {
     return NextResponse.json({ error: tErrors.missingCodeOrState }, { status: 400 });
+  }
+
+  if (!OAUTH_STATE_JWT_REGEX.test(state)) {
+    return NextResponse.json({ error: tErrors.invalidOrExpiredOAuthState }, { status: 400 });
   }
 
   const statePayload = await verifyAndConsumeOAuthState(state, request.cookies.get("session_id")?.value);
