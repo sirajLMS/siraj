@@ -36,47 +36,49 @@ export interface QuotaInsightsMetricsData {
   readonly pendingBacklogCount: number;
 }
 
-function filterByDateRange(quotas: QuotaItem[], dateRange: InsightsDateRange): QuotaItem[] {
-  if (dateRange === "all") return quotas;
-  const now = new Date();
-  const cutoff = new Date(now);
-  switch (dateRange) {
-    case "month":
-      cutoff.setMonth(now.getMonth() - 1);
-      break;
-    case "quarter":
-      cutoff.setMonth(now.getMonth() - 3);
-      break;
-    case "year":
-      cutoff.setFullYear(now.getFullYear() - 1);
-      break;
-  }
-  return quotas.filter(q => {
-    const d = q.createdAt ? new Date(q.createdAt) : null;
-    return d !== null && d >= cutoff;
-  });
-}
-
-function filterByKind(quotas: QuotaItem[], kind: QuotaKind | null): QuotaItem[] {
-  if (!kind) return quotas;
-  return quotas.filter(q => q.kind === kind);
-}
-
-function filterByStatus(quotas: QuotaItem[], status: QuotaStatus | null): QuotaItem[] {
-  if (!status) return quotas;
-  return quotas.filter(q => q.status === status);
-}
-
-function filterByStudentId(quotas: QuotaItem[], studentId: string | null): QuotaItem[] {
-  if (!studentId) return quotas;
-  return quotas.filter(q => q.studentId === studentId);
-}
-
+/**
+ * Single-pass O(N) filter function for quota insights.
+ * Combines dateRange, kind, status, and studentId checks into a single loop,
+ * using numeric epoch ms comparisons (`Date.parse()`) and fast-path returning
+ * original array when no filters are active.
+ */
 export function applyInsightsFilters(quotas: QuotaItem[], filters: QuotaInsightsFilters): QuotaItem[] {
-  return filterByStudentId(
-    filterByStatus(filterByKind(filterByDateRange(quotas, filters.dateRange), filters.kind), filters.status),
-    filters.studentId
-  );
+  const { dateRange, kind, status, studentId } = filters;
+
+  if (dateRange === "all" && !kind && !status && !studentId) {
+    return quotas;
+  }
+
+  let cutoffMs = 0;
+  if (dateRange !== "all") {
+    const now = new Date();
+    switch (dateRange) {
+      case "month":
+        now.setMonth(now.getMonth() - 1);
+        break;
+      case "quarter":
+        now.setMonth(now.getMonth() - 3);
+        break;
+      case "year":
+        now.setFullYear(now.getFullYear() - 1);
+        break;
+    }
+    cutoffMs = now.getTime();
+  }
+
+  const result: QuotaItem[] = [];
+  for (const q of quotas) {
+    if (kind && q.kind !== kind) continue;
+    if (status && q.status !== status) continue;
+    if (studentId && q.studentId !== studentId) continue;
+    if (dateRange !== "all") {
+      if (!q.createdAt) continue;
+      const createdMs = Date.parse(q.createdAt);
+      if (Number.isNaN(createdMs) || createdMs < cutoffMs) continue;
+    }
+    result.push(q);
+  }
+  return result;
 }
 
 export function buildChartData(
