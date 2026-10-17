@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 type DateInput = Date | string | number;
@@ -98,15 +97,19 @@ function createFormatFunction(
     formatWithFallback(date, locale, options, fallback);
 }
 
-const ISO_DATE_FORMAT = "yyyy-MM-dd";
-
 /**
  * Formats a `Date` (or null) as an ISO calendar date (`YYYY-MM-DD`) for date
  * input/picker state; returns an empty string when the value is invalid.
  */
 export function formatDateInput(date: Date | null): string {
   const parsed = parseDateInput(date);
-  return parsed ? format(parsed, ISO_DATE_FORMAT) : "";
+  if (!parsed) {
+    return "";
+  }
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 /**

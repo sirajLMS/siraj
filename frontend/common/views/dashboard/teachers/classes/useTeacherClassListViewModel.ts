@@ -7,6 +7,9 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useRouter } from "@/shared/i18n/navigation";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import { formatClassSchedule } from "./formatClassSchedule";
+
+export { formatClassSchedule };
 
 /**
  * TeacherClassList ViewModel.
@@ -63,35 +66,6 @@ interface TeacherClassListLabels {
 
 export type UseTeacherClassListViewModelProps = Record<string, never>;
 
-/** Formats a class's scheduled start/end timestamps as a localized range. */
-export function formatClassSchedule(
-  scheduledStartAt: string | null | undefined,
-  scheduledEndAt: string | null | undefined,
-  locale: string
-): string {
-  if (!scheduledStartAt) {
-    return "";
-  }
-  const start = new Date(scheduledStartAt);
-  const datePart = start.toLocaleDateString(locale, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-  const timePart = start.toLocaleTimeString(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  if (!scheduledEndAt) {
-    return `${datePart} · ${timePart}`;
-  }
-  const end = new Date(scheduledEndAt);
-  const endTime = end.toLocaleTimeString(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${datePart} · ${timePart} – ${endTime}`;
-}
 
 /** Shared helper exposed to tier views so they don't compute this inline. */
 export function isRowJoinable(row: TeacherClassRow): boolean {

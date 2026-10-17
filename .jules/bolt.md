@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-10 - Optimizing class schedule formatting with Intl cache and native date parsing
+
+**Learning:** In class list views, `formatClassSchedule` called `toLocaleDateString` and `toLocaleTimeString` 2-3 times per row, creating up to 150 `Intl.DateTimeFormat` instances per 50-row render pass. In addition, `dateFormat.ts` imported `date-fns` for basic ISO date string formatting.
+**Action:** Route schedule formatting through `@/frontend/common/components/intl/dateFormat`'s `getDateTimeFormatter` with module-level options to hit the dual-tier `WeakMap` cache, and replace `date-fns` with native date methods in `formatDateInput`.
