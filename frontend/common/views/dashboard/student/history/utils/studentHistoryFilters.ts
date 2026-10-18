@@ -34,10 +34,32 @@ export function filterHistorySessions(
   });
 }
 
+/**
+ * Single-pass extraction of unique subject titles to prevent intermediate array allocations
+ * (`.map()`, `.filter()`, and array spread into `Set`).
+ */
 export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.title).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
+  const set = new Set<string>();
+  for (let i = 0; i < sessions.length; i += 1) {
+    const title = sessions[i].title;
+    if (title) {
+      set.add(title);
+    }
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
+/**
+ * Single-pass extraction of unique session statuses to prevent intermediate array allocations
+ * (`.map()`, `.filter()`, and array spread into `Set`).
+ */
 export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
-  return [...new Set(sessions.map(s => s.status).filter(Boolean))].toSorted((a, b) => a.localeCompare(b));
+  const set = new Set<string>();
+  for (let i = 0; i < sessions.length; i += 1) {
+    const status = sessions[i].status;
+    if (status) {
+      set.add(status);
+    }
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
