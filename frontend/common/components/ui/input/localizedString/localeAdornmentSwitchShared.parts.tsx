@@ -7,7 +7,7 @@ import type { LocaleEmojiComponentProps } from "@/frontend/common/components/ui/
 import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale";
 import type { AppLocale } from "@/shared/i18n/routing";
 
-const BaseLanguageOption = styled(Box, {
+const BaseLanguageOption = styled("li", {
   shouldForwardProp: prop => prop !== "isSelected" && prop !== "isLastItem",
 })<{ readonly isSelected: boolean; readonly isLastItem: boolean }>(({ theme, isSelected, isLastItem }) => ({
   cursor: "pointer",
@@ -22,6 +22,10 @@ const BaseLanguageOption = styled(Box, {
   gap: theme.spacing(1.5),
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
+  },
+  "&:focus-visible": {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: "-2px",
   },
 }));
 
@@ -52,10 +56,17 @@ export function LocaleList({
         return (
           <BaseLanguageOption
             key={language.code}
-            aria-selected={isSelected}
+            tabIndex={0}
+            aria-current={isSelected ? "true" : undefined}
             isSelected={isSelected}
             isLastItem={isLastItem}
             onClick={() => onPick(language.code)}
+            onKeyDown={event => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onPick(language.code);
+              }
+            }}
             sx={optionSx}
           >
             <LocaleEmoji emoji={language.emoji} />
