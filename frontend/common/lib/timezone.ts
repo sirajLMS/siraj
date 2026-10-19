@@ -97,6 +97,10 @@ function getTimezoneOffsetMs(timeZone: string, date: Date): number {
 }
 
 function normalizeIanaTimezoneId(value: string): string {
+  // Fast path: canonical timezone keys skip string replacement and excluded checks
+  if (IANA_TIMEZONE_SET.has(value)) {
+    return value;
+  }
   const slashNormalized = value.includes("/") ? value : value.replaceAll("_", "/");
   return resolveExcludedIanaTimezoneId(slashNormalized);
 }
@@ -136,12 +140,18 @@ function getTimezoneTerritoryCode(ianaTimezone: string): string | null {
   return resolveUiCountryCode(IANA_TIMEZONE_TERRITORY_CODES_MAP[normalizedTimezone] ?? null);
 }
 
+/** Cache country flag emoji lookups per timezone ID to eliminate repeated country catalog searches */
+const timezoneEmojiCache = new Map<string, string>();
+
 export function getTimezoneEmoji(ianaTimezone: string): string {
-  const territoryCode = getTimezoneTerritoryCode(ianaTimezone);
-  if (!territoryCode) {
-    return GLOBE_EMOJI;
+  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
+  let emoji = timezoneEmojiCache.get(normalizedTimezone);
+  if (!emoji) {
+    const territoryCode = getTimezoneTerritoryCode(normalizedTimezone);
+    emoji = !territoryCode ? GLOBE_EMOJI : (getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI);
+    timezoneEmojiCache.set(normalizedTimezone, emoji);
   }
-  return getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI;
+  return emoji;
 }
 
 export function formatOffsetFromMinutes(offsetMinutes: number): string {
@@ -174,13 +184,33 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
   return formatOffsetFromMinutes(getTimezoneOffsetMinutes(ianaTimezone, date));
 }
 
+/**
+ * Cache timezone offset minutes per minute timestamp to eliminate repeated Intl formatting
+ * during batch operations (e.g., generating options for ~420 timezones).
+ * Automatically clears when minuteTs changes to prevent memory leaks across long sessions.
+ */
+let currentCachedMinuteTs = -1;
+const offsetMinutesCache = new Map<string, number>();
+
 function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
-  try {
-    return Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
-  } catch {
-    return 0;
+  const minuteTs = Math.floor(date.getTime() / 60000);
+
+  if (minuteTs !== currentCachedMinuteTs) {
+    offsetMinutesCache.clear();
+    currentCachedMinuteTs = minuteTs;
   }
+
+  let cached = offsetMinutesCache.get(normalizedTimezone);
+  if (cached === undefined) {
+    try {
+      cached = Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
+    } catch {
+      cached = 0;
+    }
+    offsetMinutesCache.set(normalizedTimezone, cached);
+  }
+  return cached;
 }
 
 export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, date = new Date()): string {
@@ -198,13 +228,18 @@ const arCollator = new Intl.Collator("ar");
 
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
   const collator = locale === "ar" ? arCollator : enCollator;
-  return IANA_TIMEZONE_IDS_STRINGS.map(id => {
+  const len = IANA_TIMEZONE_IDS_STRINGS.length;
+  // Pre-allocate result array to eliminate map allocation overhead
+  const options: TimezoneOption[] = new Array(len);
+
+  for (let i = 0; i < len; i++) {
+    const id = IANA_TIMEZONE_IDS_STRINGS[i];
     const pathLabel = getTimezonePathLabel(id, locale);
     // Compute the offset once per timezone and derive the label from it
     const offsetMinutes = getTimezoneOffsetMinutes(id, date);
     const offsetLabel = formatOffsetFromMinutes(offsetMinutes);
     const timezoneId = toIanaTimezone(id);
-    return {
+    options[i] = {
       id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
       pathLabel,
@@ -212,7 +247,10 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
       offsetMinutes,
       emoji: getTimezoneEmoji(id),
     };
-  }).toSorted((left, right) => {
+  }
+
+  // In-place sort avoids array copy allocation from .toSorted()
+  return options.sort((left, right) => {
     if (left.offsetMinutes !== right.offsetMinutes) {
       return left.offsetMinutes - right.offsetMinutes;
     }
