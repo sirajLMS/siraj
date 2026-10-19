@@ -39,13 +39,20 @@ const STATUS_PREDICATES: Record<SessionAuditStatus, SQL> = {
 const KNOWN_STATUSES: readonly SessionAuditStatus[] = ["open", "end", "Absent", "absent_student"];
 
 /**
- * Resolves a raw status string against the predicate-key registry. Values the
+ * Module-level O(1) Map lookup for mapping candidate status strings to predicate keys.
+ * Performance optimization: Replaces linear `KNOWN_STATUSES.find(...)` scans on every status lookup.
+ */
+const PREDICATE_KEY_MAP = new Map<string, SessionAuditStatus>(
+  KNOWN_STATUSES.map(status => [STATUS_TO_PREDICATE_KEY[status], status])
+);
+
+/**
+ * Resolves a raw status string against the predicate-key registry in O(1) time. Values the
  * registry does not know fall back to the open predicate, mirroring the
  * mapper's catch-all classification of unmatched rows.
  */
 function toPredicateKey(candidate: string): SessionAuditStatus {
-  const known = KNOWN_STATUSES.find(status => STATUS_TO_PREDICATE_KEY[status] === candidate);
-  return known ?? "open";
+  return PREDICATE_KEY_MAP.get(candidate) ?? "open";
 }
 
 /**
@@ -57,15 +64,27 @@ function toPredicateKey(candidate: string): SessionAuditStatus {
  * URL query parameters for the export route), so the parameter is typed as
  * raw strings and normalized here.
  *
+ * Performance optimization: Single-pass loop populates a `Set` directly, eliminating
+ * intermediate array allocations from `.map()` and array spread (`[...]`) before generating SQL fragments.
+ *
  * - Duplicate statuses collapse into one predicate.
  * - Unrecognized values fall back to the open predicate.
  * - An empty list matches every row; callers treat the absence of a status
  *   filter as "no filtering".
  */
 export function expandStatusesToSql(statuses: readonly string[]): SQL {
-  const uniqueStatuses = [...new Set(statuses.map(toPredicateKey))];
-  if (uniqueStatuses.length === 0) return sql`true`;
+  if (statuses.length === 0) return sql`true`;
 
-  const fragments = uniqueStatuses.map(status => sql`(${STATUS_PREDICATES[status]})`);
+  const uniqueStatuses = new Set<SessionAuditStatus>();
+  for (let i = 0; i < statuses.length; i++) {
+    uniqueStatuses.add(toPredicateKey(statuses[i]));
+  }
+
+  if (uniqueStatuses.size === 0) return sql`true`;
+
+  const fragments: SQL[] = [];
+  for (const status of uniqueStatuses) {
+    fragments.push(sql`(${STATUS_PREDICATES[status]})`);
+  }
   return sql.join(fragments, sql` OR `);
 }
