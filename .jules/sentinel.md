@@ -1,0 +1,4 @@
+## 2026-03-30 - Log Injection & Input Validation in Telemetry Ingestion
+**Vulnerability:** Client log ingestion (`POST /api/logs`) directly interpolated `entry.timestamp` and `entry.level` into log file output strings without newline or ANSI sanitization, enabling log line forgery and log injection. `isValidLogEntry` also lacked strict property primitive type checks.
+**Learning:** Even when message payload fields are sanitized, auxiliary header or metadata fields (`level`, `timestamp`, `caller`) passed in JSON API requests can serve as log injection vectors if interpolated raw into text log files.
+**Prevention:** Always pass all user-influenced fields in log line formatters through `sanitizeForRendering` (replacing newlines/CRLF with spaces and stripping ANSI escape codes), and strictly validate property types in type guards.

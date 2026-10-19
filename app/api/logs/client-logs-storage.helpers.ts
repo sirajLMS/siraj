@@ -80,9 +80,11 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
         buffer.nextSequence = entry.sequence;
       }
 
+      const sanitizedTimestamp = truncateLogField(entry.timestamp ? sanitizeForRendering(entry.timestamp) : "unknown");
+      const sanitizedLevel = truncateLogField(entry.level ? sanitizeForRendering(entry.level).toUpperCase() : "INFO");
       const sanitizedMessage = truncateLogField(sanitizeForRendering(entry.message));
       const sanitizedCaller = truncateLogField(entry.caller ? sanitizeForRendering(entry.caller) : "unknown");
-      const logLine = `[${entry.timestamp}] [${entry.level.toUpperCase()}] [SEQ:${entry.sequence}] [${sanitizedCaller}] ${sanitizedMessage}\n`;
+      const logLine = `[${sanitizedTimestamp}] [${sanitizedLevel}] [SEQ:${entry.sequence}] [${sanitizedCaller}] ${sanitizedMessage}\n`;
 
       await writeFile(logFilePath, logLine, { flag: "a" });
 

@@ -6,7 +6,6 @@ import {
   MAX_LOG_MESSAGE_LENGTH,
   SAFE_SESSION_ID_REGEX,
 } from "@/app/api/logs/client-logs.constants";
-import { CacheDbRepository } from "@/backend/db/repo";
 
 function endOfDay(date: Date): Date {
   const end = new Date(date);
@@ -24,6 +23,7 @@ function endOfDay(date: Date): Date {
 export async function checkDailyByteBudget(userId: string, batchBytes: number): Promise<boolean> {
   const key = `${DAILY_BYTES_CACHE_PREFIX}${userId}`;
   try {
+    const { CacheDbRepository } = await import("@/backend/db/repo/shared/cache.repository");
     const existing = await CacheDbRepository.get(key);
     const currentTotal = existing ? Number.parseInt(existing.value, 10) || 0 : 0;
     const newTotal = currentTotal + batchBytes;
@@ -56,7 +56,16 @@ export function isBatchLogRequest(value: unknown): value is BatchLogRequest {
 }
 
 export function isValidLogEntry(log: LogEntry): boolean {
-  return !!(log.sessionId && log.level && log.message && typeof log.sequence === "number");
+  return (
+    typeof log === "object" &&
+    log !== null &&
+    typeof log.sessionId === "string" &&
+    typeof log.level === "string" &&
+    typeof log.message === "string" &&
+    typeof log.sequence === "number" &&
+    (log.timestamp === undefined || typeof log.timestamp === "string") &&
+    (log.caller === undefined || typeof log.caller === "string")
+  );
 }
 
 /**
