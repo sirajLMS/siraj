@@ -21,9 +21,8 @@ import { logger } from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, oauthCallbackRateLimiter } from "@/backend/lib/ratelimit";
 import { buildCallbackRedirectUri, MeetingOAuthService, verifyAndConsumeOAuthState } from "@/backend/services";
 import type { OAuthCallbackConfig } from "@/backend/types";
-
-import { getServerTranslations } from "@/shared/locale";
 import { isRelativeSafePath } from "@/shared/lib/safe-path";
+import { getServerTranslations } from "@/shared/locale";
 
 // Re-export the config type so the three route files that import it from this
 // module continue to work without changing their import paths.

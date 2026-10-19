@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { queryDb } from "@/backend/db";
 import { logger } from "@/backend/lib/logger";
-import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
+import { apiRateLimiter, checkRateLimit, getClientIdentifier, rateLimitLogId } from "@/backend/lib/ratelimit";
 
 /**
  * Lightweight database liveness probe consumed by the full-screen
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const ip = getClientIdentifier(request);
   const rateLimit = await checkRateLimit(`health-db:${ip}`, apiRateLimiter);
   if (!rateLimit.success) {
-    logger.warn(`DB health probe rate limit exceeded for ${ip}`);
+    logger.warn(`DB health probe rate limit exceeded for ${rateLimitLogId(ip)}`);
     return NextResponse.json({ status: "unavailable" }, { status: 429, headers: NO_STORE });
   }
 

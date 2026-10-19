@@ -1,9 +1,9 @@
-import crypto from "node:crypto";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { UploadType } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
-import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
+import { prepareUploadHelper } from "@/backend/storage/disk/shared/upload-operations.helper";
+import { STORAGE_CONFIG } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { type FileErrors, getServerTranslations } from "@/shared/locale";
@@ -15,22 +15,8 @@ export async function prepareUpload(
   ctx: GcpContext,
   input: Types.UploadPreparationInput
 ): Promise<Types.UploadPreparationResult> {
-  try {
-    logger.info("Preparing upload", {
-      path: input.path,
-      fileSize: input.fileSize,
-    });
-
-    const uploadErr = StorageUtils.validateUpload({
-      path: input.path,
-      size: input.fileSize,
-      contentType: input.contentType,
-    });
-    if (uploadErr) {
-      throw new StorageValidationError(uploadErr);
-    }
-
-    const file = ctx.bucket.file(input.path);
+  return prepareUploadHelper(input, async (sessionId, cleanedPath) => {
+    const file = ctx.bucket.file(cleanedPath);
 
     const result = await file.getSignedUrl({
       version: "v4",
@@ -40,30 +26,18 @@ export async function prepareUpload(
       contentMd5: input.contentHash,
     });
 
-    const signedUrl = result[0];
-
-    // Generate a unique ID for tracking this upload
-    const uploadId = crypto.randomUUID();
-
     logger.info("Prepared upload successfully", {
-      uploadId,
-      path: input.path,
+      uploadId: sessionId,
+      path: cleanedPath,
       uploadType: UploadType.SIGNED_URL,
     });
 
     return {
-      id: uploadId,
-      url: signedUrl,
+      id: sessionId,
+      url: result[0],
       uploadType: UploadType.SIGNED_URL,
     };
-  } catch (error) {
-    logger.error("Failed to prepare upload", {
-      path: input.path,
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    throw error;
-  }
+  });
 }
 
 /**

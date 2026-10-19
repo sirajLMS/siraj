@@ -36,47 +36,50 @@ export interface QuotaInsightsMetricsData {
   readonly pendingBacklogCount: number;
 }
 
-function filterByDateRange(quotas: QuotaItem[], dateRange: InsightsDateRange): QuotaItem[] {
-  if (dateRange === "all") return quotas;
+function insightsCutoffMs(dateRange: InsightsDateRange): number {
+  if (dateRange === "all") return 0;
   const now = new Date();
-  const cutoff = new Date(now);
   switch (dateRange) {
     case "month":
-      cutoff.setMonth(now.getMonth() - 1);
+      now.setMonth(now.getMonth() - 1);
       break;
     case "quarter":
-      cutoff.setMonth(now.getMonth() - 3);
+      now.setMonth(now.getMonth() - 3);
       break;
     case "year":
-      cutoff.setFullYear(now.getFullYear() - 1);
+      now.setFullYear(now.getFullYear() - 1);
       break;
   }
-  return quotas.filter(q => {
-    const d = q.createdAt ? new Date(q.createdAt) : null;
-    return d !== null && d >= cutoff;
-  });
+  return now.getTime();
 }
 
-function filterByKind(quotas: QuotaItem[], kind: QuotaKind | null): QuotaItem[] {
-  if (!kind) return quotas;
-  return quotas.filter(q => q.kind === kind);
+function matchesInsightsFilters(q: QuotaItem, filters: QuotaInsightsFilters, cutoffMs: number): boolean {
+  if (filters.kind && q.kind !== filters.kind) return false;
+  if (filters.status && q.status !== filters.status) return false;
+  if (filters.studentId && q.studentId !== filters.studentId) return false;
+  if (filters.dateRange !== "all") {
+    if (!q.createdAt) return false;
+    const createdMs = Date.parse(q.createdAt);
+    if (Number.isNaN(createdMs) || createdMs < cutoffMs) return false;
+  }
+  return true;
 }
 
-function filterByStatus(quotas: QuotaItem[], status: QuotaStatus | null): QuotaItem[] {
-  if (!status) return quotas;
-  return quotas.filter(q => q.status === status);
-}
-
-function filterByStudentId(quotas: QuotaItem[], studentId: string | null): QuotaItem[] {
-  if (!studentId) return quotas;
-  return quotas.filter(q => q.studentId === studentId);
-}
-
+// Applies all active insight filters in a single pass over the quotas;
+// returns the original array untouched when no filter is active.
 export function applyInsightsFilters(quotas: QuotaItem[], filters: QuotaInsightsFilters): QuotaItem[] {
-  return filterByStudentId(
-    filterByStatus(filterByKind(filterByDateRange(quotas, filters.dateRange), filters.kind), filters.status),
-    filters.studentId
-  );
+  const { dateRange, kind, status, studentId } = filters;
+
+  if (dateRange === "all" && !kind && !status && !studentId) {
+    return quotas;
+  }
+
+  const cutoffMs = insightsCutoffMs(dateRange);
+  const result: QuotaItem[] = [];
+  for (const q of quotas) {
+    if (matchesInsightsFilters(q, filters, cutoffMs)) result.push(q);
+  }
+  return result;
 }
 
 export function buildChartData(
@@ -86,8 +89,8 @@ export function buildChartData(
 ): QuotaInsightsChartData {
   return {
     purchasesOverTime: buildPurchasesOverTime(quotas, monthFormatter),
-    redemptionByType: buildRedemptionByType(quotas, labels),
-    deliveryRate: buildDeliveryRate(quotas, labels),
+    redemptionByType: buildRedemptionByType(quotas, labels.charts),
+    deliveryRate: buildDeliveryRate(quotas, labels.charts),
     expiredSlippage: buildExpiredSlippage(quotas, monthFormatter),
   };
 }

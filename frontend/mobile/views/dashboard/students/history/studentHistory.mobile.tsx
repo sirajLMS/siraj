@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
 import type { ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
@@ -15,6 +16,8 @@ import { MobileWeeklyScroller } from "@/frontend/mobile/views/dashboard/students
 import { PerformanceStreakMobile } from "@/frontend/mobile/views/dashboard/students/history/components/performanceStreak.mobile";
 import { deriveStreakDays } from "@/frontend/mobile/views/dashboard/students/history/studentHistory.helpers";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 export function StudentHistoryMobileView({
   studentName,
@@ -35,7 +38,7 @@ export function StudentHistoryMobileView({
   labels,
 }: Readonly<StudentHistoryViewModel>) {
   const { canView } = useStudentFieldAccess();
-  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(currentMonth);
 
   const selectedDaySessions: ClassSession[] = useMemo(() => {
     if (selectedDay === null) return [];

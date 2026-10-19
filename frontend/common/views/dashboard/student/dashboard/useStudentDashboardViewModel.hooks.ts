@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
@@ -90,7 +91,7 @@ export function useStudentDashboardHandlers(upcomingLessons: readonly UpcomingLe
         const lesson = upcomingLessons.find(l => l.id === id);
         const url = lesson?.meetingJoinUrl;
         if (url) {
-          window.open(url, "_blank", "noopener,noreferrer");
+          safeOpenWindow(url);
         } else {
           logger.warn("No join URL for lesson", { id });
         }

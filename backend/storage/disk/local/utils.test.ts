@@ -48,6 +48,12 @@ describe("local storage utils", () => {
       expect(() => getAbsolutePath(basePath, "../outside.txt")).toThrow(StorageValidationError);
       expect(() => getAbsolutePath(basePath, "sub/../../outside.txt")).toThrow(StorageValidationError);
     });
+
+    it("should throw StorageValidationError on null byte paths", () => {
+      const basePath = path.resolve("test-base-storage");
+      expect(() => getAbsolutePath(basePath, "file.txt\0.png")).toThrow(StorageValidationError);
+      expect(() => getAbsolutePath(basePath, "sub/\0/file.txt")).toThrow(StorageValidationError);
+    });
   });
 
   describe("calculateFileHash", () => {

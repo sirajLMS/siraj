@@ -27,7 +27,10 @@ export function buildPurchasesOverTime(
   return entries.map(([month, data]) => ({ month, purchases: data.purchases, classes: data.classes }));
 }
 
-export function buildRedemptionByType(quotas: QuotaItem[], labels: QuotaLabels): RedemptionByTypeData[] {
+export function buildRedemptionByType(
+  quotas: QuotaItem[],
+  labels: Pick<QuotaLabels["charts"], "packageType" | "periodicType">
+): RedemptionByTypeData[] {
   let pkg = 0;
   let periodic = 0;
   for (const q of quotas) {
@@ -38,18 +41,25 @@ export function buildRedemptionByType(quotas: QuotaItem[], labels: QuotaLabels):
   const total = pkg + periodic;
   if (total === 0) return [];
   return [
-    { name: labels.charts.packageType, value: pkg, pct: Math.round((pkg / total) * 100) },
-    { name: labels.charts.periodicType, value: periodic, pct: Math.round((periodic / total) * 100) },
+    { name: labels.packageType, value: pkg, pct: Math.round((pkg / total) * 100) },
+    { name: labels.periodicType, value: periodic, pct: Math.round((periodic / total) * 100) },
   ].filter(d => d.value > 0);
 }
 
-export function buildDeliveryRate(quotas: QuotaItem[], labels: QuotaLabels): DeliveryRateData[] {
-  const pkgQuotas = quotas.filter(q => q.kind === QuotaKind.Package);
-  const committed = pkgQuotas.filter(q => q.status === QuotaStatus.Active).length;
-  const cancelled = pkgQuotas.filter(q => q.status !== QuotaStatus.Active).length;
+export function buildDeliveryRate(
+  quotas: QuotaItem[],
+  labels: Pick<QuotaLabels["charts"], "committed" | "cancelled">
+): DeliveryRateData[] {
+  let committed = 0;
+  let cancelled = 0;
+  for (const q of quotas) {
+    if (q.kind !== QuotaKind.Package) continue;
+    if (q.status === QuotaStatus.Active) committed += 1;
+    else cancelled += 1;
+  }
   return [
-    { name: labels.charts.committed, count: committed },
-    { name: labels.charts.cancelled, count: cancelled },
+    { name: labels.committed, count: committed },
+    { name: labels.cancelled, count: cancelled },
   ];
 }
 
@@ -76,12 +86,7 @@ export function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.D
     cumRed += monthData.redeemed;
     result.push({ month: monthKey, cumulativeExpired: cumExp, cumulativeRedeemed: cumRed });
   }
-  const seen = new Set<string>();
-  return result.filter(r => {
-    if (seen.has(r.month)) return false;
-    seen.add(r.month);
-    return true;
-  });
+  return result;
 }
 
 /**
@@ -92,23 +97,30 @@ export function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.D
  * simply aliased to `activeCount` as in the original implementation.
  */
 export function computeInsightsMetrics(quotas: QuotaItem[]): QuotaInsightsMetrics {
-  const activeCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
-  const totalRemaining = quotas.reduce((sum, q) => sum + (q.remaining ?? 0), 0);
-  const totalReserved = quotas.reduce((sum, q) => sum + (q.reservedClasses ?? 0), 0);
-  const now = new Date();
-  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const expiringCount = quotas.filter(q => {
-    if (!q.validUntil) return false;
-    const d = new Date(q.validUntil);
-    return d >= now && d <= nextWeek;
-  }).length;
-  const pendingBacklogCount = quotas.filter(q => {
-    if (q.status !== QuotaStatus.Active) return false;
-    if ((q.remaining ?? 0) <= 0) return false;
-    if (!q.validUntil) return false;
-    const d = new Date(q.validUntil);
-    return d < now;
-  }).length;
+  let activeCount = 0;
+  let totalRemaining = 0;
+  let totalReserved = 0;
+  let expiringCount = 0;
+  let pendingBacklogCount = 0;
+
+  const nowMs = Date.now();
+  const nextWeekMs = nowMs + 7 * 24 * 60 * 60 * 1000;
+
+  for (const q of quotas) {
+    const isActive = q.status === QuotaStatus.Active;
+    if (isActive) activeCount += 1;
+
+    const remaining = q.remaining ?? 0;
+    totalRemaining += remaining;
+    totalReserved += q.reservedClasses ?? 0;
+
+    if (!q.validUntil) continue;
+    const validUntilMs = Date.parse(q.validUntil);
+    if (Number.isNaN(validUntilMs)) continue;
+    if (validUntilMs >= nowMs && validUntilMs <= nextWeekMs) expiringCount += 1;
+    if (isActive && remaining > 0 && validUntilMs < nowMs) pendingBacklogCount += 1;
+  }
+
   return { activeCount, totalRemaining, totalReserved, expiringCount, pendingBacklogCount };
 }
 

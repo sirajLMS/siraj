@@ -10,12 +10,24 @@ export const HOURS = Array.from({ length: 16 }, (_, i) => i + 7);
 const HOUR_NUMERIC_OPTIONS: Intl.DateTimeFormatOptions = { hour: "numeric", hour12: true };
 const WEEKDAY_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { weekday: "short" };
 
+// Formatted hour strings keyed by `${latnLocaleTag}:${hour}` — the week grid
+// re-formats the same 16 hours on every render, so reuse the resolved strings.
+const hourFormatCache = new Map<string, string>();
+
 // Visible-but-subtle grid line color — derived from text.primary so it adapts
 // to light/dark themes.
 export const gridLineColor = (theme: Theme) => alpha(theme.palette.text.primary, 0.08);
 
 export function formatHour(hour: number, locale: string): string {
-  return getDateTimeFormatter(getLatnLocaleTag(locale), HOUR_NUMERIC_OPTIONS).format(new Date(0, 0, 0, hour));
+  const latnTag = getLatnLocaleTag(locale);
+  const cacheKey = `${latnTag}:${hour}`;
+  const cached = hourFormatCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const formatted = getDateTimeFormatter(latnTag, HOUR_NUMERIC_OPTIONS).format(new Date(0, 0, 0, hour));
+  hourFormatCache.set(cacheKey, formatted);
+  return formatted;
 }
 
 export function createWeekdayFormatter(locale: string): Intl.DateTimeFormat {

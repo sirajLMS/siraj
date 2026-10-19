@@ -244,3 +244,16 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     expect(src).toContain("sanitizeIpAddress");
   });
 });
+
+describe("Meeting join URL hardening", () => {
+  test("student dashboard join handler routes meeting URLs through safeOpenWindow", async () => {
+    // meetingJoinUrl is stored provider data — every join surface must delegate
+    // to safeOpenWindow (which blocks javascript:/data:/vbscript: targets)
+    // instead of calling window.open directly.
+    const src = await readSrc(
+      "frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel.hooks.ts"
+    );
+    expect(src).toContain("safeOpenWindow");
+    expect(src).not.toContain("window.open(");
+  });
+});

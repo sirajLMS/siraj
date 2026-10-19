@@ -27,6 +27,11 @@ function assertContained(basePath: string, candidatePath: string): void {
  * stands.
  */
 export function getAbsolutePath(basePath: string, relativePath: string): string {
+  // Node fs rejects null bytes with a bare TypeError (ERR_INVALID_ARG_VALUE),
+  // which would bypass the StorageValidationError contract callers rely on.
+  if (relativePath.includes("\0")) {
+    throw new StorageValidationError("Path traversal attempt detected: null byte in path");
+  }
   const resolvedPath = path.resolve(basePath, relativePath);
   assertContained(basePath, resolvedPath);
 

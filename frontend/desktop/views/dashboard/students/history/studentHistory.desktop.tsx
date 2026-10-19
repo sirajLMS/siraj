@@ -2,6 +2,7 @@
 
 import { CalendarToday, PictureAsPdf, School, Timer, TrendingUp, VerifiedUser } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { ExportButton } from "@/frontend/common/components/ui/button";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -18,6 +19,8 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { StudentHistoryLabels } from "@/shared/locale";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 interface HistoryHeaderProps {
   readonly studentName: string;
@@ -104,7 +107,7 @@ export function StudentHistoryDesktopView({
 }: Readonly<StudentHistoryViewModel>) {
   const t = labels;
   const { canView } = useStudentFieldAccess();
-  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS).format(currentMonth);
   const yearStr = currentMonth.getFullYear();
 
   const canGoPrev = !enrollmentMonth || currentMonth > enrollmentMonth;

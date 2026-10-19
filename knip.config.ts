@@ -83,9 +83,6 @@ const config: KnipConfig = {
     "backend/db/repo/billing/supported-online-account.repository.ts",
   ],
 
-  // External CLI tool spawned at runtime via child_process.spawn — not an npm binary
-  // knip can resolve. Referenced in scripts/sonar-interactive-fixer.ts as optional copilot runner mode.
-  ignoreBinaries: ["copilot"],
 
   // Tooling-only / lifecycle dependencies not statically imported from any source file.
   // These are spell-check dicts, sonar CLI, and duplicate scanner.

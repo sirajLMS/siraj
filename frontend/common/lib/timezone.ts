@@ -97,6 +97,10 @@ function getTimezoneOffsetMs(timeZone: string, date: Date): number {
 }
 
 function normalizeIanaTimezoneId(value: string): string {
+  // Fast path: canonical timezone keys skip string replacement and excluded checks
+  if (IANA_TIMEZONE_SET.has(value)) {
+    return value;
+  }
   const slashNormalized = value.includes("/") ? value : value.replaceAll("_", "/");
   return resolveExcludedIanaTimezoneId(slashNormalized);
 }
@@ -136,12 +140,18 @@ function getTimezoneTerritoryCode(ianaTimezone: string): string | null {
   return resolveUiCountryCode(IANA_TIMEZONE_TERRITORY_CODES_MAP[normalizedTimezone] ?? null);
 }
 
+/** Cache flag emoji lookups per timezone ID to skip repeated territory and country lookups. */
+const timezoneEmojiCache = new Map<string, string>();
+
 export function getTimezoneEmoji(ianaTimezone: string): string {
-  const territoryCode = getTimezoneTerritoryCode(ianaTimezone);
-  if (!territoryCode) {
-    return GLOBE_EMOJI;
+  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
+  let emoji = timezoneEmojiCache.get(normalizedTimezone);
+  if (!emoji) {
+    const territoryCode = getTimezoneTerritoryCode(normalizedTimezone);
+    emoji = !territoryCode ? GLOBE_EMOJI : (getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI);
+    timezoneEmojiCache.set(normalizedTimezone, emoji);
   }
-  return getCountryByCode(territoryCode)?.emoji ?? GLOBE_EMOJI;
+  return emoji;
 }
 
 export function formatOffsetFromMinutes(offsetMinutes: number): string {
@@ -174,13 +184,33 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
   return formatOffsetFromMinutes(getTimezoneOffsetMinutes(ianaTimezone, date));
 }
 
+/**
+ * Cache timezone offset minutes per minute timestamp to eliminate repeated Intl formatting
+ * during batch operations (e.g., generating options for ~420 timezones).
+ * Automatically clears when the minute changes to keep the cache bounded.
+ */
+let currentCachedMinuteTs = -1;
+const offsetMinutesCache = new Map<string, number>();
+
 function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
-  try {
-    return Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
-  } catch {
-    return 0;
+  const minuteTs = Math.floor(date.getTime() / 60000);
+
+  if (minuteTs !== currentCachedMinuteTs) {
+    offsetMinutesCache.clear();
+    currentCachedMinuteTs = minuteTs;
   }
+
+  let cached = offsetMinutesCache.get(normalizedTimezone);
+  if (cached === undefined) {
+    try {
+      cached = Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
+    } catch {
+      cached = 0;
+    }
+    offsetMinutesCache.set(normalizedTimezone, cached);
+  }
+  return cached;
 }
 
 export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, date = new Date()): string {

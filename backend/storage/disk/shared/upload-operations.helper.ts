@@ -12,7 +12,10 @@ import { getServerTranslations } from "@/shared/locale";
  */
 export async function prepareUploadHelper(
   input: Types.UploadPreparationInput,
-  onPrepareFn: (sessionId: string, cleanedPath: string) => Types.UploadPreparationResult
+  onPrepareFn: (
+    sessionId: string,
+    cleanedPath: string
+  ) => Types.UploadPreparationResult | Promise<Types.UploadPreparationResult>
 ): Promise<Types.UploadPreparationResult> {
   try {
     const cleanedPath = normalizePath(input.path);

@@ -214,9 +214,9 @@ export function getVacationBlockedRangesForDate(
   vacations: { startAt: Date; endAt: Date }[]
 ): { start: number; end: number }[] {
   if (vacations.length === 0) return [];
-  // Store raw UTC epoch ms bounds to avoid repeated Date object coercions inside the loop (~13x speedup)
-  const dayStartMs = new Date(`${calendarDate}T00:00:00.000Z`).getTime();
-  const dayEndMs = new Date(`${calendarDate}T23:59:59.999Z`).getTime();
+  // UTC-only day bounds in epoch ms; the end is start + 86_399_999 ms (23:59:59.999).
+  const dayStartMs = Date.parse(`${calendarDate}T00:00:00.000Z`);
+  const dayEndMs = dayStartMs + 86_399_999;
   const blocked: { start: number; end: number }[] = [];
 
   for (let i = 0; i < vacations.length; i++) {
@@ -238,9 +238,9 @@ export function getBookingBlockedRangesForDate(
   bookings: { scheduledStartAt: Date; scheduledEndAt: Date }[]
 ): { start: number; end: number }[] {
   if (bookings.length === 0) return [];
-  // Store raw UTC epoch ms bounds to avoid repeated Date object coercions inside the loop (~13x speedup)
-  const dayStartMs = new Date(`${calendarDate}T00:00:00.000Z`).getTime();
-  const dayEndMs = new Date(`${calendarDate}T23:59:59.999Z`).getTime();
+  // UTC-only day bounds in epoch ms; the end is start + 86_399_999 ms (23:59:59.999).
+  const dayStartMs = Date.parse(`${calendarDate}T00:00:00.000Z`);
+  const dayEndMs = dayStartMs + 86_399_999;
   const blocked: { start: number; end: number }[] = [];
 
   for (let i = 0; i < bookings.length; i++) {

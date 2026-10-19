@@ -2,15 +2,19 @@
 
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import type { TeacherFutureScheduleQuery_teacherFutureSchedule_classes as FutureClass } from "@/frontend/common/graphql/generated/gql/graphql";
 import { classHref } from "@/frontend/common/utils/profileHref";
 import type {
   FutureClassCardSlots,
   FutureClassCardStyleProps,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types/futureClassCardShared.types";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
+
+const MONTH_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { month: "short" };
 
 interface DateSquareProps {
   readonly date: string;
@@ -21,7 +25,7 @@ export function DateSquare({ date, isRescheduled }: Readonly<DateSquareProps>) {
   const locale = useAppLocale();
   const dateObj = new Date(date);
   const dayNum = dateObj.getDate();
-  const monthStr = dateObj.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { month: "short" });
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_SHORT_OPTIONS).format(dateObj);
 
   return (
     <Box
@@ -69,8 +73,7 @@ interface ClassInfoProps {
 
 export function ClassInfo({ item, labels, slots, style }: Readonly<ClassInfoProps>) {
   const isRescheduled = item.isRescheduled === true;
-  const { StatusBadge, MeetingJoinAction } = slots;
-  const classProfileLink = slots.ClassProfileLink;
+  const { StatusBadge, MeetingJoinAction, ClassProfileLink: classProfileLink } = slots;
 
   return (
     <Box sx={{ flex: 1 }}>
@@ -132,14 +135,7 @@ export function ActionButtons({ item, onRequestLeave, labels, slots, style }: Re
   const leaveIcon = quotaDisabled ? <BlockOutlined /> : <EventBusyOutlined />;
 
   return (
-    <Stack
-      direction="row"
-      spacing={1.5}
-      sx={{
-        alignItems: "center",
-        alignSelf: style.actionButtonsAlignSelf,
-      }}
-    >
+    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", alignSelf: style.actionButtonsAlignSelf }}>
       <LeaveRequestButton
         startIcon={leaveIcon}
         disabled={item.leaveRequestDisabled === true}

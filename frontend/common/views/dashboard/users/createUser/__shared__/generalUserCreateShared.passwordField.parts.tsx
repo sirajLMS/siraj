@@ -30,7 +30,7 @@ function PasswordField({
   };
   const passwordAdornment = (
     <InputAdornment position="end">
-      <IconButton onClick={toggleShowPassword} edge="end" aria-label={labels.password}>
+      <IconButton onClick={toggleShowPassword} edge="end" aria-label={labels.password} aria-pressed={showPassword}>
         {showPassword ? <VisibilityOff /> : <Visibility />}
       </IconButton>
     </InputAdornment>

@@ -72,8 +72,8 @@ function WeekDayColumn({ dayClasses, locale, defaultSubject }: DayColumnProps) {
       ))}
       {dayClasses.map(cls => {
         const startDate = new Date(cls.scheduledStartAt);
-        const hourIndex = HOURS.indexOf(startDate.getHours());
-        if (hourIndex === -1) return null;
+        const hourIndex = startDate.getHours() - HOURS[0];
+        if (hourIndex < 0 || hourIndex >= HOURS.length) return null;
         return (
           <Box key={cls.id} sx={{ position: "absolute", top: hourIndex * 60 + 2, left: 2, right: 2, zIndex: 1 }}>
             <SessionCard cls={cls} locale={locale} defaultSubject={defaultSubject} />

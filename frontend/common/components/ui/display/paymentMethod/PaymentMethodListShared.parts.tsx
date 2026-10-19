@@ -3,9 +3,10 @@
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type * as React from "react";
+import { TooltipIconButton } from "@/frontend/common/components/ui";
 import {
   isPaymentDirectionLabelKey,
   isPaymentMethodTypeLabelKey,
@@ -133,19 +134,25 @@ export function buildPaymentMethodColumns({
       renderCell: params => (
         <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
           {!params.row.isDefault && onSetDefaultAction ? (
-            <IconButton aria-label={tList.setDefault} size="small" onClick={() => onSetDefaultAction(params.row.id)}>
-              <StarOutlinedIcon fontSize="small" />
-            </IconButton>
+            <TooltipIconButton
+              label={tList.setDefault}
+              onClick={() => onSetDefaultAction(params.row.id)}
+              icon={<StarOutlinedIcon fontSize="small" />}
+            />
           ) : null}
           {onEditAction ? (
-            <IconButton aria-label={tList.edit} size="small" onClick={() => onEditAction(params.row.id)}>
-              <EditOutlinedIcon fontSize="small" />
-            </IconButton>
+            <TooltipIconButton
+              label={tList.edit}
+              onClick={() => onEditAction(params.row.id)}
+              icon={<EditOutlinedIcon fontSize="small" />}
+            />
           ) : null}
           {onDeleteAction ? (
-            <IconButton aria-label={tList.delete} size="small" onClick={() => onDeleteAction(params.row.id)}>
-              <DeleteOutlinedIcon fontSize="small" />
-            </IconButton>
+            <TooltipIconButton
+              label={tList.delete}
+              onClick={() => onDeleteAction(params.row.id)}
+              icon={<DeleteOutlinedIcon fontSize="small" />}
+            />
           ) : null}
         </Stack>
       ),

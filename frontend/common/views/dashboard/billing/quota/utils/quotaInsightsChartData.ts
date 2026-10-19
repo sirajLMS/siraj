@@ -36,7 +36,7 @@ export function groupQuotasByMonth<T>(
     if (!dateStr) continue;
     const d = new Date(dateStr);
     const key = `${monthFormatter.format(d)} ${d.getFullYear()}`;
-    const existing = monthMap.get(key) ?? structuredClone(init);
+    const existing = monthMap.get(key) ?? { ...init };
     accum(existing, q);
     monthMap.set(key, existing);
   }

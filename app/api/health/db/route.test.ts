@@ -21,6 +21,7 @@ await mock.module("@/backend/lib/ratelimit", () => ({
   apiRateLimiter: {},
   checkRateLimit: mockCheckRateLimit,
   getClientIdentifier: () => "127.0.0.1",
+  rateLimitLogId: (id: string) => id,
 }));
 
 const { GET } = await import("@/app/api/health/db/route");

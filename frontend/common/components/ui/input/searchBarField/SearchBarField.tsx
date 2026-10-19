@@ -19,6 +19,8 @@ export interface SearchBarFieldProps {
 /**
  * Shared search bar field: TextField with search icon adornment, optional
  * clear button when input is non-empty, and optional searching helper text.
+ * Pressing Escape on a non-empty input clears the value and swallows the
+ * keystroke so ancestor handlers (dialogs, popovers) do not also react.
  * Both common and mobile search bar wrappers delegate here, supplying their
  * own outer layout/Box.
  */
@@ -32,6 +34,14 @@ export function SearchBarField({
   clearLabel = "Clear search",
   maxLength,
 }: Readonly<SearchBarFieldProps>) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape" && value) {
+      event.preventDefault();
+      event.stopPropagation();
+      onChange("");
+    }
+  };
+
   return (
     <TextField
       fullWidth
@@ -63,6 +73,7 @@ export function SearchBarField({
         htmlInput: {
           "aria-label": placeholder,
           autoComplete: "off",
+          onKeyDown: handleKeyDown,
           ...(maxLength === undefined ? null : { maxLength }),
         },
       }}

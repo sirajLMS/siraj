@@ -55,8 +55,22 @@ export function isBatchLogRequest(value: unknown): value is BatchLogRequest {
   return typeof value === "object" && value !== null && "logs" in value && Array.isArray(value.logs);
 }
 
-export function isValidLogEntry(log: LogEntry): boolean {
-  return !!(log.sessionId && log.level && log.message && typeof log.sequence === "number");
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+export function isValidLogEntry(log: unknown): log is LogEntry {
+  if (!isRecord(log)) {
+    return false;
+  }
+  return (
+    typeof log.sessionId === "string" &&
+    typeof log.level === "string" &&
+    typeof log.message === "string" &&
+    typeof log.sequence === "number" &&
+    (log.timestamp === undefined || typeof log.timestamp === "string") &&
+    (log.caller === undefined || typeof log.caller === "string")
+  );
 }
 
 /**

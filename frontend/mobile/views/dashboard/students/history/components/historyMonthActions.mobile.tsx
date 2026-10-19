@@ -2,6 +2,7 @@
 
 import { CalendarToday, PictureAsPdf } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
   type MonthNavigatorMonthDisplayProps,
@@ -9,6 +10,8 @@ import {
 } from "@/frontend/common/views/dashboard/students/history/components/__shared__";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 function MobileMonthDisplay({ monthStr, yearStr }: Readonly<MonthNavigatorMonthDisplayProps>) {
   return (
@@ -47,7 +50,9 @@ export function HistoryMobileActions({
 }>) {
   const t = useStudentHistoryLabels();
   const locale = useAppLocale();
-  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
+  const monthStr = getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_LONG_OPTIONS)
+    .format(currentMonth)
+    .toUpperCase();
   const yearStr = currentMonth.getFullYear();
 
   return (
