@@ -3,6 +3,8 @@ import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { UploadType } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
+import { getStringEnv } from "@/backend/lib/env";
 import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
@@ -30,6 +32,15 @@ export async function prepareUpload(
       throw new StorageValidationError(uploadErr);
     }
 
+    const cleanupStrategy = getStringEnv("SIGNED_URL_CLEANUP_STRATEGY", "lazy");
+    if (cleanupStrategy === "lazy" || cleanupStrategy === "both") {
+      try {
+        await SignedUrlRepository.deleteExpired();
+      } catch (error) {
+        logger.error("Lazy cleanup failed during GCP upload preparation", error);
+      }
+    }
+
     const file = ctx.bucket.file(input.path);
 
     const result = await file.getSignedUrl({
@@ -44,6 +55,19 @@ export async function prepareUpload(
 
     // Generate a unique ID for tracking this upload
     const uploadId = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + STORAGE_CONFIG.SIGNED_URL_DURATION * 60 * 1000);
+
+    await SignedUrlRepository.createSignedUrl({
+      id: uploadId,
+      filePath: input.path,
+      contentType: input.contentType,
+      fileSize: BigInt(input.fileSize),
+      contentHash: input.contentHash,
+      expiresAt,
+      uploadedByUserId: input.uploadedByUserId ?? null,
+      createdAt: new Date(),
+      used: false,
+    });
 
     logger.info("Prepared upload successfully", {
       uploadId,
