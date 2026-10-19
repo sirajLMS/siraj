@@ -249,7 +249,9 @@ export const signedUrls = createTable(
     expiresAt: timestampColumn("expires_at").notNull(),
     // M2 fix: bind signed URL to the user who created it, so only the original
     // uploader can write via the token (prevents token-sharing attacks).
-    uploadedByUserId: varcharColumn("uploaded_by_user_id", { length: 36 }), // nullable for backfill
+    uploadedByUserId: uuidDefaultColumn("uploaded_by_user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }), // nullable for backfill
     ...createdAtColumn(),
     used: booleanColumn("used").notNull().default(false),
   },
@@ -259,5 +261,6 @@ export const signedUrls = createTable(
     index("signed_url_created_at_idx").on(table.createdAt),
     index("signed_url_file_path_idx").on(table.filePath),
     index("signed_url_content_hash_idx").on(table.contentHash),
+    index("signed_url_uploaded_by_user_id_idx").on(table.uploadedByUserId),
   ]
 );
