@@ -3,7 +3,7 @@
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type * as React from "react";
 import {
@@ -133,19 +133,25 @@ export function buildPaymentMethodColumns({
       renderCell: params => (
         <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
           {!params.row.isDefault && onSetDefaultAction ? (
-            <IconButton aria-label={tList.setDefault} size="small" onClick={() => onSetDefaultAction(params.row.id)}>
-              <StarOutlinedIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title={tList.setDefault}>
+              <IconButton aria-label={tList.setDefault} size="small" onClick={() => onSetDefaultAction(params.row.id)}>
+                <StarOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           ) : null}
           {onEditAction ? (
-            <IconButton aria-label={tList.edit} size="small" onClick={() => onEditAction(params.row.id)}>
-              <EditOutlinedIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title={tList.edit}>
+              <IconButton aria-label={tList.edit} size="small" onClick={() => onEditAction(params.row.id)}>
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           ) : null}
           {onDeleteAction ? (
-            <IconButton aria-label={tList.delete} size="small" onClick={() => onDeleteAction(params.row.id)}>
-              <DeleteOutlinedIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title={tList.delete}>
+              <IconButton aria-label={tList.delete} size="small" onClick={() => onDeleteAction(params.row.id)}>
+                <DeleteOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           ) : null}
         </Stack>
       ),
