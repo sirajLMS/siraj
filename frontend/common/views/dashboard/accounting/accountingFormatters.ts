@@ -7,12 +7,18 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
  * (and any future shared components) can reuse them.
  */
 
+/** Cached `Intl.NumberFormat` instance for money formatting to prevent instantiation overhead during grid rendering. */
+const moneyNumberFormat = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 /** "25000.00" → "25,000.00" (grouped, no currency symbol — currency renders beside). */
 export function formatAccountingMoney(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const numeric = typeof value === "string" ? Number(value) : value;
   if (Number.isNaN(numeric)) return String(value);
-  return numeric.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return moneyNumberFormat.format(numeric);
 }
 
 /** ISO DateTime / date → localized short date (locale-safe for AR via Intl). */
@@ -59,15 +65,44 @@ function resolveAccountingDateLocale(locale: string): string {
   return locale.startsWith("ar") ? "ar" : "en";
 }
 
+/** Cache `Intl.DateTimeFormat` instances per resolved locale to avoid instantiation overhead during grid rendering. */
+const accountingDateDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getAccountingDateDtf(locale: string): Intl.DateTimeFormat {
+  const tag = resolveAccountingDateLocale(locale);
+  let dtf = accountingDateDtfCache.get(tag);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(tag, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    accountingDateDtfCache.set(tag, dtf);
+  }
+  return dtf;
+}
+
 export function formatAccountingDate(value: string | null | undefined, locale: string): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(resolveAccountingDateLocale(locale), {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return getAccountingDateDtf(locale).format(date);
+}
+
+/** Cache `Intl.DateTimeFormat` instances per resolved locale for accounting month formatting. */
+const accountingMonthDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getAccountingMonthDtf(locale: string): Intl.DateTimeFormat {
+  const tag = resolveAccountingDateLocale(locale);
+  let dtf = accountingMonthDtfCache.get(tag);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(tag, {
+      month: "short",
+      year: "numeric",
+    });
+    accountingMonthDtfCache.set(tag, dtf);
+  }
+  return dtf;
 }
 
 /**
@@ -80,7 +115,7 @@ export function formatAccountingMonth(value: string | null | undefined, locale: 
   const match = /^(\d{4})-(\d{2})$/.exec(value);
   const date = match === null ? null : new Date(Number(match[1]), Number(match[2]) - 1, 1);
   if (date === null || Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(resolveAccountingDateLocale(locale), { month: "short", year: "numeric" });
+  return getAccountingMonthDtf(locale).format(date);
 }
 
 /**
