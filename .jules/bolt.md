@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-10-11 - Caching google-libphonenumber lookups in calling-code.ts
+
+**Learning:** `google-libphonenumber` `getCountryCodeForRegion` (~5µs) and `getRegionCodeForCountryCode` (~0.1µs) are already fast O(1) internal map lookups inside the library. Caching them in `calling-code.ts` adds mutable module-level state and sentinel logic without providing a noticeable product-level win, as `ensureCallingCodeIndex` already handles one-time region indexing up front.
+**Action:** Do not add wrapper caches over fast O(1) library lookups unless profiling shows a real bottleneck on an active product path.
