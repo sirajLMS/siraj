@@ -27,6 +27,9 @@ function assertContained(basePath: string, candidatePath: string): void {
  * stands.
  */
 export function getAbsolutePath(basePath: string, relativePath: string): string {
+  if (relativePath.includes("\0") || relativePath.toLowerCase().includes("%00")) {
+    throw new StorageValidationError("Path traversal attempt detected: null byte in path");
+  }
   const resolvedPath = path.resolve(basePath, relativePath);
   assertContained(basePath, resolvedPath);
 
