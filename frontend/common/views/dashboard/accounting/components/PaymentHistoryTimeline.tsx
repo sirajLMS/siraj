@@ -1,16 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { HistoryOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { formatAccountingDate } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
-
-type HistoryEvent = {
-  readonly id: string | null;
-  readonly kind: string | null;
-  readonly occurredAt: string | Date | null;
-  readonly hoursDelta: string | null;
-  readonly notes: string | null;
-};
+import { sortHistoryEvents, type HistoryEvent } from "./PaymentHistoryTimeline.helpers";
 
 interface PaymentHistoryTimelineProps {
   readonly events: readonly HistoryEvent[];
@@ -26,11 +20,12 @@ const kindDotTone: Readonly<Record<string, "info" | "success" | "warning" | "pri
   MARKED_PAID: "primary",
 };
 
-const toMillis = (value: string | Date | null): number =>
-  value instanceof Date ? value.getTime() : new Date(String(value ?? 0)).getTime();
-
 /** Vertical timeline of derived payment events (newest first). */
 export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: Readonly<PaymentHistoryTimelineProps>) {
+  // Unconditionally memoize sorted events at top-level to preserve hook ordering across re-renders
+  // and pre-calculate epoch milliseconds in single-pass O(N) mapping to eliminate Date allocations during sorting.
+  const ordered = useMemo(() => sortHistoryEvents(events), [events]);
+
   if (events.length === 0) {
     return (
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -38,8 +33,6 @@ export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: R
       </Typography>
     );
   }
-
-  const ordered = [...events].toSorted((a, b) => toMillis(b.occurredAt) - toMillis(a.occurredAt));
 
   return (
     <Stack component="ol" sx={{ m: 0, p: 0, listStyle: "none" }} spacing={0}>
