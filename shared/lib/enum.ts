@@ -88,23 +88,6 @@ function parseEnumValue<T extends string>(
 }
 
 /**
- * Factory: creates a typed parser with a default fallback for a string enum.
- * Used to generate the `parseX(value, fallback)` wrappers below without
- * repeating the `parseEnumValue(Enum, value, fallback) ?? fallback` token
- * sequence in every wrapper (which previously matched the frontend enum
- * parsers as a jscpd clone — see D7-1 in deferred-items.md).
- */
-function withFallback<T extends string>(
-  enumObject: StringEnum<T>,
-  fallback: T
-): (value: string | null | undefined) => T {
-  return (value: string | null | undefined): T => {
-    const parsed = parseEnumValue(enumObject, value, fallback);
-    return parsed ?? fallback;
-  };
-}
-
-/**
  * Factory: creates a typed parser returning `T | null` for a string enum.
  */
 function orNull<T extends string>(enumObject: StringEnum<T>): (value: string | null | undefined) => T | null {
@@ -118,7 +101,7 @@ function orNull<T extends string>(enumObject: StringEnum<T>): (value: string | n
 export const parseAccountStatus: (value: string | null | undefined, fallback?: AccountStatus) => AccountStatus = (
   value,
   fallback = AccountStatus.ACTIVATED
-) => withFallback(AccountStatus, fallback)(value);
+) => parseEnumValue(AccountStatus, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into an AppLanguage enum, returning null if invalid.
@@ -136,7 +119,7 @@ export const parseClassExecutionState: (
   value: string | null | undefined,
   fallback?: ClassExecutionState
 ) => ClassExecutionState = (value, fallback = ClassExecutionState.NOT_ACTIVATED) =>
-  withFallback(ClassExecutionState, fallback)(value);
+  parseEnumValue(ClassExecutionState, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a ClassOutcome enum with a fallback.
@@ -145,7 +128,7 @@ export const parseClassExecutionState: (
 export const parseClassOutcome: (value: string | null | undefined, fallback?: ClassOutcome) => ClassOutcome = (
   value,
   fallback = ClassOutcome.PENDING
-) => withFallback(ClassOutcome, fallback)(value);
+) => parseEnumValue(ClassOutcome, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a ClassType enum with a fallback.
@@ -154,7 +137,7 @@ export const parseClassOutcome: (value: string | null | undefined, fallback?: Cl
 export const parseClassType: (value: string | null | undefined, fallback?: ClassType) => ClassType = (
   value,
   fallback = ClassType.REGULAR
-) => withFallback(ClassType, fallback)(value);
+) => parseEnumValue(ClassType, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a ClassType enum, returning null if invalid.
@@ -168,7 +151,7 @@ export const parseClassTypeOrNull: (value: string | null | undefined) => ClassTy
 export const parseCurrencyCode: (value: string | null | undefined, fallback?: CurrencyCode) => CurrencyCode = (
   value,
   fallback = CurrencyCode.EGP
-) => withFallback(CurrencyCode, fallback)(value);
+) => parseEnumValue(CurrencyCode, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a CurrencyCode enum, returning null if invalid.
@@ -182,7 +165,7 @@ export const parseCurrencyCodeOrNull: (value: string | null | undefined) => Curr
 export const parseGender: (value: string | null | undefined, fallback?: Gender) => Gender = (
   value,
   fallback = Gender.MALE
-) => withFallback(Gender, fallback)(value);
+) => parseEnumValue(Gender, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into an InvoiceStatus enum with a fallback.
@@ -191,7 +174,7 @@ export const parseGender: (value: string | null | undefined, fallback?: Gender) 
 export const parseInvoiceStatus: (value: string | null | undefined, fallback?: InvoiceStatus) => InvoiceStatus = (
   value,
   fallback = InvoiceStatus.UNPAID
-) => withFallback(InvoiceStatus, fallback)(value);
+) => parseEnumValue(InvoiceStatus, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into an InvoiceType enum with a fallback.
@@ -200,7 +183,7 @@ export const parseInvoiceStatus: (value: string | null | undefined, fallback?: I
 export const parseInvoiceType: (value: string | null | undefined, fallback?: InvoiceType) => InvoiceType = (
   value,
   fallback = InvoiceType.MONTHLY
-) => withFallback(InvoiceType, fallback)(value);
+) => parseEnumValue(InvoiceType, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a ParentStatus enum, returning null if invalid.
@@ -221,7 +204,8 @@ export const parsePaymentMethodType = orNull(PaymentMethodType);
 export const parsePaymentDirection: (
   value: string | null | undefined,
   fallback?: PaymentDirection
-) => PaymentDirection = (value, fallback = PaymentDirection.BOTH) => withFallback(PaymentDirection, fallback)(value);
+) => PaymentDirection = (value, fallback = PaymentDirection.BOTH) =>
+  parseEnumValue(PaymentDirection, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a StudentStatus enum, returning null if invalid.
@@ -242,7 +226,7 @@ export const parseDayOfWeek: (value: string | null | undefined) => DayOfWeek | n
 export const parseIanaTimezone: (value: string | null | undefined, fallback?: IanaTimezone) => IanaTimezone = (
   value,
   fallback = IanaTimezone.UTC
-) => withFallback(IanaTimezone, fallback)(value);
+) => parseEnumValue(IanaTimezone, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into an IanaTimezone enum, returning null if invalid.
@@ -269,7 +253,7 @@ export const parseOverrideState = (value: string | null | undefined): OverrideSt
 export const parseBookingStatus: (value: string | null | undefined, fallback?: BookingStatus) => BookingStatus = (
   value,
   fallback = BookingStatus.CONFIRMED
-) => withFallback(BookingStatus, fallback)(value);
+) => parseEnumValue(BookingStatus, value, fallback) ?? fallback;
 
 /**
  * Parses a string value into a GroupClassAttendanceStatus enum with a fallback.
@@ -279,7 +263,7 @@ export const parseGroupClassAttendanceStatus: (
   value: string | null | undefined,
   fallback?: GroupClassAttendanceStatus
 ) => GroupClassAttendanceStatus = (value, fallback = GroupClassAttendanceStatus.PENDING) =>
-  withFallback(GroupClassAttendanceStatus, fallback)(value);
+  parseEnumValue(GroupClassAttendanceStatus, value, fallback) ?? fallback;
 
 /**
  * Type guard for AppLocale.
