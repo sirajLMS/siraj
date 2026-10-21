@@ -32,6 +32,10 @@ export function buildDateColumns(fromDate: string, toDate: string): string[] {
   return Array.from({ length: dayCount }, (_, index) => format(addDays(start, index), ISO_DATE_FORMAT));
 }
 
+/**
+ * Single-pass grouping of gaps by calendar date.
+ * Avoids quadratic array allocations by pushing directly into a pre-allocated array per date key.
+ */
 export function groupGapsByDate(
   gaps: readonly (TeacherAvailabilityGapItem | null)[] | null | undefined
 ): Map<string, readonly TeacherAvailabilityGapItem[]> {
@@ -40,17 +44,28 @@ export function groupGapsByDate(
     if (!gap?.calendarDate) {
       continue;
     }
-    const existing = grouped.get(gap.calendarDate) ?? [];
-    grouped.set(gap.calendarDate, [...existing, gap]);
+    let list = grouped.get(gap.calendarDate);
+    if (!list) {
+      list = [];
+      grouped.set(gap.calendarDate, list);
+    }
+    list.push(gap);
   }
   return grouped;
 }
 
+/**
+ * Groups gaps by day of month for a target month and year.
+ * Pre-computes target month/year outside the loop and parses ISO date strings ("YYYY-MM-DD")
+ * without instantiating Date objects, eliminating GC overhead and quadratic array copies.
+ */
 export function groupGapsByDayOfMonth(
   gaps: readonly (TeacherAvailabilityGapItem | null)[] | null | undefined,
   month: Date
 ): Partial<Record<number, readonly TeacherAvailabilityGapItem[]>> {
   const grouped: Record<number, TeacherAvailabilityGapItem[]> = {};
+  const targetMonth = month.getMonth();
+  const targetYear = month.getFullYear();
 
   for (const gap of gaps ?? []) {
     if (!gap) {
@@ -61,13 +76,31 @@ export function groupGapsByDayOfMonth(
       continue;
     }
 
-    const parsed = parseIsoDate(calendarDate);
-    if (parsed.getMonth() !== month.getMonth() || parsed.getFullYear() !== month.getFullYear()) {
+    let year: number;
+    let monthIndex: number;
+    let day: number;
+
+    if (calendarDate.length === 10) {
+      year = Number(calendarDate.slice(0, 4));
+      monthIndex = Number(calendarDate.slice(5, 7)) - 1;
+      day = Number(calendarDate.slice(8, 10));
+    } else {
+      const parsed = new Date(calendarDate);
+      year = parsed.getUTCFullYear();
+      monthIndex = parsed.getUTCMonth();
+      day = parsed.getUTCDate();
+    }
+
+    if (monthIndex !== targetMonth || year !== targetYear) {
       continue;
     }
 
-    const day = parsed.getDate();
-    grouped[day] = [...(grouped[day] ?? []), gap];
+    let list = grouped[day];
+    if (!list) {
+      list = [];
+      grouped[day] = list;
+    }
+    list.push(gap);
   }
 
   return grouped;

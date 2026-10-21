@@ -19,12 +19,14 @@ function getActiveTeachers(
   return teachers.filter((teacher): teacher is SearchScheduleResultItem => teacher != null);
 }
 
+/**
+ * Constructs teacher schedule slot structures from pre-filtered active teachers.
+ */
 function buildTeacherScheduleSlots(
-  searchResult: SearchScheduleResultSummary | null | undefined,
+  activeTeachers: readonly SearchScheduleResultItem[],
   fromDate: string,
   toDate: string
 ): readonly SearchScheduleActiveTeacher[] {
-  const activeTeachers = getActiveTeachers(searchResult);
   const dateColumns = buildDateColumns(fromDate, toDate);
   return activeTeachers.map(teacher => ({
     teacher,
@@ -43,14 +45,19 @@ export interface SearchScheduleResultsData {
   readonly teacherSlots: readonly SearchScheduleActiveTeacher[];
 }
 
+/**
+ * Computes search schedule results data. Evaluates `getActiveTeachers` once
+ * and reuses the active teachers array when building schedule slots.
+ */
 export function computeSearchScheduleResults(
   searchResult: SearchScheduleResultSummary | null | undefined,
   fromDate: string,
   toDate: string
 ): SearchScheduleResultsData {
+  const activeTeachers = getActiveTeachers(searchResult);
   return {
     totalGaps: getTotalGaps(searchResult),
-    activeTeachers: getActiveTeachers(searchResult),
-    teacherSlots: buildTeacherScheduleSlots(searchResult, fromDate, toDate),
+    activeTeachers,
+    teacherSlots: buildTeacherScheduleSlots(activeTeachers, fromDate, toDate),
   };
 }
