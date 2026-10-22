@@ -5,9 +5,10 @@ import { sanitizeForRendering, sanitizeSessionId, truncateLogField } from "@/app
 
 // Track if we've already cleaned up old logs for this session
 const cleanedSessions = new Set<string>();
+const MAX_CLEANED_SESSIONS = 1000;
 
-// Buffer to store out-of-order log entries per session
-const logBuffers = new Map<string, { entries: LogEntry[]; nextSequence: number; writeLock: Promise<void> }>();
+// Buffer to store out-of-order log entries per session. Exported for memory/leak testing.
+export const logBuffers = new Map<string, { entries: LogEntry[]; nextSequence: number; writeLock: Promise<void> }>();
 
 async function cleanupOldClientLogs(logsDir: string, sessionId: string): Promise<void> {
   // Check if cleanup is enabled (default: false to keep logs)
@@ -30,7 +31,10 @@ async function cleanupOldClientLogs(logsDir: string, sessionId: string): Promise
       )
     );
 
-    // Mark this session as cleaned up
+    // Mark this session as cleaned up (bound set size to prevent memory leak)
+    if (cleanedSessions.size >= MAX_CLEANED_SESSIONS) {
+      cleanedSessions.clear();
+    }
     cleanedSessions.add(sessionId);
   } catch {
     // Silently fail to avoid infinite loops
@@ -93,6 +97,10 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
       }
     }, Promise.resolve());
   } finally {
+    // Prevent memory leak by removing empty session buffers once all queued entries are written
+    if (buffer.entries.length === 0) {
+      logBuffers.delete(sessionId);
+    }
     resolveWriteLock?.();
   }
 }
