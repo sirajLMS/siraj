@@ -6,14 +6,16 @@ export interface EmptyStateProps {
   readonly title: string;
   readonly subtitle?: string;
   readonly icon?: ReactNode;
+  readonly action?: ReactNode;
   readonly sx?: SxProps<Theme>;
 }
 
 /**
- * Viewport-agnostic empty-state display: centered icon, title, and optional
- * subtitle on a padded canvas. Shared counterpart of the tier `MobileEmptyState`.
+ * Viewport-agnostic empty-state display: centered icon, title, optional
+ * subtitle, and optional call-to-action on a padded canvas. Shared counterpart
+ * of the tier `MobileEmptyState`.
  */
-export function EmptyState({ title, subtitle, icon, sx }: Readonly<EmptyStateProps>) {
+export function EmptyState({ title, subtitle, icon, action, sx }: Readonly<EmptyStateProps>) {
   return (
     <Box
       sx={mergeSx(
@@ -28,6 +30,7 @@ export function EmptyState({ title, subtitle, icon, sx }: Readonly<EmptyStatePro
           {subtitle}
         </Typography>
       ) : null}
+      {action ? <Box sx={{ mt: 1 }}>{action}</Box> : null}
     </Box>
   );
 }
