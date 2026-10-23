@@ -1,0 +1,4 @@
+## 2026-03-30 - Rate Limiter Fail-Closed Option Bypassed on Cache Errors
+**Vulnerability:** Security-critical endpoints passing `failOpen: false` to `checkRateLimit` (e.g. webhooks, OAuth callbacks) still failed open during cache/Redis outages because `RateLimiter.limitSimple` swallowed cache exceptions and used instance-level `this.failOpen` (default `true`) without receiving the caller's `failOpen` override.
+**Learning:** Helper wrappers that catch internal exceptions and transform them into result objects can accidentally bypass caller-specified strategy options if options aren't forwarded into the low-level method's exception handler.
+**Prevention:** Pass strategy override options (like `{ failOpen }`) directly into underlying rate limiter methods (`limit` / `limitSimple`) and evaluate `options?.failOpen ?? this.failOpen` inside exception handlers.

@@ -38,7 +38,7 @@ await mock.module("@/backend/services", () => ({
   },
 }));
 
-const { checkRateLimit, getClientIdentifier } = await import("@/backend/lib/ratelimit");
+const { apiRateLimiter, checkRateLimit, getClientIdentifier } = await import("@/backend/lib/ratelimit");
 
 afterEach(() => {
   mockGetBooleanEnv.mockImplementation((key: string) => key === "TEST_ENFORCE_RATE_LIMIT");
@@ -95,6 +95,16 @@ describe("checkRateLimit with TEST_ENFORCE_RATE_LIMIT flag", () => {
     mockGetBooleanEnv.mockImplementation(() => false);
 
     const result = await checkRateLimit("test-identifier-3");
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("checkRateLimit failOpen option", () => {
+  test("returns success: false when cache errors occur and failOpen: false is passed", async () => {
+    exceededIncrement.mockImplementationOnce(() => Promise.reject(new Error("Redis connection refused")));
+    Object.assign(process.env, { NODE_ENV: "production" });
+
+    const result = await checkRateLimit("test-identifier-fail-closed", apiRateLimiter, { failOpen: false });
     expect(result.success).toBe(false);
   });
 });
