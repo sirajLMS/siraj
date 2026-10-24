@@ -2,7 +2,8 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { checkRateLimit, cronRateLimiter, getClientIdentifier, rateLimitLogId } from "@/backend/lib/ratelimit";
+import { getServerTranslations } from "@/shared/locale";
 
 const CRON_SECRET_HEADER = "authorization";
 const R11_EXPECTED_PREFIX = "Bearer ";
@@ -80,10 +81,10 @@ export function verifyCronSecretAuth(request: NextRequest): CronAuthResult {
 }
 
 /**
- * Higher-order function that wraps a cron route handler with authentication.
- * If auth fails, the error `NextResponse` is returned immediately and the
- * handler is never called. This eliminates the duplicated `verifyCronSecretAuth`
- * + `maxDuration` boilerplate across cron route handlers.
+ * Higher-order function that wraps a cron route handler with rate limiting and authentication.
+ * Rate-limits requests per client IP to prevent CRON_SECRET brute forcing and endpoint flooding.
+ * If rate limit or auth fails, the error `NextResponse` is returned immediately and the
+ * handler is never called.
  *
  * Usage:
  * ```ts
@@ -95,6 +96,17 @@ export function withCronAuth(
   handler: (request: NextRequest) => Promise<NextResponse>
 ): (request: NextRequest) => Promise<NextResponse> {
   return async (request: NextRequest): Promise<NextResponse> => {
+    // Rate-limit cron requests per IP before credential check to prevent secret brute-forcing and endpoint flooding
+    const clientIdentifier = getClientIdentifier(request);
+    const rateLimit = await checkRateLimit(`cron:${clientIdentifier}`, cronRateLimiter);
+    if (!rateLimit.success) {
+      logger.warn("Cron endpoint rate limit exceeded", { rateLimitLogId: rateLimitLogId(clientIdentifier) });
+      return NextResponse.json(
+        { error: getServerTranslations("en").errorsTranslations.rateLimitExceeded },
+        { status: 429 }
+      );
+    }
+
     const authResult = verifyCronSecretAuth(request);
     if (!authResult.authorized) {
       return authResult.response;
