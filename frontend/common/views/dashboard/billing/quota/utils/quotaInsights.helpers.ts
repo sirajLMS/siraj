@@ -63,6 +63,11 @@ export function buildDeliveryRate(
   ];
 }
 
+/**
+ * Builds cumulative expired and redeemed slippage data over grouped monthly quota entries.
+ *
+ * Performance optimization: Pre-allocates result array size to avoid incremental push re-allocations.
+ */
 export function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.DateTimeFormat): ExpiredSlippageData[] {
   const entries = groupQuotasByMonth(
     quotas,
@@ -80,11 +85,13 @@ export function buildExpiredSlippage(quotas: QuotaItem[], monthFormatter: Intl.D
   );
   let cumExp = 0;
   let cumRed = 0;
-  const result: ExpiredSlippageData[] = [];
-  for (const [monthKey, monthData] of entries) {
+  const len = entries.length;
+  const result: ExpiredSlippageData[] = new Array(len);
+  for (let i = 0; i < len; i++) {
+    const [monthKey, monthData] = entries[i];
     cumExp += monthData.expired;
     cumRed += monthData.redeemed;
-    result.push({ month: monthKey, cumulativeExpired: cumExp, cumulativeRedeemed: cumRed });
+    result[i] = { month: monthKey, cumulativeExpired: cumExp, cumulativeRedeemed: cumRed };
   }
   return result;
 }

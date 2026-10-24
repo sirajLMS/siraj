@@ -23,6 +23,14 @@ export interface ExpiredSlippageData {
   readonly cumulativeRedeemed: number;
 }
 
+/**
+ * Groups quota items by formatted month string and aggregates metrics.
+ *
+ * Performance optimization:
+ * - Single-pass indexed loop avoids iterator overhead.
+ * - `{ ...init }` and `monthMap.set(key, existing)` executed only on initial insertion (O(M) instead of O(N)).
+ * - `Array.from(monthMap.entries()).sort(...)` sorts in-place on newly allocated array, eliminating `.toSorted()` copy allocation.
+ */
 export function groupQuotasByMonth<T>(
   quotas: QuotaItem[],
   getDate: (q: QuotaItem) => string | null,
@@ -31,14 +39,18 @@ export function groupQuotasByMonth<T>(
   monthFormatter: Intl.DateTimeFormat
 ): [string, T][] {
   const monthMap: Map<string, T> = new Map();
-  for (const q of quotas) {
+  for (let i = 0; i < quotas.length; i++) {
+    const q = quotas[i];
     const dateStr = getDate(q);
     if (!dateStr) continue;
     const d = new Date(dateStr);
     const key = `${monthFormatter.format(d)} ${d.getFullYear()}`;
-    const existing = monthMap.get(key) ?? { ...init };
+    let existing = monthMap.get(key);
+    if (!existing) {
+      existing = { ...init };
+      monthMap.set(key, existing);
+    }
     accum(existing, q);
-    monthMap.set(key, existing);
   }
-  return Array.from(monthMap.entries()).toSorted((a, b) => a[0].localeCompare(b[0]));
+  return Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 }
