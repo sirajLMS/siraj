@@ -55,27 +55,35 @@ export function CopyMeetingUrlButtonTrigger({
   iconColor,
   label,
 }: Readonly<CopyMeetingUrlTriggerProps>): ReactElement {
+  const button = (
+    <Button
+      size={size}
+      variant="text"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label={ariaLabel}
+      aria-pressed={pressed}
+      startIcon={icon}
+      sx={theme => ({
+        color: iconColor(theme),
+        "&:hover": {
+          backgroundColor: alpha(theme.palette.success.main, 0.08),
+        },
+      })}
+    >
+      {label}
+    </Button>
+  );
+
   return (
     <Tooltip title={tooltipText}>
-      <span>
-        <Button
-          size={size}
-          variant="text"
-          disabled={disabled}
-          onClick={onClick}
-          aria-label={ariaLabel}
-          aria-pressed={pressed}
-          startIcon={icon}
-          sx={theme => ({
-            color: iconColor(theme),
-            "&:hover": {
-              backgroundColor: alpha(theme.palette.success.main, 0.08),
-            },
-          })}
-        >
-          {label}
-        </Button>
-      </span>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
     </Tooltip>
   );
 }
@@ -90,39 +98,49 @@ export function CopyMeetingUrlTextTrigger({
   iconColor,
   label,
 }: Readonly<CopyMeetingUrlTriggerProps>): ReactElement {
-  return (
-    <Tooltip title={tooltipText}>
-      <Box
-        sx={theme => ({
+  const trigger = (
+    <Box
+      sx={theme => ({
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.5,
+        color: iconColor(theme),
+        "&:hover": disabled ? {} : { color: theme.palette.primary.main },
+      })}
+    >
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-pressed={pressed}
+        style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: 0.5,
-          color: iconColor(theme),
-          "&:hover": disabled ? {} : { color: theme.palette.primary.main },
-        })}
+          gap: 4,
+          background: "none",
+          border: "none",
+          cursor: disabled ? "default" : "pointer",
+          padding: 0,
+          color: "inherit",
+          font: "inherit",
+        }}
       >
-        <button
-          type="button"
-          onClick={onClick}
-          disabled={disabled}
-          aria-label={ariaLabel}
-          aria-pressed={pressed}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-            background: "none",
-            border: "none",
-            cursor: disabled ? "default" : "pointer",
-            padding: 0,
-            color: "inherit",
-            font: "inherit",
-          }}
-        >
-          {icon}
-          <Box sx={{ typography: "bodyMd" }}>{label}</Box>
-        </button>
-      </Box>
+        {icon}
+        <Box sx={{ typography: "bodyMd" }}>{label}</Box>
+      </button>
+    </Box>
+  );
+
+  return (
+    <Tooltip title={tooltipText}>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {trigger}
+        </Box>
+      ) : (
+        trigger
+      )}
     </Tooltip>
   );
 }
@@ -155,5 +173,15 @@ export function CopyMeetingUrlIconTrigger({
     </IconButton>
   );
 
-  return <Tooltip title={tooltipText}>{disabled ? <span>{iconButton}</span> : iconButton}</Tooltip>;
+  return (
+    <Tooltip title={tooltipText}>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {iconButton}
+        </Box>
+      ) : (
+        iconButton
+      )}
+    </Tooltip>
+  );
 }
