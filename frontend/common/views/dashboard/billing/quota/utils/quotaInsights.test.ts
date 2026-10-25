@@ -8,6 +8,7 @@ import {
 import {
   buildDeliveryRate,
   buildExpiredSlippage,
+  buildQuotaInsightsCsv,
   computeInsightsMetrics,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsights.helpers";
 import { groupQuotasByMonth } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsightsChartData";
@@ -170,5 +171,38 @@ describe("applyInsightsFilters", () => {
 
     const filterMonth: QuotaInsightsFilters = { ...filtersNoOp, dateRange: "month" };
     expect(applyInsightsFilters(quotas, filterMonth)).toHaveLength(2);
+  });
+});
+
+describe("buildQuotaInsightsCsv", () => {
+  it("neutralizes CSV formula injection prefixes in quota cells", () => {
+    const mockLabels = {
+      fields: {
+        name: "Name",
+        student: "Student",
+        kind: "Kind",
+        status: "Status",
+        totalClasses: "Total",
+        remaining: "Remaining",
+        reservedClasses: "Reserved",
+        validFrom: "Valid From",
+        validUntil: "Valid Until",
+      },
+    } as unknown as QuotaLabels;
+
+    const maliciousQuotas: QuotaItem[] = [
+      createQuota({ name: "=1+1", studentId: "+15551234" }),
+      createQuota({ name: "@SUM(A1:A10)", studentId: "-cmd|' /C calc'!A0" }),
+      createQuota({ name: "\tTabLeading", studentId: "\rCRLeading" }),
+    ];
+
+    const csv = buildQuotaInsightsCsv(maliciousQuotas, mockLabels);
+
+    expect(csv).toContain("'=1+1");
+    expect(csv).toContain("'+15551234");
+    expect(csv).toContain("'@SUM(A1:A10)");
+    expect(csv).toContain("'-cmd|' /C calc'!A0");
+    expect(csv).toContain("'\tTabLeading");
+    expect(csv).toContain("'\rCRLeading");
   });
 });

@@ -8,6 +8,7 @@ import {
   type RedemptionByTypeData,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsightsChartData";
 import type { QuotaInsightsMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsightsMetrics.types";
+import { toCsvCell } from "@/shared/lib/csv/csv-cell";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export function buildPurchasesOverTime(
@@ -124,13 +125,6 @@ export function computeInsightsMetrics(quotas: QuotaItem[]): QuotaInsightsMetric
   return { activeCount, totalRemaining, totalReserved, expiringCount, pendingBacklogCount };
 }
 
-function escapeCsvCell(cell: string): string {
-  if (cell.includes(",") || cell.includes('"') || cell.includes("\n")) {
-    return `"${cell.replaceAll('"', '""')}"`;
-  }
-  return cell;
-}
-
 export function buildQuotaInsightsCsv(quotas: QuotaItem[], labels: QuotaLabels): string {
   const headers = [
     labels.fields.name,
@@ -154,6 +148,6 @@ export function buildQuotaInsightsCsv(quotas: QuotaItem[], labels: QuotaLabels):
     q.validFrom ?? "",
     q.validUntil ?? "",
   ]);
-  const csvLines = [headers, ...rows].map(row => row.map(escapeCsvCell).join(","));
+  const csvLines = [headers, ...rows].map(row => row.map(toCsvCell).join(","));
   return csvLines.join("\n");
 }

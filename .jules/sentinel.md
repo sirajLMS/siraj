@@ -1,0 +1,4 @@
+## 2026-03-08 - CSV Formula Injection and Control Character Truncation
+**Vulnerability:** Frontend CSV export helpers (`toCsvValue`, `buildQuotaInsightsCsv`, `exportToCsv`) omitted formula neutralization, exposing exported CSV files to formula injection attacks when user data contains formula prefixes (`=`, `+`, `-`, `@`, `\t`, `\r`). Furthermore, `toCsvCell` previously used `value.trimStart()`, which stripped leading ASCII whitespace control characters (`\t`, `\r`) prior to checking formula starters.
+**Learning:** `String.prototype.trimStart()` removes ECMAScript WhiteSpace characters including `\t` and `\r`. Using `value.replace(/^ +/, '')` strips leading spaces while preserving control characters (`\t`, `\r`) for formula starter detection.
+**Prevention:** Always delegate all CSV cell formatting in frontend and backend export helpers to `toCsvCell` from `@/shared/lib/csv/csv-cell`.
