@@ -266,6 +266,18 @@ export const oauthCallbackRateLimiter = new RateLimiter(
 );
 
 /**
+ * Cron route rate limiter. Caps machine-to-machine cron trigger endpoints
+ * (`/api/cron/*`, `/api/fx/refresh`). 60 requests per minute per IP.
+ * Security note: failOpen is set to false so cache outages fail closed.
+ */
+export const cronRateLimiter = new RateLimiter(
+  "ratelimit:cron",
+  60,
+  60 * 1000, // 1 minute
+  false
+);
+
+/**
  * Log-safe view of a rate-limit identifier: client IPs are PII, so they are
  * logged as a short stable hash instead of in the clear.
  */

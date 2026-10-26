@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import { checkRateLimit, cronRateLimiter, getClientIdentifier, rateLimitLogId } from "@/backend/lib/ratelimit";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 const CRON_SECRET_HEADER = "authorization";
@@ -21,12 +22,23 @@ function timingSafeSecretCompare(a: string, b: string): boolean {
 
 export type CronAuthResult = { authorized: true } | { authorized: false; response: NextResponse };
 
-export function verifyCronSecretAuth(request: NextRequest): CronAuthResult {
+export async function verifyCronSecretAuth(request: NextRequest): Promise<CronAuthResult> {
   // R3: GET only — callers must enforce method, but fail-closed for non-GET here too
   if (request.method !== "GET") {
     return {
       authorized: false,
       response: NextResponse.json({ error: cronErrorMessages().methodNotAllowed }, { status: 405 }),
+    };
+  }
+
+  // Rate limit check before verifying secret or credentials
+  const ip = getClientIdentifier(request);
+  const rateLimit = await checkRateLimit(`cron:${ip}`, cronRateLimiter, { failOpen: false });
+  if (!rateLimit.success) {
+    logger.warn(`Cron route rate limit exceeded for ${rateLimitLogId(ip)}`);
+    return {
+      authorized: false,
+      response: NextResponse.json({ error: cronErrorMessages().unauthorized }, { status: 429 }),
     };
   }
 
@@ -95,7 +107,7 @@ export function withCronAuth(
   handler: (request: NextRequest) => Promise<NextResponse>
 ): (request: NextRequest) => Promise<NextResponse> {
   return async (request: NextRequest): Promise<NextResponse> => {
-    const authResult = verifyCronSecretAuth(request);
+    const authResult = await verifyCronSecretAuth(request);
     if (!authResult.authorized) {
       return authResult.response;
     }

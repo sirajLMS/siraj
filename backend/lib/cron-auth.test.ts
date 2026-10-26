@@ -3,6 +3,7 @@ import { generateTestPassword } from "@/backend/db/test/test-utils";
 import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
 import type { EnvironmentConfig } from "@/backend/lib/env";
 import * as envModule from "@/backend/lib/env";
+import * as rateLimitModule from "@/backend/lib/ratelimit";
 
 const { NextRequest: NextRequestImpl } = await import("next/server");
 
@@ -44,6 +45,12 @@ beforeEach(() => {
   setEnv("NODE_ENV", "test");
   setEnv("CRON_SECRET", TEST_SECRET);
   spyOn(envModule, "getEnvironmentConfig").mockReturnValue(minimalEnvConfig(TEST_SECRET));
+  spyOn(rateLimitModule, "checkRateLimit").mockResolvedValue({
+    success: true,
+    limit: 60,
+    remaining: 59,
+    reset: Date.now() + 60_000,
+  });
 });
 
 afterEach(() => {
@@ -65,70 +72,85 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
 }
 
 describe("verifyCronSecretAuth (R1–R11)", () => {
-  test("R3: returns 405 for non-GET methods", () => {
-    const result = verifyCronSecretAuth(makeRequest("POST", { authorization: `Bearer ${TEST_SECRET}` }));
+  test("R3: returns 405 for non-GET methods", async () => {
+    const result = await verifyCronSecretAuth(makeRequest("POST", { authorization: `Bearer ${TEST_SECRET}` }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(405);
   });
 
-  test("R1b: production without CRON_SECRET returns 500 (server misconfigured)", () => {
+  test("returns 429 status code when cron rate limit is exceeded", async () => {
+    spyOn(rateLimitModule, "checkRateLimit").mockResolvedValueOnce({
+      success: false,
+      limit: 60,
+      remaining: 0,
+      reset: Date.now() + 60_000,
+    });
+
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}` }));
+    expect(result.authorized).toBe(false);
+    if (!result.authorized) {
+      expect(result.response.status).toBe(429);
+    }
+  });
+
+  test("R1b: production without CRON_SECRET returns 500 (server misconfigured)", async () => {
     setEnv("NODE_ENV", "production");
     setEnv("CRON_SECRET", "");
     spyOn(envModule, "getEnvironmentConfig").mockReturnValue(minimalEnvConfig(undefined));
 
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer anything" }));
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer anything" }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(500);
   });
 
-  test("S7: non-test env without CRON_SECRET returns 401", () => {
+  test("S7: non-test env without CRON_SECRET returns 401", async () => {
     setEnv("NODE_ENV", "development");
     setEnv("CRON_SECRET", "");
     spyOn(envModule, "getEnvironmentConfig").mockReturnValue(minimalEnvConfig(undefined));
 
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer anything" }));
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer anything" }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(401);
   });
 
-  test("R2/R4: missing Authorization header returns 401", () => {
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: null }));
+  test("R2/R4: missing Authorization header returns 401", async () => {
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: null }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(401);
   });
 
-  test("R2: Authorization without Bearer prefix returns 401", () => {
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: TEST_SECRET }));
+  test("R2: Authorization without Bearer prefix returns 401", async () => {
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: TEST_SECRET }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(401);
   });
 
-  test("R2: wrong Bearer secret returns 401", () => {
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer wrong-secret" }));
+  test("R2: wrong Bearer secret returns 401", async () => {
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer wrong-secret" }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(401);
   });
 
-  test("R11: valid Bearer secret authorizes the request", () => {
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}` }));
+  test("R11: valid Bearer secret authorizes the request", async () => {
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}` }));
     expect(result.authorized).toBe(true);
   });
 
-  test("R6: logs x-vercel-cron-schedule header when present (audit only)", () => {
-    const result = verifyCronSecretAuth(
+  test("R6: logs x-vercel-cron-schedule header when present (audit only)", async () => {
+    const result = await verifyCronSecretAuth(
       makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}`, "x-vercel-cron-schedule": "0 6 * * *" })
     );
     expect(result.authorized).toBe(true);
   });
 
-  test("empty provided secret (Bearer with no value) returns 401", () => {
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer " }));
+  test("empty provided secret (Bearer with no value) returns 401", async () => {
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer " }));
     expect(result.authorized).toBe(false);
     if (!result.authorized) expect(result.response.status).toBe(401);
   });
 
   test("error response body contains an error key", async () => {
-    const result = verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer wrong" }));
+    const result = await verifyCronSecretAuth(makeRequest("GET", { authorization: "Bearer wrong" }));
     if (!result.authorized) {
       const body = await parseJson(result.response);
       expect(body).toHaveProperty("error");
