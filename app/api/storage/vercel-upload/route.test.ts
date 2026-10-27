@@ -18,6 +18,7 @@ await mock.module("@/backend/lib/ratelimit", () => ({
   authRateLimiter: {},
   clientLogsRateLimiter: {},
   getClientIdentifier: (request: Request) => request.headers.get("x-forwarded-for") ?? "test-ip",
+  rateLimitLogId: (id: string) => id,
 }));
 
 // Mock dependencies
@@ -34,6 +35,10 @@ await mock.module("@/backend/lib", () => ({
     }
     return null;
   },
+  resolveLocalStoragePath: (filePath: string) => `/tmp/test-storage/${filePath}`,
+  resolvePublicStoragePath: (filePath: string) => `/tmp/test-storage/${filePath}`,
+  getServerUserContext: async () => ({ userId: "user-123", context: {} }),
+  rateLimitLogId: (id: string) => id,
 }));
 
 await mock.module("@/backend/services", () => ({
