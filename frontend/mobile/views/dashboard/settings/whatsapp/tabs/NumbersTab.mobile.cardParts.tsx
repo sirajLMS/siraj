@@ -1,7 +1,7 @@
 "use client";
 
 import { PersonAddAlt1Outlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, IconButton, InputAdornment, LinearProgress, Typography } from "@mui/material";
+import { Box, IconButton, InputAdornment, LinearProgress, Tooltip, Typography } from "@mui/material";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
@@ -42,11 +42,12 @@ export function ManageRecipientsMobileAction({
   if (account.isTestNumber !== true || label === undefined || label === "") {
     return null;
   }
-  return (
+  const isDisabled = disabled || !account.id;
+  const button = (
     <IconButton
       size="small"
       aria-label={label}
-      disabled={disabled || !account.id}
+      disabled={isDisabled}
       onClick={() => {
         if (account.id) {
           onOpen(account.id);
@@ -55,6 +56,18 @@ export function ManageRecipientsMobileAction({
     >
       <PersonAddAlt1Outlined />
     </IconButton>
+  );
+
+  return (
+    <Tooltip title={label}>
+      {isDisabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
+    </Tooltip>
   );
 }
 
