@@ -267,6 +267,12 @@ function buildGroupByKeyMap(): Readonly<Record<ProfileFieldGroupKey, ProfileFiel
 export const PROFILE_FIELD_GROUP_BY_KEY: Readonly<Record<ProfileFieldGroupKey, ProfileFieldGroupDefinition>> =
   buildGroupByKeyMap();
 
+/**
+ * Pre-computed arrays of view permission keys to avoid repeated `.map()` allocations on every profile authorization check.
+ */
+export const PROFILE_VIEW_OWN_KEYS: readonly AppPermission[] = PROFILE_FIELD_GROUPS.map(group => group.viewOwn);
+export const PROFILE_VIEW_OTHER_KEYS: readonly AppPermission[] = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
+
 export function getProfileViewPermission(group: ProfileFieldGroupDefinition, scope: ProfileScope): AppPermission {
   return scope === ProfileScope.OWN ? group.viewOwn : group.viewOther;
 }

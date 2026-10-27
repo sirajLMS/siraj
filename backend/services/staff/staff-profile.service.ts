@@ -4,7 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { invalidateTeacherWrite } from "@/backend/services/cache";
-import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
+import { PROFILE_VIEW_OTHER_KEYS } from "@/backend/services/profile/profile-field-manifest";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInput } from "@/backend/types";
 import { parseNationalId, serializeNationalId } from "@/shared/lib/national-id";
 import { getServerTranslations } from "@/shared/locale";
@@ -104,8 +104,7 @@ export namespace StaffProfileService {
     teacherId: string,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
-    const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
-    assertPermission(await PermissionsService.hasAnyPermission(actorUserId, viewOtherKeys), locale);
+    assertPermission(await PermissionsService.hasAnyPermission(actorUserId, PROFILE_VIEW_OTHER_KEYS), locale);
 
     const profile = await fetchTeacherProfileOrThrow(teacherId, locale);
     return toMaskedTeacherProfile(profile);
