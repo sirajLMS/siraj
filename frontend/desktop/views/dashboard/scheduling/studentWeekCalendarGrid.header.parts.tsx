@@ -61,14 +61,17 @@ export function WeekDayHeader({ weekStart, locale }: Readonly<{ weekStart: Date;
   return (
     <Box sx={theme => ({ display: "flex", borderBottom: `1px solid ${gridLineColor(theme)}` })}>
       <Box sx={{ minWidth: 60, p: 1 }} />
-      {Array.from({ length: 7 }, (_, idx) => (
-        <DayHeaderCell
-          key={addDays(weekStart, idx).toISOString()}
-          dayDate={addDays(weekStart, idx)}
-          isToday={sameDay(addDays(weekStart, idx), now)}
-          dayFormatter={dayFormatter}
-        />
-      ))}
+      {Array.from({ length: 7 }, (_, idx) => {
+        const dayDate = addDays(weekStart, idx);
+        return (
+          <DayHeaderCell
+            key={dayDate.toISOString()}
+            dayDate={dayDate}
+            isToday={sameDay(dayDate, now)}
+            dayFormatter={dayFormatter}
+          />
+        );
+      })}
     </Box>
   );
 }

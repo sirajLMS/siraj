@@ -73,12 +73,15 @@ export function isValidLogEntry(log: unknown): log is LogEntry {
   );
 }
 
+// ESC (0x1b) built via char code — keeps control characters out of regex literals.
+// Module-level so the pattern is compiled once instead of per log line.
+const ANSI_ESCAPE_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[a-zA-Z]`, "g");
+
 /**
  * Strip ANSI escape sequences from a string to prevent log injection
  */
 function stripAnsiEscapes(str: string): string {
-  const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[a-zA-Z]`, "g");
-  return str.replace(ansiRegex, "");
+  return str.replace(ANSI_ESCAPE_REGEX, "");
 }
 
 /**

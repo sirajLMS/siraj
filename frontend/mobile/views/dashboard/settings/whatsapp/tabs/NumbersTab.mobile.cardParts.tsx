@@ -1,8 +1,11 @@
 "use client";
 
-import { PersonAddAlt1Outlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, LinearProgress, Typography } from "@mui/material";
-import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import {
+  ManageRecipientsActionShared,
+  type ManageRecipientsActionSharedProps,
+} from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__/ManageRecipientsActionShared";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 /** Visibility toggle adornment for the token field — access-token accounts only. */
@@ -27,35 +30,8 @@ export function TokenVisibilityAdornmentMobile({
   );
 }
 
-/** Card affordance opening the recipients manage dialog — test numbers only. */
-export function ManageRecipientsMobileAction({
-  account,
-  label,
-  disabled,
-  onOpen,
-}: Readonly<{
-  readonly account: WhatsappAccountRow;
-  readonly label: string | undefined;
-  readonly disabled: boolean;
-  readonly onOpen: (accountId: string) => void;
-}>) {
-  if (account.isTestNumber !== true || label === undefined || label === "") {
-    return null;
-  }
-  return (
-    <IconButton
-      size="small"
-      aria-label={label}
-      disabled={disabled || !account.id}
-      onClick={() => {
-        if (account.id) {
-          onOpen(account.id);
-        }
-      }}
-    >
-      <PersonAddAlt1Outlined />
-    </IconButton>
-  );
+export function ManageRecipientsMobileAction(props: Omit<ManageRecipientsActionSharedProps, "iconButtonSize">) {
+  return <ManageRecipientsActionShared {...props} iconButtonSize="small" />;
 }
 
 export function SkeletonAccountCard() {

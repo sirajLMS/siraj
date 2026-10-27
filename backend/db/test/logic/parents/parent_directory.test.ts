@@ -14,7 +14,7 @@ describe("ParentDirectoryService Permission Gating", () => {
   beforeAll(() => {
     PermissionsService.hasAnyPermission = async (
       userId: UserPermissionContext | string,
-      permissionKeys: AppPermission[]
+      permissionKeys: readonly AppPermission[]
     ) => {
       const userIdStr = typeof userId === "string" ? userId : "";
       return permissionKeys.some(permissionKey => mockPermissions.get(`${userIdStr}:${permissionKey}`) ?? false);

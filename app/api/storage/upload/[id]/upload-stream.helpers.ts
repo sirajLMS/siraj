@@ -82,7 +82,7 @@ export async function streamToFile(
 
     const actualHash = hash.digest("base64");
     if (actualHash !== expectedMd5) {
-      throw new Error(options.hashMismatchMessage);
+      throw new UploadStreamError(400, options.hashMismatchMessage);
     }
   } catch (error) {
     await fs.unlink(filePath).catch(() => {});

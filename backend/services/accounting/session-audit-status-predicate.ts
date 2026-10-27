@@ -39,13 +39,21 @@ const STATUS_PREDICATES: Record<SessionAuditStatus, SQL> = {
 const KNOWN_STATUSES: readonly SessionAuditStatus[] = ["open", "end", "Absent", "absent_student"];
 
 /**
+ * Candidate predicate key → owning status. STATUS_TO_PREDICATE_KEY values are
+ * unique per status, so this is a lossless inversion of the registry scan and
+ * resolves candidates in O(1).
+ */
+const PREDICATE_KEY_BY_CANDIDATE = new Map<string, SessionAuditStatus>(
+  KNOWN_STATUSES.map(status => [STATUS_TO_PREDICATE_KEY[status], status])
+);
+
+/**
  * Resolves a raw status string against the predicate-key registry. Values the
  * registry does not know fall back to the open predicate, mirroring the
  * mapper's catch-all classification of unmatched rows.
  */
 function toPredicateKey(candidate: string): SessionAuditStatus {
-  const known = KNOWN_STATUSES.find(status => STATUS_TO_PREDICATE_KEY[status] === candidate);
-  return known ?? "open";
+  return PREDICATE_KEY_BY_CANDIDATE.get(candidate) ?? "open";
 }
 
 /**

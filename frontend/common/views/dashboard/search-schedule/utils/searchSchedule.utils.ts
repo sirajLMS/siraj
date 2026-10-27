@@ -40,8 +40,12 @@ export function groupGapsByDate(
     if (!gap?.calendarDate) {
       continue;
     }
-    const existing = grouped.get(gap.calendarDate) ?? [];
-    grouped.set(gap.calendarDate, [...existing, gap]);
+    let list = grouped.get(gap.calendarDate);
+    if (!list) {
+      list = [];
+      grouped.set(gap.calendarDate, list);
+    }
+    list.push(gap);
   }
   return grouped;
 }
@@ -51,6 +55,8 @@ export function groupGapsByDayOfMonth(
   month: Date
 ): Partial<Record<number, readonly TeacherAvailabilityGapItem[]>> {
   const grouped: Record<number, TeacherAvailabilityGapItem[]> = {};
+  const targetMonth = month.getMonth();
+  const targetYear = month.getFullYear();
 
   for (const gap of gaps ?? []) {
     if (!gap) {
@@ -62,12 +68,17 @@ export function groupGapsByDayOfMonth(
     }
 
     const parsed = parseIsoDate(calendarDate);
-    if (parsed.getMonth() !== month.getMonth() || parsed.getFullYear() !== month.getFullYear()) {
+    if (parsed.getMonth() !== targetMonth || parsed.getFullYear() !== targetYear) {
       continue;
     }
 
     const day = parsed.getDate();
-    grouped[day] = [...(grouped[day] ?? []), gap];
+    let list = grouped[day];
+    if (!list) {
+      list = [];
+      grouped[day] = list;
+    }
+    list.push(gap);
   }
 
   return grouped;

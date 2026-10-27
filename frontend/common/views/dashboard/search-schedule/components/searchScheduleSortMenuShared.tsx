@@ -24,6 +24,8 @@ export function SearchScheduleSortMenuShared({
       <Tooltip title={`${labels.sort}: ${currentSortLabel}`}>
         <IconButton
           aria-label={labels.sort}
+          aria-haspopup="menu"
+          aria-expanded={open}
           aria-pressed={sortActive}
           onClick={onSortMenuOpen}
           size="small"

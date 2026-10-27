@@ -8,7 +8,8 @@ import {
   SaveOutlined,
   UndoOutlined,
 } from "@mui/icons-material";
-import { Box, Button, Chip, Divider, IconButton, type SvgIconProps, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, Divider, type SvgIconProps, Typography } from "@mui/material";
+import { TooltipIconButton } from "@/frontend/common/components/ui";
 import type { AppearanceDraftInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { exportAppearanceJson } from "@/frontend/common/views/dashboard/appearance/shared/exportAppearanceJson";
 import type { SettingsAppearanceTabLabels } from "@/shared/locale/types/dashboard/settings/appearance";
@@ -21,15 +22,7 @@ interface HistoryIconButtonProps {
 }
 
 function HistoryIconButton({ title, icon: Icon, onClick, disabled }: HistoryIconButtonProps) {
-  return (
-    <Tooltip title={title}>
-      <span>
-        <IconButton size="small" onClick={onClick} disabled={disabled} aria-label={title}>
-          <Icon fontSize="small" />
-        </IconButton>
-      </span>
-    </Tooltip>
-  );
+  return <TooltipIconButton label={title} icon={<Icon fontSize="small" />} onClick={onClick} disabled={disabled} />;
 }
 
 export interface CustomizeToolbarControlsProps {

@@ -83,7 +83,6 @@ const config: KnipConfig = {
     "backend/db/repo/billing/supported-online-account.repository.ts",
   ],
 
-
   // Tooling-only / lifecycle dependencies not statically imported from any source file.
   // These are spell-check dicts, sonar CLI, and duplicate scanner.
   // Conservative starter set — re-run knip after entry changes to verify remaining deps.

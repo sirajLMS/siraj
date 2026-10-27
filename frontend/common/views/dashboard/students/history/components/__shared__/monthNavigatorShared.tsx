@@ -39,34 +39,50 @@ export function MonthNavigatorShared({
       ...(stepperButtonSx ? stepperButtonSx(enabled)(theme) : {}),
     });
 
+  const prevButton = (
+    <IconButton
+      onClick={onPrevMonth}
+      size={chevronSize}
+      disabled={!canGoPrev}
+      aria-label={labels.previousMonth}
+      sx={buttonSx(canGoPrev)}
+    >
+      <ChevronLeft />
+    </IconButton>
+  );
+
+  const nextButton = (
+    <IconButton
+      onClick={onNextMonth}
+      size={chevronSize}
+      disabled={!canGoNext}
+      aria-label={labels.nextMonth}
+      sx={buttonSx(canGoNext)}
+    >
+      <ChevronRight />
+    </IconButton>
+  );
+
   return (
     <Box sx={containerSx}>
       <Tooltip title={labels.previousMonth}>
-        <Box component="span" sx={{ display: "inline-flex" }}>
-          <IconButton
-            onClick={onPrevMonth}
-            size={chevronSize}
-            disabled={!canGoPrev}
-            aria-label={labels.previousMonth}
-            sx={buttonSx(canGoPrev)}
-          >
-            <ChevronLeft />
-          </IconButton>
-        </Box>
+        {!canGoPrev ? (
+          <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+            {prevButton}
+          </Box>
+        ) : (
+          prevButton
+        )}
       </Tooltip>
       <MonthDisplay monthStr={monthStr} yearStr={yearStr} />
       <Tooltip title={labels.nextMonth}>
-        <Box component="span" sx={{ display: "inline-flex" }}>
-          <IconButton
-            onClick={onNextMonth}
-            size={chevronSize}
-            disabled={!canGoNext}
-            aria-label={labels.nextMonth}
-            sx={buttonSx(canGoNext)}
-          >
-            <ChevronRight />
-          </IconButton>
-        </Box>
+        {!canGoNext ? (
+          <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+            {nextButton}
+          </Box>
+        ) : (
+          nextButton
+        )}
       </Tooltip>
     </Box>
   );

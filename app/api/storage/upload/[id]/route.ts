@@ -112,10 +112,7 @@ async function processUpload(
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
     logger.error("Failed to stream file to disk", { tokenId, error });
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : tErrors.file.failedToWriteFile },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: tErrors.file.failedToWriteFile }, { status: 500 });
   }
 
   return await finalizeUpload(signedUrl, absolutePath, tokenId, tErrors);

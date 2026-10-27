@@ -226,28 +226,53 @@ export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, da
 const enCollator = new Intl.Collator("en");
 const arCollator = new Intl.Collator("ar");
 
+/**
+ * Cache built option lists per locale to skip rebuilding and sorting ~420 option objects
+ * on warm re-renders. Automatically clears when the minute changes to keep offsets fresh.
+ */
+let currentOptionsCachedMinuteTs = -1;
+const timezoneOptionsCache = new Map<string, TimezoneOption[]>();
+
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
-  const collator = locale === "ar" ? arCollator : enCollator;
-  return IANA_TIMEZONE_IDS_STRINGS.map(id => {
+  const localeKey = resolveLocaleKey(locale);
+  const minuteTs = Math.floor(date.getTime() / 60000);
+
+  if (minuteTs !== currentOptionsCachedMinuteTs) {
+    timezoneOptionsCache.clear();
+    currentOptionsCachedMinuteTs = minuteTs;
+  }
+
+  const cached = timezoneOptionsCache.get(localeKey);
+  if (cached) {
+    return [...cached];
+  }
+
+  const collator = localeKey === "ar" ? arCollator : enCollator;
+  const options: TimezoneOption[] = [];
+  for (const id of IANA_TIMEZONE_IDS_STRINGS) {
     const pathLabel = getTimezonePathLabel(id, locale);
-    // Compute the offset once per timezone and derive the label from it
     const offsetMinutes = getTimezoneOffsetMinutes(id, date);
     const offsetLabel = formatOffsetFromMinutes(offsetMinutes);
     const timezoneId = toIanaTimezone(id);
-    return {
+    options.push({
       id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
       pathLabel,
       offsetLabel,
       offsetMinutes,
       emoji: getTimezoneEmoji(id),
-    };
-  }).toSorted((left, right) => {
+    });
+  }
+
+  options.sort((left, right) => {
     if (left.offsetMinutes !== right.offsetMinutes) {
       return left.offsetMinutes - right.offsetMinutes;
     }
     return collator.compare(left.pathLabel, right.pathLabel);
   });
+
+  timezoneOptionsCache.set(localeKey, options);
+  return [...options];
 }
 
 export function isValidIanaTimezoneId(value: string): value is IanaTimezone {

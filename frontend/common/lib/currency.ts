@@ -148,6 +148,9 @@ function getNumberFormat(locale: string, currency: string, decimals: number): In
 /** Cache of currency `Intl.DisplayNames` instances keyed by locale tag. */
 const currencyDisplayNamesCache = new Map<string, Intl.DisplayNames>();
 
+/** Cache of resolved currency display name strings keyed by `${locale}:${code}`. Bypasses repeated V8 ICU bridge calls. */
+const currencyDisplayNameStringCache = new Map<string, string>();
+
 function getCurrencyDisplayNames(locale: string): Intl.DisplayNames {
   let displayNames = currencyDisplayNamesCache.get(locale);
   if (!displayNames) {
@@ -165,8 +168,17 @@ function getCurrencyDisplayNames(locale: string): Intl.DisplayNames {
  * `getCountryDisplayName` fallback pattern in `frontend/lib/locale/country`.
  */
 export function getCurrencyDisplayName(code: CurrencyCode | string, locale?: string): string {
+  const loc = locale ?? "en";
+  const cacheKey = `${loc}:${code}`;
+  const cachedName = currencyDisplayNameStringCache.get(cacheKey);
+  if (cachedName !== undefined) {
+    return cachedName;
+  }
+
   try {
-    return getCurrencyDisplayNames(locale ?? "en").of(code) ?? code;
+    const resolvedName = getCurrencyDisplayNames(loc).of(code) ?? code;
+    currencyDisplayNameStringCache.set(cacheKey, resolvedName);
+    return resolvedName;
   } catch {
     return code;
   }

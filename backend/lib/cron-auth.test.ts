@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
+import { NextResponse } from "next/server";
 import { generateTestPassword } from "@/backend/db/test/test-utils";
-import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
+import { verifyCronSecretAuth, withCronAuth } from "@/backend/lib/cron-auth";
 import type { EnvironmentConfig } from "@/backend/lib/env";
 import * as envModule from "@/backend/lib/env";
+import * as ratelimitModule from "@/backend/lib/ratelimit";
 
 const { NextRequest: NextRequestImpl } = await import("next/server");
 
@@ -62,6 +64,23 @@ function makeRequest(method: string, headers: Record<string, string | null> = {}
 
 async function parseJson(response: Response): Promise<Record<string, unknown>> {
   return await response.json();
+}
+
+async function runCronRequest(rateLimit: { success: boolean; remaining: number; once?: boolean }) {
+  const spy = spyOn(ratelimitModule, "checkRateLimit");
+  const result = {
+    success: rateLimit.success,
+    limit: 60,
+    remaining: rateLimit.remaining,
+    reset: Date.now() + 60_000,
+  };
+  if (rateLimit.once) spy.mockResolvedValueOnce(result);
+  else spy.mockResolvedValue(result);
+
+  const handler = mock(async () => NextResponse.json({ ok: true }));
+  const wrapped = withCronAuth(handler);
+  const req = makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}` });
+  return { handler, res: await wrapped(req) };
 }
 
 describe("verifyCronSecretAuth (R1–R11)", () => {
@@ -133,5 +152,23 @@ describe("verifyCronSecretAuth (R1–R11)", () => {
       const body = await parseJson(result.response);
       expect(body).toHaveProperty("error");
     }
+  });
+});
+
+describe("withCronAuth wrapper", () => {
+  test("returns 429 when rate limit is exceeded", async () => {
+    const { handler, res } = await runCronRequest({ success: false, remaining: 0, once: true });
+
+    expect(res.status).toBe(429);
+    const body = await parseJson(res);
+    expect(body).toHaveProperty("error");
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  test("invokes handler when authenticated and not rate limited", async () => {
+    const { handler, res } = await runCronRequest({ success: true, remaining: 59 });
+
+    expect(res.status).toBe(200);
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });

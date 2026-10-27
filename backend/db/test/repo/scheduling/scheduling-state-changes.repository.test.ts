@@ -136,7 +136,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const originalHasAnyPermission = PermissionsService.hasAnyPermission;
         PermissionsService.hasAnyPermission = async (
           userIdOrContext: UserPermissionContext | string,
-          permissionKeys: AppPermission[]
+          permissionKeys: readonly AppPermission[]
         ) => {
           const userId = typeof userIdOrContext === "string" ? userIdOrContext : "";
           if (userId === adminUser.id) return true;

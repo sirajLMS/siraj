@@ -58,16 +58,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Module-level membership sets for the filterable enums, avoiding repeated
+ * `Object.values()` allocations and linear scans on every filter mapping call.
+ */
+const GENDER_SET = new Set<string>(Object.values(Gender));
+const APP_LANGUAGE_SET = new Set<string>(Object.values(AppLanguage));
+const STUDENT_STATUS_SET = new Set<string>(Object.values(StudentStatus));
+
 function isGender(value: unknown): value is StudentFilterArgs["gender"] {
-  return typeof value === "string" && (Object.values(Gender) as readonly string[]).includes(value);
+  return typeof value === "string" && GENDER_SET.has(value);
 }
 
 function isAppLanguage(value: unknown): value is StudentFilterArgs["language"] {
-  return typeof value === "string" && (Object.values(AppLanguage) as readonly string[]).includes(value);
+  return typeof value === "string" && APP_LANGUAGE_SET.has(value);
 }
 
 function isStudentStatus(value: unknown): value is StudentFilterArgs["status"] {
-  return typeof value === "string" && (Object.values(StudentStatus) as readonly string[]).includes(value);
+  return typeof value === "string" && STUDENT_STATUS_SET.has(value);
 }
 
 function pickString(record: Record<string, unknown>, key: string): string | undefined {

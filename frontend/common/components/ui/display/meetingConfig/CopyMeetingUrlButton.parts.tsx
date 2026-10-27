@@ -55,27 +55,35 @@ export function CopyMeetingUrlButtonTrigger({
   iconColor,
   label,
 }: Readonly<CopyMeetingUrlTriggerProps>): ReactElement {
+  const button = (
+    <Button
+      size={size}
+      variant="text"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label={ariaLabel}
+      aria-pressed={pressed}
+      startIcon={icon}
+      sx={theme => ({
+        color: iconColor(theme),
+        "&:hover": {
+          backgroundColor: alpha(theme.palette.success.main, 0.08),
+        },
+      })}
+    >
+      {label}
+    </Button>
+  );
+
   return (
     <Tooltip title={tooltipText}>
-      <span>
-        <Button
-          size={size}
-          variant="text"
-          disabled={disabled}
-          onClick={onClick}
-          aria-label={ariaLabel}
-          aria-pressed={pressed}
-          startIcon={icon}
-          sx={theme => ({
-            color: iconColor(theme),
-            "&:hover": {
-              backgroundColor: alpha(theme.palette.success.main, 0.08),
-            },
-          })}
-        >
-          {label}
-        </Button>
-      </span>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
     </Tooltip>
   );
 }
@@ -93,6 +101,7 @@ export function CopyMeetingUrlTextTrigger({
   return (
     <Tooltip title={tooltipText}>
       <Box
+        aria-disabled={disabled ? true : undefined}
         sx={theme => ({
           display: "inline-flex",
           alignItems: "center",
@@ -155,5 +164,15 @@ export function CopyMeetingUrlIconTrigger({
     </IconButton>
   );
 
-  return <Tooltip title={tooltipText}>{disabled ? <span>{iconButton}</span> : iconButton}</Tooltip>;
+  return (
+    <Tooltip title={tooltipText}>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {iconButton}
+        </Box>
+      ) : (
+        iconButton
+      )}
+    </Tooltip>
+  );
 }

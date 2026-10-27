@@ -20,11 +20,10 @@ function getActiveTeachers(
 }
 
 function buildTeacherScheduleSlots(
-  searchResult: SearchScheduleResultSummary | null | undefined,
+  activeTeachers: readonly SearchScheduleResultItem[],
   fromDate: string,
   toDate: string
 ): readonly SearchScheduleActiveTeacher[] {
-  const activeTeachers = getActiveTeachers(searchResult);
   const dateColumns = buildDateColumns(fromDate, toDate);
   return activeTeachers.map(teacher => ({
     teacher,
@@ -48,9 +47,10 @@ export function computeSearchScheduleResults(
   fromDate: string,
   toDate: string
 ): SearchScheduleResultsData {
+  const activeTeachers = getActiveTeachers(searchResult);
   return {
     totalGaps: getTotalGaps(searchResult),
-    activeTeachers: getActiveTeachers(searchResult),
-    teacherSlots: buildTeacherScheduleSlots(searchResult, fromDate, toDate),
+    activeTeachers,
+    teacherSlots: buildTeacherScheduleSlots(activeTeachers, fromDate, toDate),
   };
 }

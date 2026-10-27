@@ -53,13 +53,21 @@ interface PaginationNavButtonProps {
 
 function PaginationNavButton({ direction, label, disabled, onClick, buttonSx }: Readonly<PaginationNavButtonProps>) {
   const Icon = direction === "previous" ? ChevronLeft : ChevronRight;
+  const button = (
+    <IconButton size="small" aria-label={label} disabled={disabled} onClick={onClick} sx={buttonSx}>
+      <Icon fontSize="small" sx={rtlFlipIconSx} />
+    </IconButton>
+  );
+
   return (
-    <Tooltip title={label} describeChild>
-      <span>
-        <IconButton size="small" aria-label={label} disabled={disabled} onClick={onClick} sx={buttonSx}>
-          <Icon fontSize="small" sx={rtlFlipIconSx} />
-        </IconButton>
-      </span>
+    <Tooltip title={label}>
+      {disabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
     </Tooltip>
   );
 }
@@ -118,9 +126,6 @@ export function PaginationNavGroup(props: Readonly<PaginationNavGroupProps>) {
         />
       ) : null}
 
-      {/* The span keeps hover working while a nav button is disabled; the
-          accessible name rides on the button itself and the tooltip only
-          describes it, so the roleless wrapper never carries naming ARIA. */}
       <PaginationNavButton
         direction="previous"
         label={labels.previousPage}

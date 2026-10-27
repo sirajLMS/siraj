@@ -8,6 +8,7 @@ import {
 import {
   buildDeliveryRate,
   buildExpiredSlippage,
+  buildQuotaInsightsCsv,
   computeInsightsMetrics,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsights.helpers";
 import { groupQuotasByMonth } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsightsChartData";
@@ -170,5 +171,53 @@ describe("applyInsightsFilters", () => {
 
     const filterMonth: QuotaInsightsFilters = { ...filtersNoOp, dateRange: "month" };
     expect(applyInsightsFilters(quotas, filterMonth)).toHaveLength(2);
+  });
+});
+
+const csvFieldsLabels: Pick<QuotaLabels, "fields"> = {
+  fields: {
+    name: "Name",
+    student: "Student",
+    kind: "Kind",
+    totalClasses: "Total",
+    remaining: "Remaining",
+    reservedClasses: "Reserved",
+    validUntil: "Valid Until",
+    validFrom: "Valid From",
+    status: "Status",
+    periodType: "Period Type",
+    priority: "Priority",
+    all: "All",
+    studentIdPlaceholder: "Student ID",
+    periodDays: "Period Days",
+    periodDaysHelperText: "Helper",
+    periodDaysRequired: "Required",
+    validUntilAfterValidFrom: "Invalid range",
+    studentPickerPlaceholder: "Pick student",
+    studentPickerNoOptions: "No options",
+    studentPickerLoading: "Loading",
+  },
+};
+
+const buildCsvWithCell = (name: string, studentId: string): string =>
+  buildQuotaInsightsCsv([createQuota({ name, studentId })], csvFieldsLabels);
+
+describe("buildQuotaInsightsCsv", () => {
+  it("quotes cells starting with = and +", () => {
+    const csv = buildCsvWithCell("=1+1", "+15551234");
+    expect(csv).toContain("'=1+1");
+    expect(csv).toContain("'+15551234");
+  });
+
+  it("quotes cells starting with @ and -", () => {
+    const csv = buildCsvWithCell("@SUM(A1:A10)", "-cmd|' /C calc'!A0");
+    expect(csv).toContain("'@SUM(A1:A10)");
+    expect(csv).toContain("'-cmd|' /C calc'!A0");
+  });
+
+  it("neutralizes cells starting with tab and carriage return", () => {
+    const csv = buildCsvWithCell("\tTabLeading", "\rCRLeading");
+    expect(csv).toContain("'\tTabLeading");
+    expect(csv).toContain("'\rCRLeading");
   });
 });

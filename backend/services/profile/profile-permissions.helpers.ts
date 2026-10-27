@@ -1,6 +1,6 @@
 import { AppPermission, ProfileAudience, ProfileScope, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
-import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
+import { PROFILE_VIEW_OTHER_KEYS, PROFILE_VIEW_OWN_KEYS } from "@/backend/services/profile/profile-field-manifest";
 import type { ProfilePermissionContext, UserPermissionContext } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -79,7 +79,7 @@ export function contextHasPermission(ctx: PermissionCheckContext, permissionKey:
   return ctx.isSuperAdmin || ctx.permissions.includes(permissionKey);
 }
 
-function contextHasAnyPermission(ctx: PermissionCheckContext, permissionKeys: AppPermission[]): boolean {
+function contextHasAnyPermission(ctx: PermissionCheckContext, permissionKeys: readonly AppPermission[]): boolean {
   if (permissionKeys.length === 0) return false;
   if (ctx.isSuperAdmin) return true;
   return permissionKeys.some(key => ctx.permissions.includes(key));
@@ -98,13 +98,11 @@ function hasAudiencePermission(
 }
 
 function hasAnyProfileViewOwnPermission(ctx: PermissionCheckContext): boolean {
-  const viewOwnKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOwn);
-  return contextHasAnyPermission(ctx, viewOwnKeys);
+  return contextHasAnyPermission(ctx, PROFILE_VIEW_OWN_KEYS);
 }
 
 export function hasAnyProfileViewOtherPermission(ctx: PermissionCheckContext): boolean {
-  const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
-  return contextHasAnyPermission(ctx, viewOtherKeys);
+  return contextHasAnyPermission(ctx, PROFILE_VIEW_OTHER_KEYS);
 }
 
 function checkOwnScopePermission(

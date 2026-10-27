@@ -62,7 +62,7 @@ function setupPermissionSpies(
   overrides: {
     hasAnyPermission?: (
       userIdOrContext: UserPermissionContext | string,
-      permissionKeys: AppPermission[]
+      permissionKeys: readonly AppPermission[]
     ) => Promise<boolean>;
     getUserContext?: Awaited<ReturnType<typeof PermissionsService.getUserContext>>;
   } = {}
@@ -95,7 +95,7 @@ async function runStudentProfileTest(
   });
   let permissionChecks = 0;
   setupPermissionSpies({
-    hasAnyPermission: async (_userId: UserPermissionContext | string, keys: AppPermission[]) => {
+    hasAnyPermission: async (_userId: UserPermissionContext | string, keys: readonly AppPermission[]) => {
       permissionChecks += 1;
       return expectedPermissionKeys.some(key => keys.includes(key));
     },
@@ -146,7 +146,7 @@ async function runStaffProfileTest(
     },
   });
   setupPermissionSpies({
-    hasAnyPermission: async (_userId: UserPermissionContext | string, keys: AppPermission[]) => {
+    hasAnyPermission: async (_userId: UserPermissionContext | string, keys: readonly AppPermission[]) => {
       if (!hasEditPermissions) return false;
       return (
         keys.includes(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN) ||
@@ -186,7 +186,7 @@ describe("ProfileService.resolvePageContext", () => {
   test("allows pure admin own profile when granted profile view_other only", async () => {
     setupProfileReposSpies();
     setupPermissionSpies({
-      hasAnyPermission: async (_userId: UserPermissionContext | string, keys: AppPermission[]) =>
+      hasAnyPermission: async (_userId: UserPermissionContext | string, keys: readonly AppPermission[]) =>
         keys.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER),
       getUserContext: {
         permissions: [AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER],

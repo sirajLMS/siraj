@@ -73,12 +73,12 @@ export namespace PermissionsService {
 
   export async function hasAnyPermission(
     context: UserPermissionContext,
-    permissionKeys: AppPermission[]
+    permissionKeys: readonly AppPermission[]
   ): Promise<boolean>;
-  export async function hasAnyPermission(userId: string, permissionKeys: AppPermission[]): Promise<boolean>;
+  export async function hasAnyPermission(userId: string, permissionKeys: readonly AppPermission[]): Promise<boolean>;
   export async function hasAnyPermission(
     userIdOrContext: string | UserPermissionContext,
-    permissionKeys: AppPermission[]
+    permissionKeys: readonly AppPermission[]
   ): Promise<boolean> {
     if (permissionKeys.length === 0) return false;
     if (typeof userIdOrContext !== "string") {

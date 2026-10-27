@@ -69,7 +69,10 @@ class RateLimiter {
    * Check if request is allowed for given identifier
    * Returns remaining requests and reset time
    */
-  async limit(identifier: string): Promise<{
+  async limit(
+    identifier: string,
+    options?: { failOpen?: boolean }
+  ): Promise<{
     success: boolean;
     limit: number;
     remaining: number;
@@ -106,10 +109,11 @@ class RateLimiter {
       };
     } catch (error) {
       logger.error("Rate limiting error:", error);
+      const failOpen = options?.failOpen ?? this.failOpen;
       return {
-        success: this.failOpen,
+        success: failOpen,
         limit: this.maxRequests,
-        remaining: this.failOpen ? this.maxRequests : 0,
+        remaining: failOpen ? this.maxRequests : 0,
         reset: now + this.windowMs,
       };
     }
@@ -118,7 +122,10 @@ class RateLimiter {
   /**
    * Simple counter-based rate limiting (fallback)
    */
-  async limitSimple(identifier: string): Promise<{
+  async limitSimple(
+    identifier: string,
+    options?: { failOpen?: boolean }
+  ): Promise<{
     success: boolean;
     limit: number;
     remaining: number;
@@ -155,10 +162,11 @@ class RateLimiter {
       return { success, limit: this.maxRequests, remaining, reset };
     } catch (error) {
       logger.error("Rate limiting error:", error);
+      const failOpen = options?.failOpen ?? this.failOpen;
       return {
-        success: this.failOpen,
+        success: failOpen,
         limit: this.maxRequests,
-        remaining: this.failOpen ? this.maxRequests : 0,
+        remaining: failOpen ? this.maxRequests : 0,
         reset: now + this.windowMs,
       };
     }
@@ -266,6 +274,20 @@ export const oauthCallbackRateLimiter = new RateLimiter(
 );
 
 /**
+ * Cron endpoints rate limiter. Caps machine-to-machine cron trigger routes
+ * (`/api/cron/*`, `/api/fx/refresh`) at 60 requests per minute per IP to slow
+ * CRON_SECRET brute forcing and endpoint flooding.
+ * Security note: failOpen is FALSE so cache outages fail closed, matching the
+ * auth limiter — brute-force protection must never be silently disabled.
+ */
+export const cronRateLimiter = new RateLimiter(
+  "ratelimit:cron",
+  60,
+  60 * 1000, // 1 minute
+  false
+);
+
+/**
  * Log-safe view of a rate-limit identifier: client IPs are PII, so they are
  * logged as a short stable hash instead of in the clear.
  */
@@ -303,7 +325,7 @@ export async function checkRateLimit(
   // real production deployments.
   const disableRateLimiting = getBooleanEnv("DISABLE_RATE_LIMITING");
   try {
-    const { success, limit, remaining, reset } = await limiter.limitSimple(identifier);
+    const { success, limit, remaining, reset } = await limiter.limitSimple(identifier, { failOpen });
 
     if (success) {
       return { success, limit, remaining, reset };

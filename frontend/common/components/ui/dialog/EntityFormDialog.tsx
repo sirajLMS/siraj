@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 
 export interface EntityFormDialogProps {
@@ -36,9 +36,13 @@ export function EntityFormDialog({
   onClose,
   children,
 }: Readonly<EntityFormDialogProps>) {
+  const titleId = useId();
+
   return (
-    <Dialog {...DialogPresets.info} open={open} onClose={isLoading ? undefined : onClose}>
-      <DialogTitle sx={{ typography: "titleLg" }}>{title}</DialogTitle>
+    <Dialog {...DialogPresets.info} open={open} onClose={isLoading ? undefined : onClose} aria-labelledby={titleId}>
+      <DialogTitle id={titleId} sx={{ typography: "titleLg" }}>
+        {title}
+      </DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button
