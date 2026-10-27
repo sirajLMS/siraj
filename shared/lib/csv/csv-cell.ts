@@ -6,7 +6,7 @@ export const CSV_LINE_SEPARATOR = "\r\n";
 
 /** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR (including after leading whitespace) get a `'` prefix. */
 export function toCsvCell(value: string): string {
-  const trimmed = value.trimStart();
+  const trimmed = value.replace(/^ +/, "");
   const startsFormula = trimmed.length > 0 && CSV_FORMULA_PREFIXES.some(prefix => trimmed.startsWith(prefix));
   const hardened = startsFormula ? `'${value}` : value;
   if (hardened.includes(",") || hardened.includes('"') || hardened.includes("\n") || hardened.includes("\r")) {

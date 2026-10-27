@@ -6,10 +6,11 @@
  * use these identical date/CSV utility functions.
  */
 
-/** Escapes and quotes a CSV cell value if it contains special characters. */
+import { toCsvCell } from "@/shared/lib/csv/csv-cell";
+
+/** Escapes and quotes a CSV cell value with formula neutralization. */
 export function toCsvValue(value: string): string {
-  const needsQuote = value.includes(",") || value.includes(`"`) || value.includes("\n");
-  return needsQuote ? `"${value.replace(/"/g, '""')}"` : value;
+  return toCsvCell(value);
 }
 
 /** Parses a date string (or null) into a `Date` or null when invalid/empty. */

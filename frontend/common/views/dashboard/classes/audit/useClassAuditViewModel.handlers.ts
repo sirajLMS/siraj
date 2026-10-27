@@ -10,6 +10,7 @@ import type {
   MaybeAudit,
 } from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel.types";
 import type { useRouter } from "@/shared/i18n/navigation";
+import { toCsvCell } from "@/shared/lib/csv/csv-cell";
 
 interface ClassAuditHandlersArgs {
   readonly id: string;
@@ -86,8 +87,10 @@ function exportToCsv(
   try {
     const filtered = students.filter((s): s is NonNullable<typeof s> => s != null);
     const csvRows = [
-      headers.join(","),
-      ...filtered.map(s => [s.name ?? "", s.studentId ?? "", s.attendanceStatus ?? ""].join(",")),
+      headers.map(toCsvCell).join(","),
+      ...filtered.map(s =>
+        [toCsvCell(s.name ?? ""), toCsvCell(s.studentId ?? ""), toCsvCell(s.attendanceStatus ?? "")].join(",")
+      ),
     ];
     const csvContent = csvRows.join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
