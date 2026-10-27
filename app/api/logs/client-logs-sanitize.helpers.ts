@@ -74,11 +74,15 @@ export function isValidLogEntry(log: unknown): log is LogEntry {
 }
 
 /**
+ * Module-level regex for stripping ANSI escape sequences.
+ */
+const ANSI_ESCAPE_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[a-zA-Z]`, "g");
+
+/**
  * Strip ANSI escape sequences from a string to prevent log injection
  */
 function stripAnsiEscapes(str: string): string {
-  const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[a-zA-Z]`, "g");
-  return str.replace(ansiRegex, "");
+  return str.replace(ANSI_ESCAPE_REGEX, "");
 }
 
 /**

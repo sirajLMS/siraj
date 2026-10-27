@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { LogEntry } from "@/app/api/logs/client-logs.constants";
 import { isBatchLogRequest, isValidLogEntry, sanitizeForRendering } from "@/app/api/logs/client-logs-sanitize.helpers";
+import { logBuffers, writeBatchLogs } from "@/app/api/logs/client-logs-storage.helpers";
 
 describe("sanitizeForRendering", () => {
   test("replaces newlines (\n, \r, \r\n) with spaces to prevent log injection", () => {
@@ -103,5 +107,36 @@ describe("isValidLogEntry", () => {
         )
       )
     ).toBe(false);
+  });
+});
+
+describe("writeBatchLogs memory cleanup", () => {
+  test("cleans up session buffers from logBuffers after writing logs to prevent memory leaks", async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), "client-logs-test-"));
+    try {
+      const logs: LogEntry[] = [
+        {
+          sessionId: "test-session-mem-1",
+          level: "info",
+          message: "test message 1",
+          sequence: 1,
+          timestamp: "2026-01-01T00:00:00Z",
+        },
+        {
+          sessionId: "test-session-mem-2",
+          level: "error",
+          message: "test message 2",
+          sequence: 1,
+          timestamp: "2026-01-01T00:00:00Z",
+        },
+      ];
+
+      await writeBatchLogs(logs, tmpDir);
+
+      expect(logBuffers.has("test-session-mem-1")).toBe(false);
+      expect(logBuffers.has("test-session-mem-2")).toBe(false);
+    } finally {
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });
