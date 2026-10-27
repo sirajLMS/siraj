@@ -24,18 +24,25 @@ export enum QuotaLedgerReason {
   ADJUST = "ADJUST",
 }
 
+// Module-level Set caches avoid repeated Object.values() array allocations
+// and linear O(N) .includes() scans on every type guard check.
+const QUOTA_KIND_SET = new Set<string>(Object.values(QuotaKind));
+const QUOTA_STATUS_SET = new Set<string>(Object.values(QuotaStatus));
+const QUOTA_PERIOD_TYPE_SET = new Set<string>(Object.values(QuotaPeriodType));
+const QUOTA_LEDGER_REASON_SET = new Set<string>(Object.values(QuotaLedgerReason));
+
 export function isQuotaKind(value: string): value is QuotaKind {
-  return (Object.values(QuotaKind) as string[]).includes(value);
+  return QUOTA_KIND_SET.has(value);
 }
 
 export function isQuotaStatus(value: string): value is QuotaStatus {
-  return (Object.values(QuotaStatus) as string[]).includes(value);
+  return QUOTA_STATUS_SET.has(value);
 }
 
 export function isQuotaPeriodType(value: string): value is QuotaPeriodType {
-  return (Object.values(QuotaPeriodType) as string[]).includes(value);
+  return QUOTA_PERIOD_TYPE_SET.has(value);
 }
 
 export function isQuotaLedgerReason(value: string): value is QuotaLedgerReason {
-  return (Object.values(QuotaLedgerReason) as string[]).includes(value);
+  return QUOTA_LEDGER_REASON_SET.has(value);
 }
