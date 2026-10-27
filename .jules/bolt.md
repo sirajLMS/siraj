@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-10-25 - Avoid micro-optimizing small capped LRU caches
+
+**Learning:** Attempting to optimize `trimToLru` in `userAutocompleteStore` by replacing `.toSorted()` with a repeated manual min-scan introduced code churn for a cache capped at N=20 items that executes at most once per 300ms debounced user keystroke. Small capped collections in UI interactions are not actual performance bottlenecks.
+**Action:** Always verify if a target operation runs on a high-frequency hot path or processes unbounded collections before attempting micro-optimizations on capped array operations.
