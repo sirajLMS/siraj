@@ -52,8 +52,9 @@ export function validateEntry<T = unknown>(entry: unknown): entry is CacheEntry<
 
 /**
  * Canonical JSON serialization for Redis entity cache keys: object keys are sorted
- * with `localeCompare` for deterministic output. Builds parts with plain loops
- * instead of `Object.entries()` tuple allocations and `.map()` intermediates.
+ * with default native `.sort()` for deterministic, fast output without `localeCompare`
+ * overhead. Builds parts with plain loops instead of `Object.entries()` tuple
+ * allocations and `.map()` intermediates.
  */
 export function stableStringify(value: unknown): string {
   if (value === null || typeof value !== "object") {
@@ -68,7 +69,7 @@ export function stableStringify(value: unknown): string {
     }
     return `[${items.join(",")}]`;
   }
-  const keys = Object.keys(value).toSorted((a, b) => a.localeCompare(b));
+  const keys = Object.keys(value).sort();
   const len = keys.length;
   if (len === 0) return "{}";
   const parts: string[] = [];
