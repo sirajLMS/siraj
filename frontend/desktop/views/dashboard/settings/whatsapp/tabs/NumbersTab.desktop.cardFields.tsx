@@ -1,7 +1,7 @@
 "use client";
 
 import { PersonAddAlt1Outlined } from "@mui/icons-material";
-import { IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import { NumberCardField } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
@@ -33,19 +33,30 @@ export function ManageRecipientsAction({
   if (account.isTestNumber !== true || label === undefined || label === "") {
     return null;
   }
+  const isDisabled = disabled || !account.id;
+  const button = (
+    <IconButton
+      aria-label={label}
+      disabled={isDisabled}
+      onClick={() => {
+        if (account.id) {
+          onOpen(account.id);
+        }
+      }}
+    >
+      <PersonAddAlt1Outlined />
+    </IconButton>
+  );
+
   return (
     <Tooltip title={label}>
-      <IconButton
-        aria-label={label}
-        disabled={disabled || !account.id}
-        onClick={() => {
-          if (account.id) {
-            onOpen(account.id);
-          }
-        }}
-      >
-        <PersonAddAlt1Outlined />
-      </IconButton>
+      {isDisabled ? (
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
     </Tooltip>
   );
 }
