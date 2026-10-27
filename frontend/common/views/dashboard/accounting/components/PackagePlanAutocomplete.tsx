@@ -101,12 +101,25 @@ export function PackagePlanAutocomplete({
   });
 
   const options = useMemo<PackagePlanOption[]>(() => {
-    const planOptions = (data?.packagePlans ?? [])
-      .filter(plan => plan.active)
-      .toSorted((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .map(plan => ({ id: plan.id ?? "", plan }));
+    const plans = data?.packagePlans;
+    if (!plans || plans.length === 0) {
+      return [ADHOC_OPTION];
+    }
+    // Single-pass filtering and mapping to eliminate intermediate array allocations
+    const planOptions: PackagePlanOption[] = [];
+    for (let i = 0; i < plans.length; i++) {
+      const plan = plans[i];
+      if (plan && plan.active) {
+        planOptions.push({ id: plan.id ?? "", plan });
+      }
+    }
+    // Sort in-place on the newly created array
+    planOptions.sort((a, b) => (a.plan?.sortOrder ?? 0) - (b.plan?.sortOrder ?? 0));
     return [ADHOC_OPTION, ...planOptions];
   }, [data]);
+
+  // Memoize composed sx function to avoid MUI style recalculations on every render
+  const composedSx = useMemo(() => composeAutocompleteSx(sx, minWidth), [sx, minWidth]);
 
   // A selected plan that is still loading (or has since been archived) has no
   // matching option; the field then falls back to an empty searchable input
@@ -120,7 +133,7 @@ export function PackagePlanAutocomplete({
       autoHighlight
       disabled={disabled}
       value={selectedOption}
-      sx={composeAutocompleteSx(sx, minWidth)}
+      sx={composedSx}
       onChange={(_: React.SyntheticEvent, newValue: PackagePlanOption | null) => {
         onChange(newValue?.id ?? null);
       }}
