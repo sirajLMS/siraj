@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 import { generateTestPassword } from "@/backend/db/test/test-utils";
-import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
+import { type NextRequest, NextResponse } from "next/server";
+import { verifyCronSecretAuth, withCronAuth } from "@/backend/lib/cron-auth";
 import type { EnvironmentConfig } from "@/backend/lib/env";
 import * as envModule from "@/backend/lib/env";
+import * as ratelimitModule from "@/backend/lib/ratelimit";
 
 const { NextRequest: NextRequestImpl } = await import("next/server");
 
@@ -133,5 +135,36 @@ describe("verifyCronSecretAuth (R1–R11)", () => {
       const body = await parseJson(result.response);
       expect(body).toHaveProperty("error");
     }
+  });
+});
+
+describe("withCronAuth wrapper", () => {
+  test("returns 429 when rate limit is exceeded", async () => {
+    spyOn(ratelimitModule, "checkRateLimit").mockResolvedValueOnce({
+      success: false,
+      limit: 60,
+      remaining: 0,
+      reset: Date.now() + 60000,
+    });
+
+    const handler = mock(async () => NextResponse.json({ ok: true }));
+    const wrapped = withCronAuth(handler);
+    const req = makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}` }) as unknown as NextRequest;
+
+    const res = await wrapped(req);
+    expect(res.status).toBe(429);
+    const body = await parseJson(res);
+    expect(body).toHaveProperty("error");
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  test("invokes handler when authenticated and not rate limited", async () => {
+    const handler = mock(async () => NextResponse.json({ ok: true }));
+    const wrapped = withCronAuth(handler);
+    const req = makeRequest("GET", { authorization: `Bearer ${TEST_SECRET}` }) as unknown as NextRequest;
+
+    const res = await wrapped(req);
+    expect(res.status).toBe(200);
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });

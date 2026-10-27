@@ -266,6 +266,18 @@ export const oauthCallbackRateLimiter = new RateLimiter(
 );
 
 /**
+ * Cron endpoints rate limiter.
+ * Limits requests per client IP to prevent secret brute-forcing or endpoint flooding.
+ * 60 per minute per IP.
+ */
+export const cronRateLimiter = new RateLimiter(
+  "ratelimit:cron",
+  60,
+  60 * 1000, // 1 minute
+  true
+);
+
+/**
  * Log-safe view of a rate-limit identifier: client IPs are PII, so they are
  * logged as a short stable hash instead of in the clear.
  */
