@@ -256,4 +256,12 @@ describe("Meeting join URL hardening", () => {
     expect(src).toContain("safeOpenWindow");
     expect(src).not.toContain("window.open(");
   });
+
+  test("meeting config reconnect-all batch routes OAuth URLs through safeOpenWindow", async () => {
+    const src = await readSrc(
+      "frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigsManagerReconnectAll.ts"
+    );
+    expect(src).toContain("safeOpenWindow");
+    expect(src).not.toContain("window.open(");
+  });
 });
