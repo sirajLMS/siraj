@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarToday, ChevronLeft, ChevronRight, CloseOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
+import { Box, CircularProgress, IconButton, Tooltip, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import type { TeacherAvailabilityMonthDrawerSlotProps } from "@/frontend/common/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawerShared.types";
@@ -45,9 +45,11 @@ export function DrawerHeader({
           {title}
         </Typography>
       </Box>
-      <IconButton aria-label={labels.closeMonthSchedule} onClick={onClose} size="small">
-        <CloseOutlined />
-      </IconButton>
+      <Tooltip title={labels.closeMonthSchedule}>
+        <IconButton aria-label={labels.closeMonthSchedule} onClick={onClose} size="small">
+          <CloseOutlined />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 }
@@ -67,26 +69,30 @@ export function MonthNavigator({
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
-      <IconButton
-        aria-label={labels.previousMonth}
-        onClick={() => onMonthChange(shiftMonth(currentMonth, -1))}
-        sx={getFlipSx}
-      >
-        <ChevronLeft />
-      </IconButton>
+      <Tooltip title={labels.previousMonth}>
+        <IconButton
+          aria-label={labels.previousMonth}
+          onClick={() => onMonthChange(shiftMonth(currentMonth, -1))}
+          sx={getFlipSx}
+        >
+          <ChevronLeft />
+        </IconButton>
+      </Tooltip>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <CalendarToday sx={(theme: Theme) => ({ fontSize: 20, color: theme.palette.primary.main })} />
         <Typography variant="titleLg" sx={(theme: Theme) => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
           {monthStr} {yearStr}
         </Typography>
       </Box>
-      <IconButton
-        aria-label={labels.nextMonth}
-        onClick={() => onMonthChange(shiftMonth(currentMonth, 1))}
-        sx={getFlipSx}
-      >
-        <ChevronRight />
-      </IconButton>
+      <Tooltip title={labels.nextMonth}>
+        <IconButton
+          aria-label={labels.nextMonth}
+          onClick={() => onMonthChange(shiftMonth(currentMonth, 1))}
+          sx={getFlipSx}
+        >
+          <ChevronRight />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 }
