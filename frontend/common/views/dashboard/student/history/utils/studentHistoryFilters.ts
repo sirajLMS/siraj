@@ -39,6 +39,7 @@ export function filterHistorySessions(
  *
  * Performance optimization: Single-pass loop populates a `Set` directly to eliminate
  * intermediate array allocations from `.map()`, `.filter()`, and array spread before sorting.
+ * In-place `.sort()` on the newly allocated `Array.from(set)` avoids `.toSorted()` copy allocation.
  */
 export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
   const set = new Set<string>();
@@ -48,7 +49,7 @@ export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRo
       set.add(title);
     }
   }
-  return Array.from(set).toSorted((a, b) => a.localeCompare(b));
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -56,6 +57,7 @@ export function uniqueSessionSubjects(sessions: readonly StudentHistorySessionRo
  *
  * Performance optimization: Single-pass loop populates a `Set` directly to eliminate
  * intermediate array allocations from `.map()`, `.filter()`, and array spread before sorting.
+ * In-place `.sort()` on the newly allocated `Array.from(set)` avoids `.toSorted()` copy allocation.
  */
 export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRow[]): readonly string[] {
   const set = new Set<string>();
@@ -65,5 +67,5 @@ export function uniqueSessionStatuses(sessions: readonly StudentHistorySessionRo
       set.add(status);
     }
   }
-  return Array.from(set).toSorted((a, b) => a.localeCompare(b));
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
