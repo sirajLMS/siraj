@@ -2,6 +2,7 @@
 
 import type { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useRef, useState } from "react";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import type { ReconnectAllProgress } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigsManager.helpers";
 import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
 
@@ -74,9 +75,9 @@ export function useMeetingConfigsManagerReconnectAll({
     (reconnectedCount: number, failedCount: number) => {
       showReconnectBatchToast(notifications, enhancements, reconnectedCount, failedCount);
       const urls = reconnectUrlsRef.current;
-      if (urls.size > 0 && globalThis.window) {
+      if (urls.size > 0) {
         for (const url of urls.values()) {
-          globalThis.window.open(url, "_blank", "noopener,noreferrer");
+          safeOpenWindow(url);
         }
         urls.clear();
       }

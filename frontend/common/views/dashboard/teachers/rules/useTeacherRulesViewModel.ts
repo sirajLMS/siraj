@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useRef, useState } from "react";
 import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import type { TeacherRulesLabelsBySection } from "@/frontend/common/views/dashboard/teachers/rules/types/teacherRules.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -42,7 +43,7 @@ export function useTeacherRulesViewModel(_props: Readonly<UseTeacherRulesViewMod
     handledRef.current = true;
     const url = handbookData?.teacherHandbookUrl?.url;
     if (url) {
-      globalThis.open(url, "_blank");
+      safeOpenWindow(url);
     }
   }, [handbookRequested, handbookLoading, handbookData]);
 

@@ -256,4 +256,25 @@ describe("Meeting join URL hardening", () => {
     expect(src).toContain("safeOpenWindow");
     expect(src).not.toContain("window.open(");
   });
+
+  test("handbook and meeting reconnect handlers route dynamic URLs through safeOpenWindow", async () => {
+    const handbookIslandSrc = await readSrc(
+      "frontend/common/views/dashboard/teachers/dashboard/components/TeacherHandbookIsland.tsx"
+    );
+    const rulesVmSrc = await readSrc(
+      "frontend/common/views/dashboard/teachers/rules/useTeacherRulesViewModel.ts"
+    );
+    const reconnectAllSrc = await readSrc(
+      "frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigsManagerReconnectAll.ts"
+    );
+
+    expect(handbookIslandSrc).toContain("safeOpenWindow");
+    expect(handbookIslandSrc).not.toContain("globalThis.open(");
+
+    expect(rulesVmSrc).toContain("safeOpenWindow");
+    expect(rulesVmSrc).not.toContain("globalThis.open(");
+
+    expect(reconnectAllSrc).toContain("safeOpenWindow");
+    expect(reconnectAllSrc).not.toContain("globalThis.window.open(");
+  });
 });

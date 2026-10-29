@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
@@ -36,7 +37,7 @@ export function TeacherHandbookIsland({ labels }: Readonly<TeacherHandbookIsland
     handledRef.current = true;
     const url = handbookData?.teacherHandbookUrl?.url;
     if (url) {
-      globalThis.open(url, "_blank");
+      safeOpenWindow(url);
     } else {
       showSnackbar(handbookUrlNotFoundMessage, "error");
     }
