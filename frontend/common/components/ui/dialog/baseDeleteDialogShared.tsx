@@ -2,6 +2,7 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { useId } from "react";
 import type {
   BaseDeleteDialogSharedProps,
   DeleteDialogSlotProps,
@@ -26,6 +27,10 @@ export function BaseDeleteDialogScaffold({
   CancelActionButton,
   ConfirmActionButton,
 }: Readonly<BaseDeleteDialogScaffoldProps>) {
+  const generatedTitleId = useId();
+  const titleId = dialogId ?? generatedTitleId;
+  const descriptionId = `${titleId}-description`;
+
   return (
     <Dialog
       open={open}
@@ -33,9 +38,10 @@ export function BaseDeleteDialogScaffold({
       maxWidth="xs"
       fullWidth
       fullScreen={fullScreen}
-      aria-labelledby={dialogId}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
     >
-      <DialogTitle id={dialogId} sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <DialogTitle id={titleId} sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Box
           sx={theme => ({
             width: 64,
@@ -56,7 +62,11 @@ export function BaseDeleteDialogScaffold({
         </Box>
       </DialogTitle>
       <DialogContent>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, textAlign: "center" })}>
+        <Typography
+          id={descriptionId}
+          variant="bodyMd"
+          sx={theme => ({ color: theme.palette.text.secondary, textAlign: "center" })}
+        >
           {body}
         </Typography>
         {children && <Box sx={{ mt: 2 }}>{children}</Box>}
