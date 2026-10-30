@@ -2,6 +2,7 @@
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -101,7 +102,7 @@ export const FormFields = ({
                 endAdornment: (
                   <InputAdornment position="end">
                     <Tooltip title={showPassword ? labels.hidePassword : labels.showPassword}>
-                      <span>
+                      <Box component="span" aria-disabled={disabled ? true : undefined} sx={{ display: "inline-flex" }}>
                         <IconButton
                           onClick={() => {
                             setShowPassword(!showPassword);
@@ -112,7 +113,7 @@ export const FormFields = ({
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
-                      </span>
+                      </Box>
                     </Tooltip>
                   </InputAdornment>
                 ),
