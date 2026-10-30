@@ -2,6 +2,7 @@
 
 import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
+import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LessonReportCardProps } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types";
@@ -93,7 +94,7 @@ export function TeacherLessonReportCardContent({
         ) : null}
         {row.submittedAt ? (
           <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-            {labels.submittedAt}: {new Date(row.submittedAt).toLocaleDateString(locale)}
+            {labels.submittedAt}: {formatDate(row.submittedAt, locale)}
           </Typography>
         ) : null}
       </Stack>
