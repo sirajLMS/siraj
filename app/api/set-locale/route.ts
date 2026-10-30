@@ -26,7 +26,11 @@ function applyLocaleCookie(response: NextResponse, locale: string): void {
   });
 }
 
-/** Only allow same-origin relative paths (block open redirects). */
+/**
+ * Security: Only allow same-origin relative paths (block open redirects).
+ * Validates path structure using `isRelativeSafePath` to guard against protocol-relative,
+ * double-slash, backslash, control character, and schemes injection.
+ */
 function safeRedirectPath(raw: string | null, fallback = "/"): string {
   if (!raw || !isRelativeSafePath(raw) || raw.includes("://")) {
     return fallback;
