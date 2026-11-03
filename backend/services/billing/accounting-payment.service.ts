@@ -312,6 +312,7 @@ export namespace AccountingPaymentService {
       });
     }
 
-    return events.toSorted((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
+    // Sort newly constructed events array in-place to prevent intermediate array allocation
+    return events.sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
   }
 }
